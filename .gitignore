@@ -1,0 +1,19 @@
+# binaries
+/providerbench
+*.exe
+
+# benchmark scratch files
+.providerbench-disk.tmp
+report*.json
+!data/results/*.json
+
+# web
+web/node_modules/
+web/.next/
+web/next-env.d.ts
+web/.vercel/
+web/*.tsbuildinfo
+
+# misc
+.DS_Store
+web/data/

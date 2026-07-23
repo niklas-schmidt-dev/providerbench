@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "cli_version": "0.1.0-sample",
+  "category": "compute",
+  "created_at": "2026-07-24T10:00:00Z",
+  "sample": true,
+  "provider": {
+    "name": "vercel-sandbox",
+    "plan": "8 vCPU sandbox",
+    "region": "iad1"
+  },
+  "system": {
+    "os": "linux",
+    "arch": "amd64",
+    "kernel": "6.8.0",
+    "cpu_model": "AMD EPYC (virtualized)",
+    "cpu_cores": 8,
+    "mem_total_mb": 16384,
+    "virtualization": "microvm"
+  },
+  "results": [
+    {
+      "test": "cpu",
+      "started_at": "2026-07-24T10:00:00Z",
+      "duration_seconds": 6.1,
+      "metrics": [
+        {
+          "name": "single_core_hash",
+          "value": 1950,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "multi_core_hash",
+          "value": 10870,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "scaling_efficiency",
+          "value": 69.7,
+          "unit": "%",
+          "higher_is_better": true
+        }
+      ],
+      "notes": [
+        "SHA-256 over 64 KiB buffers; uses CPU crypto extensions where available"
+      ]
+    },
+    {
+      "test": "disk",
+      "started_at": "2026-07-24T10:00:00Z",
+      "duration_seconds": 9.4,
+      "metrics": [
+        {
+          "name": "seq_write",
+          "value": 618,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "seq_read",
+          "value": 989,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "rand_read_4k",
+          "value": 41800,
+          "unit": "IOPS",
+          "higher_is_better": true
+        },
+        {
+          "name": "fsync_latency_p50",
+          "value": 1.05,
+          "unit": "ms",
+          "higher_is_better": false
+        }
+      ],
+      "notes": [
+        "reads bypass the page cache (direct I/O)",
+        "test file: 1024 MiB, random reads at queue depth 4"
+      ]
+    },
+    {
+      "test": "memory",
+      "started_at": "2026-07-24T10:00:00Z",
+      "duration_seconds": 5.2,
+      "metrics": [
+        {
+          "name": "copy_bandwidth",
+          "value": 13.4,
+          "unit": "GB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "random_access_latency",
+          "value": 122,
+          "unit": "ns",
+          "higher_is_better": false
+        }
+      ],
+      "notes": [
+        "bandwidth counts bytes copied (read+write traffic is ~2x)"
+      ]
+    },
+    {
+      "test": "network",
+      "started_at": "2026-07-24T10:00:00Z",
+      "duration_seconds": 8.3,
+      "metrics": [
+        {
+          "name": "latency_p50",
+          "value": 1.2,
+          "unit": "ms",
+          "higher_is_better": false
+        },
+        {
+          "name": "download",
+          "value": 5860,
+          "unit": "Mbps",
+          "higher_is_better": true
+        },
+        {
+          "name": "upload",
+          "value": 4230,
+          "unit": "Mbps",
+          "higher_is_better": true
+        }
+      ],
+      "notes": [
+        "measured against the nearest Cloudflare edge"
+      ]
+    },
+    {
+      "test": "steal",
+      "started_at": "2026-07-24T10:00:00Z",
+      "duration_seconds": 13.9,
+      "metrics": [
+        {
+          "name": "unit_time_p50",
+          "value": 12.1,
+          "unit": "ms",
+          "higher_is_better": false
+        },
+        {
+          "name": "consistency_cv",
+          "value": 11.8,
+          "unit": "%",
+          "higher_is_better": false
+        },
+        {
+          "name": "p99_over_p50",
+          "value": 1.62,
+          "unit": "ratio",
+          "higher_is_better": false
+        },
+        {
+          "name": "cpu_steal",
+          "value": 3.41,
+          "unit": "%",
+          "higher_is_better": false
+        }
+      ],
+      "notes": [
+        "consistency_cv near 0% and p99_over_p50 near 1.0 indicate a quiet host; high values suggest noisy neighbors or throttling"
+      ]
+    }
+  ]
+}

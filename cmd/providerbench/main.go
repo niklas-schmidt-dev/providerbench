@@ -1,0 +1,159 @@
+// providerbench is an open, extendable benchmark for VPS and server
+// providers. Run it on any machine, share the JSON, compare on
+// providerbench.dev.
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/niklas-schmidt-dev/providerbench/internal/bench"
+	"github.com/niklas-schmidt-dev/providerbench/internal/output"
+	"github.com/niklas-schmidt-dev/providerbench/internal/sysinfo"
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests" // registers built-in tests
+)
+
+// version is overridden at release time via -ldflags "-X main.version=...".
+var version = "0.1.0-dev"
+
+const usage = `providerbench — open benchmark for VPS & server providers
+
+Usage:
+  providerbench run [flags]   run benchmarks
+  providerbench list          list available tests
+  providerbench system        show detected system info
+  providerbench version       print version
+
+Run flags:
+  -t, --tests cpu,disk    comma-separated tests to run (default: all)
+      --quick             faster, less precise runs
+      --json FILE         write the full report as JSON (use "-" for stdout)
+      --dir DIR           scratch directory for disk tests (default: current dir)
+      --provider NAME     provider name for the report, e.g. hetzner
+      --plan NAME         plan/instance type, e.g. cax21
+      --region NAME       region, e.g. fsn1
+      --price EUR         monthly price in EUR
+
+Examples:
+  providerbench run --provider hetzner --plan cax21 --region fsn1 --json report.json
+  providerbench run --quick -t cpu,steal
+`
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Print(usage)
+		os.Exit(2)
+	}
+	switch os.Args[1] {
+	case "run":
+		os.Exit(runCmd(os.Args[2:]))
+	case "list":
+		for _, b := range bench.All() {
+			fmt.Printf("  %-10s %s\n", b.Name(), b.Description())
+		}
+	case "system":
+		info := sysinfo.Collect()
+		fmt.Printf("os: %s/%s\nkernel: %s\ncpu: %s (%d cores)\nmemory: %d MB\nvirtualization: %s\n",
+			info.OS, info.Arch, info.Kernel, info.CPUModel, info.CPUCores, info.MemTotalMB, info.Virtualization)
+	case "version":
+		fmt.Println(version)
+	case "help", "-h", "--help":
+		fmt.Print(usage)
+	default:
+		fmt.Fprintf(os.Stderr, "unknown command %q\n\n%s", os.Args[1], usage)
+		os.Exit(2)
+	}
+}
+
+func runCmd(args []string) int {
+	fs := flag.NewFlagSet("run", flag.ExitOnError)
+	var (
+		testsFlag = fs.String("tests", "", "comma-separated tests to run")
+		quick     = fs.Bool("quick", false, "faster, less precise runs")
+		jsonPath  = fs.String("json", "", "write JSON report to file (- for stdout)")
+		dir       = fs.String("dir", "", "scratch directory for disk tests")
+		provider  = fs.String("provider", "", "provider name")
+		plan      = fs.String("plan", "", "plan / instance type")
+		region    = fs.String("region", "", "region")
+		price     = fs.Float64("price", 0, "monthly price in EUR")
+	)
+	fs.StringVar(testsFlag, "t", "", "alias for --tests")
+	fs.Parse(args)
+
+	selected := bench.All()
+	if *testsFlag != "" {
+		var err error
+		selected, err = bench.Select(strings.Split(*testsFlag, ","))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 2
+		}
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	quiet := *jsonPath == "-" // keep stdout clean when the report goes there
+	logf := func(format string, a ...any) {
+		fmt.Fprintf(os.Stderr, "  "+format+"\n", a...)
+	}
+	opts := bench.Options{Quick: *quick, Dir: *dir, Log: logf}
+
+	report := &bench.Report{
+		SchemaVersion: bench.SchemaVersion,
+		CLIVersion:    version,
+		Category:      "compute",
+		CreatedAt:     time.Now().UTC(),
+		Provider:      bench.Provider{Name: *provider, Plan: *plan, Region: *region, PriceEURMonth: *price},
+		System:        sysinfo.Collect(),
+	}
+
+	exitCode := 0
+	for _, b := range selected {
+		if ctx.Err() != nil {
+			break
+		}
+		fmt.Fprintf(os.Stderr, "\n▸ %s — %s\n", b.Name(), b.Description())
+		res, err := b.Run(ctx, opts)
+		if res == nil {
+			res = &bench.Result{Test: b.Name()}
+		}
+		if err != nil && ctx.Err() == nil {
+			exitCode = 1
+			res.Error = err.Error()
+			fmt.Fprintf(os.Stderr, "  failed: %v\n", err)
+		}
+		report.Results = append(report.Results, *res)
+	}
+
+	if !quiet {
+		output.PrintReport(os.Stdout, report)
+	}
+
+	if *jsonPath != "" {
+		data, err := report.JSON()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "encode report:", err)
+			return 1
+		}
+		if *jsonPath == "-" {
+			os.Stdout.Write(data)
+		} else if err := os.WriteFile(*jsonPath, data, 0o644); err != nil {
+			fmt.Fprintln(os.Stderr, "write report:", err)
+			return 1
+		} else if !quiet {
+			fmt.Fprintf(os.Stdout, "\nreport written to %s — submit it at https://github.com/niklas-schmidt-dev/providerbench\n", *jsonPath)
+		}
+	}
+	if ctx.Err() != nil {
+		fmt.Fprintln(os.Stderr, "\ninterrupted")
+		return 130
+	}
+	return exitCode
+}
