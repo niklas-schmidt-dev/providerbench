@@ -119,10 +119,7 @@ function LiveCategory({
           >
             data/results/
           </a>{" "}
-          · method:{" "}
-          <Link href="/methodology" className="text-brand hover:underline">
-            /methodology
-          </Link>
+          · every chart links its benchmark source
         </p>
       </div>
     </main>

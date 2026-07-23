@@ -1,6 +1,6 @@
 //go:build linux
 
-package tests
+package compute
 
 import (
 	"os"

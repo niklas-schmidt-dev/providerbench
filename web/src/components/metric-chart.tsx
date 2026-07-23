@@ -4,7 +4,7 @@ import { getMetricDef } from "@/lib/metrics";
 import { metricSeries } from "@/lib/series";
 
 // Server-side wrapper: looks up the metric definition so every chart carries
-// its workload description and methodology link — a number is never shown
+// its workload description and source-code link — a number is never shown
 // without saying what was measured.
 export function MetricChart({
   runs,
@@ -23,7 +23,7 @@ export function MetricChart({
       unit={def.unit}
       higherIsBetter={def.higherIsBetter}
       description={def.workload}
-      sourceHref={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/${def.test}.go`}
+      sourceHref={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/${def.category}/${def.test}.go`}
       note={def.note}
       data={metricSeries(runs, test, metric)}
     />

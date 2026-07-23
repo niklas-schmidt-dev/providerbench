@@ -40,7 +40,7 @@ A full run takes ~90 seconds. `providerbench run --quick` finishes in ~20.
 | `network` | latency, download, upload vs Cloudflare edge | neutral endpoint, no peering tricks |
 | `steal`   | CPU steal %, consistency CV, p99/p50 | the kernel's own confession |
 
-Full details: [providerbench.dev/methodology](https://providerbench.dev/methodology)
+Full details: [the benchmark sources](https://github.com/niklas-schmidt-dev/providerbench/tree/main/internal/tests)
 
 ## Adding a test
 

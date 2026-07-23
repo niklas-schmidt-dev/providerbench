@@ -1,7 +1,7 @@
-// Package tests contains the built-in benchmarks. Each test lives in its own
+// Package compute contains the built-in compute-category benchmarks. Each test lives in its own
 // file, implements bench.Benchmark and registers itself in init — add new
 // tests the same way.
-package tests
+package compute
 
 import (
 	"math"

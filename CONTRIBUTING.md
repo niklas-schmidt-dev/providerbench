@@ -26,7 +26,7 @@ providerbench run \
 
 ## 2. Add a benchmark test
 
-Every test is one file in `internal/tests/` implementing one interface:
+Every test is one file in `internal/tests/compute/` implementing one interface:
 
 ```go
 func init() { bench.Register(myTest{}) }
@@ -38,7 +38,7 @@ func (myTest) Description() string { return "one line" }
 func (myTest) Run(ctx context.Context, opts Options) (*bench.Result, error) { ... }
 ```
 
-Ground rules for tests (see the [methodology](https://providerbench.dev/methodology)):
+Ground rules for tests (the benchmark source is the methodology):
 
 - **Deterministic**: fixed seeds, identical work on every machine.
 - **Cache-honest**: if the number can be faked by a cache, bypass the cache.

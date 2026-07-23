@@ -1,6 +1,6 @@
 //go:build darwin
 
-package tests
+package compute
 
 import (
 	"os"

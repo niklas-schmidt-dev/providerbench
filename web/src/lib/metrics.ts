@@ -4,6 +4,7 @@
 // real implementation, not marketing.
 
 export type MetricDef = {
+  category: string;
   test: string;
   metric: string;
   title: string;
@@ -25,6 +26,7 @@ export const TEST_SUMMARIES: Record<string, string> = {
 
 export const METRICS: MetricDef[] = [
   {
+    category: "compute",
     test: "cpu",
     metric: "single_core_hash",
     title: "CPU · single core",
@@ -34,6 +36,7 @@ export const METRICS: MetricDef[] = [
       "SHA-256 over 64 KiB buffers on one core for 3 s. Cache-resident and deterministic; uses the CPU's crypto extensions where present.",
   },
   {
+    category: "compute",
     test: "cpu",
     metric: "multi_core_hash",
     title: "CPU · all cores",
@@ -43,6 +46,7 @@ export const METRICS: MetricDef[] = [
       "The same SHA-256 workload running on every core simultaneously for 3 s — what the machine sustains when you actually use all the vCPUs you pay for.",
   },
   {
+    category: "compute",
     test: "cpu",
     metric: "scaling_efficiency",
     title: "CPU · scaling efficiency",
@@ -53,6 +57,7 @@ export const METRICS: MetricDef[] = [
     note: "Collapses when 'cores' are time slices of somebody else's workload.",
   },
   {
+    category: "compute",
     test: "memory",
     metric: "copy_bandwidth",
     title: "Memory · copy bandwidth",
@@ -62,6 +67,7 @@ export const METRICS: MetricDef[] = [
       "Copies between two 256 MiB buffers for 2 s — far beyond any CPU cache, so this is DRAM bandwidth, not cache tricks.",
   },
   {
+    category: "compute",
     test: "memory",
     metric: "random_access_latency",
     title: "Memory · random access",
@@ -71,6 +77,7 @@ export const METRICS: MetricDef[] = [
       "Pointer chase through a randomly permuted 64 MiB array (fixed seed). Every load depends on the previous one, so prefetching can't hide the true latency.",
   },
   {
+    category: "compute",
     test: "disk",
     metric: "seq_write",
     title: "Disk · sequential write",
@@ -80,6 +87,7 @@ export const METRICS: MetricDef[] = [
       "1 GiB written in 4 MiB blocks, each stamped unique to defeat compression and dedup, with a final fsync included in the time.",
   },
   {
+    category: "compute",
     test: "disk",
     metric: "seq_read",
     title: "Disk · sequential read",
@@ -89,6 +97,7 @@ export const METRICS: MetricDef[] = [
       "The same 1 GiB file read back in 4 MiB blocks with direct I/O — the page cache is bypassed, so this is the device, not RAM.",
   },
   {
+    category: "compute",
     test: "disk",
     metric: "rand_read_4k",
     title: "Disk · random 4K read",
@@ -98,6 +107,7 @@ export const METRICS: MetricDef[] = [
       "Random 4 KiB direct-I/O reads at queue depth 4 for 2 s across the 1 GiB file — the access pattern of databases and busy filesystems.",
   },
   {
+    category: "compute",
     test: "disk",
     metric: "fsync_latency_p50",
     title: "Disk · fsync latency (p50)",
@@ -108,6 +118,7 @@ export const METRICS: MetricDef[] = [
     note: "Suspiciously low values can mean the storage acknowledges before data is durable.",
   },
   {
+    category: "compute",
     test: "network",
     metric: "latency_p50",
     title: "Network · latency (p50)",
@@ -117,6 +128,7 @@ export const METRICS: MetricDef[] = [
       "Median of 8 tiny requests on a warm connection to the nearest Cloudflare edge — effectively the round-trip time out of the datacenter.",
   },
   {
+    category: "compute",
     test: "network",
     metric: "download",
     title: "Network · download",
@@ -126,6 +138,7 @@ export const METRICS: MetricDef[] = [
       "Sequential 50 MiB downloads from speed.cloudflare.com for up to 10 s (200 MiB max), counted at the socket.",
   },
   {
+    category: "compute",
     test: "network",
     metric: "upload",
     title: "Network · upload",
@@ -134,6 +147,7 @@ export const METRICS: MetricDef[] = [
     workload: "A 50 MiB POST to speed.cloudflare.com, timed end to end.",
   },
   {
+    category: "compute",
     test: "steal",
     metric: "consistency_cv",
     title: "Consistency · variation",
@@ -144,6 +158,7 @@ export const METRICS: MetricDef[] = [
     note: "High spread = noisy neighbors or burst throttling.",
   },
   {
+    category: "compute",
     test: "steal",
     metric: "p99_over_p50",
     title: "Tail latency · p99 / median",
@@ -154,6 +169,7 @@ export const METRICS: MetricDef[] = [
     note: "Burstable instances show their credit cliff here.",
   },
   {
+    category: "compute",
     test: "steal",
     metric: "cpu_steal",
     title: "CPU steal time",

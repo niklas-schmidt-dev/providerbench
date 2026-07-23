@@ -16,7 +16,7 @@ import (
 	"github.com/niklas-schmidt-dev/providerbench/internal/bench"
 	"github.com/niklas-schmidt-dev/providerbench/internal/output"
 	"github.com/niklas-schmidt-dev/providerbench/internal/sysinfo"
-	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests" // registers built-in tests
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/compute" // registers built-in tests
 )
 
 // version is overridden at release time via -ldflags "-X main.version=...".

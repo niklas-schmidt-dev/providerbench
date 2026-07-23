@@ -32,7 +32,6 @@ const nav = [
   { href: "/ai", label: "AI" },
   { href: "/storage", label: "Storage" },
   { href: "/providers", label: "Providers" },
-  { href: "/methodology", label: "Methodology" },
   { href: "/cli", label: "CLI" },
 ];
 
@@ -88,9 +87,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </p>
               <p>
                 No affiliate links, no sponsored rankings.{" "}
-                <Link href="/methodology" className="text-brand hover:underline">
-                  Methodology
-                </Link>
+                <a
+                  href="https://github.com/niklas-schmidt-dev/providerbench/tree/main/internal/tests"
+                  className="text-brand hover:underline"
+                >
+                  Read the benchmark code
+                </a>
               </p>
             </div>
           </footer>

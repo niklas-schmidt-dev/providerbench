@@ -1,6 +1,6 @@
 //go:build !linux && !darwin
 
-package tests
+package compute
 
 import "os"
 

@@ -66,7 +66,7 @@ function TestCard({ result, peers }: { result: TestResult; peers: Run[] }) {
       <CardHeader>
         <CardTitle className="font-mono text-sm">
           <a
-            href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/${result.test}.go`}
+            href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/compute/${result.test}.go`}
             className="hover:text-brand hover:underline"
             title="benchmark source code"
           >
