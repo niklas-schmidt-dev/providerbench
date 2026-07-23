@@ -2,11 +2,10 @@ import Link from "next/link";
 
 import { CompanyLogo } from "@/components/company-logo";
 import { ComparisonTable } from "@/components/comparison-table";
-import { MetricBarChart } from "@/components/metric-bar-chart";
+import { MetricChart } from "@/components/metric-chart";
 import { SampleBanner } from "@/components/sample-banner";
 import { CATEGORIES } from "@/lib/categories";
 import { anySample, loadRuns, metricOf, type Run } from "@/lib/data";
-import { metricSeries } from "@/lib/series";
 import { PROVIDERS } from "@/lib/providers";
 
 
@@ -47,24 +46,12 @@ export default function Home() {
 
       {/* Leaderboard charts */}
       <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <MetricBarChart title="CPU · single core" unit="MB/s" higherIsBetter data={metricSeries(runs, "cpu", "single_core_hash")} />
-        <MetricBarChart title="CPU · all cores" unit="MB/s" higherIsBetter data={metricSeries(runs, "cpu", "multi_core_hash")} />
-        <MetricBarChart title="Disk · random 4K read" unit="IOPS" higherIsBetter data={metricSeries(runs, "disk", "rand_read_4k")} />
-        <MetricBarChart title="Network · download" unit="Mbps" higherIsBetter data={metricSeries(runs, "network", "download")} />
-        <MetricBarChart
-          title="CPU steal time"
-          unit="%"
-          higherIsBetter={false}
-          data={metricSeries(runs, "steal", "cpu_steal")}
-          note="CPU time the hypervisor gave to other tenants while all cores were saturated. Above ~2% sustained = oversold."
-        />
-        <MetricBarChart
-          title="Disk · fsync latency"
-          unit="ms"
-          higherIsBetter={false}
-          data={metricSeries(runs, "disk", "fsync_latency_p50")}
-          note="Small write + flush to stable storage — what every database commit waits on."
-        />
+        <MetricChart runs={runs} test="cpu" metric="single_core_hash" />
+        <MetricChart runs={runs} test="cpu" metric="multi_core_hash" />
+        <MetricChart runs={runs} test="disk" metric="rand_read_4k" />
+        <MetricChart runs={runs} test="network" metric="download" />
+        <MetricChart runs={runs} test="steal" metric="cpu_steal" />
+        <MetricChart runs={runs} test="disk" metric="fsync_latency_p50" />
       </div>
       <p className="mt-3 text-[13px] text-muted-foreground">
         <Link href="/compute" className="text-brand hover:underline">

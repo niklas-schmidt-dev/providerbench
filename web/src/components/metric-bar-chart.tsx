@@ -23,12 +23,16 @@ export function MetricBarChart({
   unit,
   higherIsBetter,
   data,
+  description,
+  methodHref,
   note,
 }: {
   title: string;
   unit: string;
   higherIsBetter: boolean;
   data: BarDatum[];
+  description?: string;
+  methodHref?: string;
   note?: string;
 }) {
   const sorted = [...data].sort((a, b) =>
@@ -46,11 +50,26 @@ export function MetricBarChart({
 
   return (
     <Card className="gap-3 py-4">
-      <CardHeader className="flex items-baseline justify-between gap-3 px-4">
-        <CardTitle className="text-[13px] font-medium">{title}</CardTitle>
-        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-          {unit} · {higherIsBetter ? "higher = better" : "lower = better"}
-        </span>
+      <CardHeader className="gap-1.5 px-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <CardTitle className="text-[13px] font-medium">{title}</CardTitle>
+          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+            {unit} · {higherIsBetter ? "higher = better" : "lower = better"}
+          </span>
+        </div>
+        {description && (
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            {description}
+            {methodHref && (
+              <>
+                {" "}
+                <a href={methodHref} className="text-brand hover:underline">
+                  method →
+                </a>
+              </>
+            )}
+          </p>
+        )}
       </CardHeader>
       <CardContent className="px-4">
         <ChartContainer

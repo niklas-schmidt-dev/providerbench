@@ -5,7 +5,7 @@ import { GitPullRequest } from "lucide-react";
 
 import { ComparisonTable } from "@/components/comparison-table";
 import { CompanyBadge } from "@/components/company-logo";
-import { MetricBarChart } from "@/components/metric-bar-chart";
+import { MetricChart } from "@/components/metric-chart";
 import { PageHeader } from "@/components/page-header";
 import { SampleBanner } from "@/components/sample-banner";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CATEGORIES, getCategory } from "@/lib/categories";
 import { anySample, metricOf, runsByCategory, type Run } from "@/lib/data";
-import { metricSeries } from "@/lib/series";
 
 export const dynamicParams = false;
 
@@ -83,12 +82,12 @@ function LiveCategory({
           the hardware, never the benchmark.
         </p>
         <div className="grid gap-4 lg:grid-cols-2">
-          <MetricBarChart title="CPU · single core" unit="MB/s" higherIsBetter data={metricSeries(runs, "cpu", "single_core_hash")} />
-          <MetricBarChart title="CPU · all cores" unit="MB/s" higherIsBetter data={metricSeries(runs, "cpu", "multi_core_hash")} />
-          <MetricBarChart title="Memory · copy bandwidth" unit="GB/s" higherIsBetter data={metricSeries(runs, "memory", "copy_bandwidth")} />
-          <MetricBarChart title="Memory · random access" unit="ns" higherIsBetter={false} data={metricSeries(runs, "memory", "random_access_latency")} />
-          <MetricBarChart title="Disk · random 4K read" unit="IOPS" higherIsBetter data={metricSeries(runs, "disk", "rand_read_4k")} />
-          <MetricBarChart title="Network · download" unit="Mbps" higherIsBetter data={metricSeries(runs, "network", "download")} />
+          <MetricChart runs={runs} test="cpu" metric="single_core_hash" />
+          <MetricChart runs={runs} test="cpu" metric="multi_core_hash" />
+          <MetricChart runs={runs} test="memory" metric="copy_bandwidth" />
+          <MetricChart runs={runs} test="memory" metric="random_access_latency" />
+          <MetricChart runs={runs} test="disk" metric="rand_read_4k" />
+          <MetricChart runs={runs} test="network" metric="download" />
         </div>
 
         <h2 className="mt-16 text-lg font-semibold text-foreground">
@@ -99,34 +98,10 @@ function LiveCategory({
           catch the difference between the cores you rent and the cores you get.
         </p>
         <div className="grid gap-4 lg:grid-cols-2">
-          <MetricBarChart
-            title="Consistency · coefficient of variation"
-            unit="%"
-            higherIsBetter={false}
-            data={metricSeries(runs, "steal", "consistency_cv")}
-            note="Spread across 400 identical CPU work units. Near 0% = a quiet host; high values = noisy neighbors or burst throttling."
-          />
-          <MetricBarChart
-            title="CPU steal time"
-            unit="%"
-            higherIsBetter={false}
-            data={metricSeries(runs, "steal", "cpu_steal")}
-            note="Read from /proc/stat while all cores were saturated. Above ~2% sustained is an oversold host."
-          />
-          <MetricBarChart
-            title="Tail latency · p99 / median"
-            unit="ratio"
-            higherIsBetter={false}
-            data={metricSeries(runs, "steal", "p99_over_p50")}
-            note="How much slower the worst 1% of work units ran. Burstable instances show their credit cliff here."
-          />
-          <MetricBarChart
-            title="Disk · fsync latency p50"
-            unit="ms"
-            higherIsBetter={false}
-            data={metricSeries(runs, "disk", "fsync_latency_p50")}
-            note="Small write + flush to stable storage — what every database commit waits on."
-          />
+          <MetricChart runs={runs} test="steal" metric="consistency_cv" />
+          <MetricChart runs={runs} test="steal" metric="cpu_steal" />
+          <MetricChart runs={runs} test="steal" metric="p99_over_p50" />
+          <MetricChart runs={runs} test="disk" metric="fsync_latency_p50" />
         </div>
 
         <h2 className="mt-16 text-lg font-semibold text-foreground">
