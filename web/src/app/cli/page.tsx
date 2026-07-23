@@ -34,7 +34,8 @@ cd providerbench && go build -o providerbench ./cmd/providerbench`}
         <div className="mt-4 grid gap-4">
           <CodeBlock title="full run with a shareable report">
             {`providerbench run \\
-  --provider hetzner --plan cax21 --region fsn1 --price 7.55 \\
+  --provider hetzner --product cloud-vps --plan cax21 \\
+  --region fsn1 --price 7.55 --env os_image=ubuntu-24.04 \\
   --json report.json`}
           </CodeBlock>
           <CodeBlock title="pick your tests, go faster">

@@ -6,12 +6,20 @@ Three ways to contribute, in ascending order of effort:
 
 ```sh
 go install github.com/niklas-schmidt-dev/providerbench/cmd/providerbench@latest
-providerbench run --provider <name> --plan <plan> --region <region> --price <eur> --json report.json
+providerbench run \
+  --provider hetzner --product cloud-vps --plan cax21 --region fsn1 --price 7.55 \
+  --env os_image=ubuntu-24.04 \
+  --json report.json
 ```
 
+- `--provider` is the **company** (hetzner, vercel, aws); `--product` is the
+  offering you tested (cloud-vps, sandbox, ec2). One company, many products.
+- `--env` (repeatable) carries the reproducibility detail: OS image, service
+  versions, non-default config. Everything needed to reproduce the run lives
+  in the public report — the site only shows a summary.
 - Run on a **fresh** instance with nothing else running.
 - Run at least twice at different times of day; submit the typical run, not the best one.
-- Name the file `data/results/<provider>-<plan>.json` and open a PR.
+- Name the file `data/results/<provider>-<product>-<plan>.json` and open a PR.
 - Reports include full system info (never your hostname) so others can verify.
 - Don't hand-edit the JSON — reports that don't match the schema in
   `schema/result.schema.json` are rejected in review.

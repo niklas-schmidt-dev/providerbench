@@ -10,8 +10,11 @@ import (
 const SchemaVersion = 1
 
 // Provider describes where the benchmark ran. All fields are user-supplied.
+// Name is the company (hetzner, vercel, aws); Product is the specific
+// offering tested (cloud-vps, sandbox, ec2) — one company can have many.
 type Provider struct {
 	Name          string  `json:"name,omitempty"`
+	Product       string  `json:"product,omitempty"`
 	Plan          string  `json:"plan,omitempty"`
 	Region        string  `json:"region,omitempty"`
 	PriceEURMonth float64 `json:"price_eur_month,omitempty"`
@@ -29,7 +32,10 @@ type Report struct {
 	Sample    bool         `json:"sample,omitempty"` // true = illustrative data, not a real measurement
 	Provider  Provider     `json:"provider"`
 	System    sysinfo.Info `json:"system"`
-	Results   []Result     `json:"results"`
+	// Environment holds user-supplied reproducibility detail beyond what
+	// sysinfo detects: OS image, database versions, config choices, ...
+	Environment map[string]string `json:"environment,omitempty"`
+	Results     []Result          `json:"results"`
 }
 
 func (r *Report) JSON() ([]byte, error) {

@@ -4,8 +4,9 @@
   "category": "compute",
   "created_at": "2026-07-23T23:38:50.2633981Z",
   "provider": {
-    "name": "vercel-sandbox",
-    "plan": "sandbox (node24)",
+    "name": "vercel",
+    "product": "Sandbox",
+    "plan": "2 vCPU / 4 GB",
     "region": "iad1"
   },
   "system": {
@@ -15,6 +16,10 @@
     "cpu_model": "Intel(R) Xeon(R) Processor @ 2.90GHz",
     "cpu_cores": 2,
     "mem_total_mb": 4283
+  },
+  "environment": {
+    "runtime": "node24",
+    "invoked_via": "@vercel/sandbox SDK"
   },
   "results": [
     {

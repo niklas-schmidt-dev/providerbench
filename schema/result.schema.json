@@ -21,11 +21,17 @@
     "provider": {
       "type": "object",
       "properties": {
-        "name": { "type": "string", "description": "provider slug, e.g. hetzner" },
+        "name": { "type": "string", "description": "provider company slug, e.g. hetzner, vercel, aws" },
+        "product": { "type": "string", "description": "the offering tested, e.g. cloud-vps, sandbox, ec2" },
         "plan": { "type": "string", "description": "plan or instance type, e.g. cax21" },
         "region": { "type": "string" },
         "price_eur_month": { "type": "number", "minimum": 0 }
       }
+    },
+    "environment": {
+      "type": "object",
+      "description": "user-supplied reproducibility detail: OS image, database versions, config choices",
+      "additionalProperties": { "type": "string" }
     },
     "system": {
       "type": "object",

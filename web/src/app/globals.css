@@ -85,7 +85,7 @@
   --provider-ovh: #199e70;
   --provider-digitalocean: #c98500;
   --provider-aws: #d55181;
-  --provider-vercel-sandbox: #008300;
+  --provider-vercel: #008300;
 }
 
 @layer base {

@@ -36,13 +36,17 @@ Run flags:
       --json FILE         where to write the JSON report; "-" prints it to
                           stdout with no table (default: providerbench-<provider>-<time>.json)
       --dir DIR           scratch directory for disk tests (default: current dir)
-      --provider NAME     provider name for the report, e.g. hetzner
+      --provider NAME     provider company, e.g. hetzner, vercel, aws
+      --product NAME      the offering tested, e.g. cloud-vps, sandbox, ec2
       --plan NAME         plan/instance type, e.g. cax21
       --region NAME       region, e.g. fsn1
       --price EUR         monthly price in EUR
+      --env KEY=VALUE     reproducibility detail, repeatable,
+                          e.g. --env os_image=ubuntu-24.04 --env postgres=16.3
 
 Examples:
-  providerbench run --provider hetzner --plan cax21 --region fsn1 --json report.json
+  providerbench run --provider hetzner --product cloud-vps --plan cax21 \
+      --region fsn1 --env os_image=ubuntu-24.04 --json report.json
   providerbench run --quick -t cpu,steal
 `
 
@@ -72,6 +76,20 @@ func main() {
 	}
 }
 
+// envFlag collects repeatable --env KEY=VALUE pairs.
+type envFlag map[string]string
+
+func (e envFlag) String() string { return "" }
+
+func (e envFlag) Set(s string) error {
+	key, value, ok := strings.Cut(s, "=")
+	if !ok || key == "" {
+		return fmt.Errorf("expected KEY=VALUE, got %q", s)
+	}
+	e[key] = value
+	return nil
+}
+
 func runCmd(args []string) int {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	var (
@@ -79,12 +97,15 @@ func runCmd(args []string) int {
 		quick     = fs.Bool("quick", false, "faster, less precise runs")
 		jsonPath  = fs.String("json", "", "write JSON report to file (- for stdout)")
 		dir       = fs.String("dir", "", "scratch directory for disk tests")
-		provider  = fs.String("provider", "", "provider name")
+		provider  = fs.String("provider", "", "provider company, e.g. hetzner")
+		product   = fs.String("product", "", "offering tested, e.g. cloud-vps")
 		plan      = fs.String("plan", "", "plan / instance type")
 		region    = fs.String("region", "", "region")
 		price     = fs.Float64("price", 0, "monthly price in EUR")
+		env       = envFlag{}
 	)
 	fs.StringVar(testsFlag, "t", "", "alias for --tests")
+	fs.Var(env, "env", "KEY=VALUE reproducibility detail (repeatable)")
 	fs.Parse(args)
 
 	selected := bench.All()
@@ -111,8 +132,11 @@ func runCmd(args []string) int {
 		CLIVersion:    version,
 		Category:      "compute",
 		CreatedAt:     time.Now().UTC(),
-		Provider:      bench.Provider{Name: *provider, Plan: *plan, Region: *region, PriceEURMonth: *price},
+		Provider:      bench.Provider{Name: *provider, Product: *product, Plan: *plan, Region: *region, PriceEURMonth: *price},
 		System:        sysinfo.Collect(),
+	}
+	if len(env) > 0 {
+		report.Environment = env
 	}
 
 	exitCode := 0

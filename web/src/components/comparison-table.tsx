@@ -99,7 +99,9 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
                         )}
                       </span>
                       <span className="block font-mono text-[10px] text-muted-foreground">
-                        {run.provider.plan} · {run.provider.region} · {run.system.cpu_cores} vCPU
+                        {[run.provider.product, run.provider.plan, run.provider.region, `${run.system.cpu_cores} vCPU`]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </span>
                     </span>
                   </Link>

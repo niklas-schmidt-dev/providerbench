@@ -178,6 +178,11 @@ export default async function ProviderPage({
                 <h2 className="text-lg font-semibold text-foreground">
                   {category?.name ?? categorySlug}
                 </h2>
+                {run.provider.product && (
+                  <Badge variant="secondary" className="font-normal">
+                    {run.provider.product}
+                  </Badge>
+                )}
                 <Badge variant="secondary" className="font-mono font-normal">
                   {run.provider.plan}
                 </Badge>
@@ -200,12 +205,15 @@ export default async function ProviderPage({
               <div className="mt-4 rounded-xl border bg-card px-5 py-4">
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
                   {[
-                    ["CPU", run.system.cpu_model ?? "—"],
+                    ["CPU", run.system.cpu_model || "—"],
                     ["Cores", String(run.system.cpu_cores)],
                     ["Memory", run.system.mem_total_mb ? `${(run.system.mem_total_mb / 1024).toFixed(0)} GiB` : "—"],
                     ["OS / arch", `${run.system.os}/${run.system.arch}`],
-                    ["Virtualization", run.system.virtualization ?? "—"],
+                    ["Kernel", run.system.kernel || "—"],
                     ["CLI", run.cli_version],
+                    // Environment carries the reproducibility detail the
+                    // submitter provided (OS image, service versions, ...).
+                    ...Object.entries(run.environment ?? {}),
                   ].map(([label, value]) => (
                     <div key={label}>
                       <dt className="text-[11px] text-muted-foreground">{label}</dt>

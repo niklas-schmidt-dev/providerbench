@@ -23,11 +23,13 @@ export type Report = {
   created_at: string;
   sample?: boolean;
   provider: {
-    name?: string;
+    name?: string; // the company: hetzner, vercel, aws
+    product?: string; // the offering tested: Cloud VPS, Sandbox, EC2
     plan?: string;
     region?: string;
     price_eur_month?: number;
   };
+  environment?: Record<string, string>;
   system: {
     os: string;
     arch: string;

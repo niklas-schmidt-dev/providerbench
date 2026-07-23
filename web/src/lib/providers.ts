@@ -60,12 +60,12 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     blurb: "EC2 — the default. Burstable instances make benchmarking interesting.",
   },
   {
-    slug: "vercel-sandbox",
+    slug: "vercel",
     company: "vercel",
-    name: "Vercel Sandbox",
+    name: "Vercel",
     color: SLOTS[5],
-    website: "https://vercel.com/docs/vercel-sandbox",
-    blurb: "Ephemeral microVM compute for untrusted code execution.",
+    website: "https://vercel.com",
+    blurb: "Frontend cloud; measured here via Sandbox, its ephemeral microVM compute.",
   },
 ];
 
