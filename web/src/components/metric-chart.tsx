@@ -23,7 +23,7 @@ export function MetricChart({
       unit={def.unit}
       higherIsBetter={def.higherIsBetter}
       description={def.workload}
-      methodHref={`/methodology#${def.test}`}
+      sourceHref={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/${def.test}.go`}
       note={def.note}
       data={metricSeries(runs, test, metric)}
     />

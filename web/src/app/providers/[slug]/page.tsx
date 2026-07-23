@@ -64,7 +64,15 @@ function TestCard({ result, peers }: { result: TestResult; peers: Run[] }) {
   return (
     <Card className="gap-3">
       <CardHeader>
-        <CardTitle className="font-mono text-sm">{result.test}</CardTitle>
+        <CardTitle className="font-mono text-sm">
+          <a
+            href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/${result.test}.go`}
+            className="hover:text-brand hover:underline"
+            title="benchmark source code"
+          >
+            {result.test}
+          </a>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

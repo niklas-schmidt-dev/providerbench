@@ -24,7 +24,7 @@ export function MetricBarChart({
   higherIsBetter,
   data,
   description,
-  methodHref,
+  sourceHref,
   note,
 }: {
   title: string;
@@ -32,7 +32,7 @@ export function MetricBarChart({
   higherIsBetter: boolean;
   data: BarDatum[];
   description?: string;
-  methodHref?: string;
+  sourceHref?: string;
   note?: string;
 }) {
   const sorted = [...data].sort((a, b) =>
@@ -60,11 +60,11 @@ export function MetricBarChart({
         {description && (
           <p className="text-[11px] leading-relaxed text-muted-foreground">
             {description}
-            {methodHref && (
+            {sourceHref && (
               <>
                 {" "}
-                <a href={methodHref} className="text-brand hover:underline">
-                  method →
+                <a href={sourceHref} className="text-brand hover:underline">
+                  source →
                 </a>
               </>
             )}
