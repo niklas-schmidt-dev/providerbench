@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node -e \"const fs=require('fs');fs.rmSync('data',{recursive:true,force:true});fs.cpSync('../data','data',{recursive:true})\"",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit"

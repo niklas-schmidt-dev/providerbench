@@ -1,23 +1,26 @@
 import Link from "next/link";
-import { TriangleAlert } from "lucide-react";
 
+import { CompanyLogo } from "@/components/company-logo";
 import { ComparisonTable } from "@/components/comparison-table";
 import { MetricBarChart, type BarDatum } from "@/components/metric-bar-chart";
+import { SampleBanner } from "@/components/sample-banner";
 import { CATEGORIES } from "@/lib/categories";
-import { allSample, loadRuns, metricOf, type Run } from "@/lib/data";
+import { anySample, loadRuns, metricOf, type Run } from "@/lib/data";
 import { PROVIDERS } from "@/lib/providers";
 
 function series(runs: Run[], test: string, metric: string): BarDatum[] {
   return runs.flatMap((r) => {
     const m = metricOf(r, test, metric);
     if (!m || !r.provider.name) return [];
-    return [{ provider: r.provider.name, plan: r.provider.plan, value: m.value }];
+    return [
+      { provider: r.provider.name, plan: r.provider.plan, value: m.value, sample: r.sample },
+    ];
   });
 }
 
 export default function Home() {
   const runs = loadRuns();
-  const sample = allSample(runs);
+  const sample = anySample(runs);
   const providerCount = new Set(runs.map((r) => r.provider.name)).size;
   const updated = runs.map((r) => r.created_at).sort().at(-1);
 
@@ -45,13 +48,9 @@ export default function Home() {
       </div>
 
       {sample && (
-        <p className="mt-4 flex items-center gap-2 rounded-md border border-warning/35 bg-warning/8 px-3 py-2 text-[13px] text-muted-foreground">
-          <TriangleAlert aria-hidden className="size-3.5 shrink-0 text-warning" />
-          <span>
-            <span className="font-medium text-foreground">Sample data</span> — illustrative
-            placeholders, not real measurements. Real runs replace them as reports land.
-          </span>
-        </p>
+        <div className="mt-4">
+          <SampleBanner />
+        </div>
       )}
 
       {/* Leaderboard charts */}
@@ -122,7 +121,7 @@ export default function Home() {
               href={`/providers/${p.slug}`}
               className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
             >
-              <span aria-hidden className="size-1.5 rounded-full" style={{ background: p.color }} />
+              <CompanyLogo company={p.company} size="xs" decorative />
               {p.name}
             </Link>
           ))}

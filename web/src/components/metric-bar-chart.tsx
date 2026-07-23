@@ -16,6 +16,7 @@ export type BarDatum = {
   provider: string;
   plan?: string;
   value: number;
+  sample?: boolean;
 };
 
 const ROW_HEIGHT = 30;
@@ -43,6 +44,7 @@ export function MetricBarChart({
     provider: d.provider,
     plan: d.plan,
     value: d.value,
+    sample: d.sample ?? false,
     fill: `var(--color-${d.provider})`,
   }));
   const config = Object.fromEntries(
@@ -100,6 +102,7 @@ export function MetricBarChart({
                         <span className="text-muted-foreground">
                           {providerLabel(String(name))}
                           {item?.payload?.plan ? ` · ${item.payload.plan}` : ""}
+                          {item?.payload?.sample ? " · sample" : ""}
                         </span>
                         <span className="ml-auto font-mono tabular-nums text-foreground">
                           {formatMetricValue(Number(value))} {unit}

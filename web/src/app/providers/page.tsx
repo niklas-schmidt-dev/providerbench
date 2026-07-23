@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import * as motion from "motion/react-client";
 
+import { CompanyLogo } from "@/components/company-logo";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,12 +38,41 @@ export default function ProvidersPage() {
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: i * 0.06 }}
               >
-                <Link href={`/providers/${p.slug}`} className="group block h-full">
-                  <Card className="h-full gap-3 transition-colors group-hover:border-input">
+                {providerRuns.length === 0 ? (
+                  <Card className="h-full gap-3 opacity-70">
                     <CardHeader className="gap-2">
                       <div className="flex items-center gap-2.5">
                         <span aria-hidden className="size-3 rounded-full" style={{ background: p.color }} />
                         <CardTitle className="text-base">{p.name}</CardTitle>
+                      </div>
+                      <p className="text-[13px] leading-relaxed text-muted-foreground">{p.blurb}</p>
+                    </CardHeader>
+                    <CardContent className="mt-auto">
+                      <p className="text-[12px] text-muted-foreground">
+                        Awaiting first report —{" "}
+                        <Link href="/cli" className="text-brand hover:underline">
+                          run the benchmark
+                        </Link>
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                <Link href={`/providers/${p.slug}`} className="group block h-full">
+                  <Card className="h-full gap-3 transition-colors group-hover:border-input">
+                    <CardHeader className="gap-2">
+                      <div className="flex items-center gap-3">
+                        <CompanyLogo company={p.company} size="md" decorative />
+                        <div>
+                          <CardTitle className="text-base">{p.name}</CardTitle>
+                          <span className="mt-1 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                            <span
+                              aria-hidden
+                              className="size-1.5 rounded-full"
+                              style={{ background: p.color }}
+                            />
+                            provider
+                          </span>
+                        </div>
                       </div>
                       <p className="text-[13px] leading-relaxed text-muted-foreground">{p.blurb}</p>
                     </CardHeader>
@@ -60,6 +90,7 @@ export default function ProvidersPage() {
                     </CardContent>
                   </Card>
                 </Link>
+                )}
               </motion.div>
             );
           })}

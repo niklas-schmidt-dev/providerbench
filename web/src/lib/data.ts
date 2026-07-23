@@ -42,12 +42,13 @@ export type Report = {
 
 export type Run = Report & { slug: string };
 
-// Canonical data lives at the repo root in data/results; when the site is
-// built with web/ as the working directory we reach up one level.
+// Canonical data lives at the repo root in data/results. The prebuild step
+// copies it to web/data so builds only read inside the app root; the ../
+// fallback covers `next dev` without a prior build.
 function dataDir(): string {
   for (const p of [
-    path.join(process.cwd(), "..", "data", "results"),
     path.join(process.cwd(), "data", "results"),
+    path.join(process.cwd(), "..", "data", "results"),
   ]) {
     try {
       readdirSync(p);
@@ -86,4 +87,8 @@ export function metricOf(run: Report, test: string, metric: string): Metric | un
 
 export function allSample(runs: Report[]): boolean {
   return runs.length > 0 && runs.every((r) => r.sample);
+}
+
+export function anySample(runs: Report[]): boolean {
+  return runs.some((r) => r.sample);
 }

@@ -1,19 +1,27 @@
 // Provider registry. Categorical color follows the entity, never its rank —
 // the slot order is the validated CVD-safe ordering, do not re-shuffle.
 // New providers: add an entry with the next free slot color.
+import type { CompanySlug } from "@/lib/companies";
+
 const SLOTS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300"];
 
 export type ProviderMeta = {
   slug: string;
+  company?: CompanySlug;
   name: string;
   color: string;
   website: string;
   blurb: string;
 };
 
-export const PROVIDERS: ProviderMeta[] = [
+type RegisteredProviderMeta = ProviderMeta & {
+  company: CompanySlug;
+};
+
+export const PROVIDERS: RegisteredProviderMeta[] = [
   {
     slug: "hetzner",
+    company: "hetzner",
     name: "Hetzner",
     color: SLOTS[0],
     website: "https://www.hetzner.com",
@@ -21,6 +29,7 @@ export const PROVIDERS: ProviderMeta[] = [
   },
   {
     slug: "netcup",
+    company: "netcup",
     name: "Netcup",
     color: SLOTS[1],
     website: "https://www.netcup.com",
@@ -28,6 +37,7 @@ export const PROVIDERS: ProviderMeta[] = [
   },
   {
     slug: "ovh",
+    company: "ovh",
     name: "OVH",
     color: SLOTS[2],
     website: "https://www.ovhcloud.com",
@@ -35,6 +45,7 @@ export const PROVIDERS: ProviderMeta[] = [
   },
   {
     slug: "digitalocean",
+    company: "digitalocean",
     name: "DigitalOcean",
     color: SLOTS[3],
     website: "https://www.digitalocean.com",
@@ -42,6 +53,7 @@ export const PROVIDERS: ProviderMeta[] = [
   },
   {
     slug: "aws",
+    company: "aws",
     name: "AWS",
     color: SLOTS[4],
     website: "https://aws.amazon.com",
@@ -49,6 +61,7 @@ export const PROVIDERS: ProviderMeta[] = [
   },
   {
     slug: "vercel-sandbox",
+    company: "vercel",
     name: "Vercel Sandbox",
     color: SLOTS[5],
     website: "https://vercel.com/docs/vercel-sandbox",

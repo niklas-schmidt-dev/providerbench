@@ -49,25 +49,42 @@ func (netTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 		latencies = append(latencies, float64(time.Since(t).Microseconds())/1000)
 	}
 
-	// --- Download ---
-	dlBytes := int64(200 << 20)
+	// --- Download: repeated bounded chunks, so no single request can hit
+	// endpoint size limits, and slow links still finish in bounded time ---
+	chunk := int64(50 << 20)
+	maxChunks := 4
 	if opts.Quick {
-		dlBytes = 25 << 20
+		chunk = 25 << 20
+		maxChunks = 1
 	}
-	opts.Logf("network: downloading %d MiB...", dlBytes>>20)
-	dlCtx, cancel := context.WithTimeout(ctx, 45*time.Second)
+	opts.Logf("network: downloading up to %d MiB...", chunk*int64(maxChunks)>>20)
+	dlCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(dlCtx, http.MethodGet, fmt.Sprintf("%s/__down?bytes=%d", speedBase, dlBytes), nil)
-	if err != nil {
-		return nil, err
-	}
+	var got int64
 	start := time.Now()
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("network: download: %w", err)
+	for i := 0; i < maxChunks && dlCtx.Err() == nil && time.Since(start) < 10*time.Second; i++ {
+		req, err := http.NewRequestWithContext(dlCtx, http.MethodGet, fmt.Sprintf("%s/__down?bytes=%d", speedBase, chunk), nil)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("network: download: %w", err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			resp.Body.Close()
+			return nil, fmt.Errorf("network: download: unexpected status %s", resp.Status)
+		}
+		n, err := io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+		got += n
+		if err != nil {
+			break // count what we transferred before the connection died
+		}
 	}
-	got, _ := io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
+	if got == 0 {
+		return nil, fmt.Errorf("network: download transferred 0 bytes")
+	}
 	dlMbps := float64(got) * 8 / time.Since(start).Seconds() / 1e6
 
 	// --- Upload ---
@@ -78,18 +95,18 @@ func (netTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 	opts.Logf("network: uploading %d MiB...", ulBytes>>20)
 	ulCtx, cancel2 := context.WithTimeout(ctx, 45*time.Second)
 	defer cancel2()
-	req, err = http.NewRequestWithContext(ulCtx, http.MethodPost, speedBase+"/__up", io.LimitReader(zeroReader{}, ulBytes))
+	ulReq, err := http.NewRequestWithContext(ulCtx, http.MethodPost, speedBase+"/__up", io.LimitReader(zeroReader{}, ulBytes))
 	if err != nil {
 		return nil, err
 	}
-	req.ContentLength = ulBytes
+	ulReq.ContentLength = ulBytes
 	start = time.Now()
-	resp, err = client.Do(req)
+	ulResp, err := client.Do(ulReq)
 	if err != nil {
 		return nil, fmt.Errorf("network: upload: %w", err)
 	}
-	io.Copy(io.Discard, resp.Body)
-	resp.Body.Close()
+	io.Copy(io.Discard, ulResp.Body)
+	ulResp.Body.Close()
 	ulMbps := float64(ulBytes) * 8 / time.Since(start).Seconds() / 1e6
 
 	res.Add("latency_p50", median(latencies), "ms", false)

@@ -1,3 +1,6 @@
+import Link from "next/link";
+
+import { CompanyLogo } from "@/components/company-logo";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -8,8 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { metricOf, type Run } from "@/lib/data";
-import { providerColor, providerLabel } from "@/lib/providers";
-import Link from "next/link";
+import { getProvider, providerColor, providerLabel } from "@/lib/providers";
 
 type Column = {
   label: string;
@@ -63,6 +65,7 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
         <TableBody>
           {runs.map((run) => {
             const name = run.provider.name ?? run.slug;
+            const provider = getProvider(name);
             return (
               <TableRow key={run.slug}>
                 <TableCell className="pl-4">
@@ -70,14 +73,30 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
                     href={`/providers/${name}`}
                     className="flex items-center gap-2.5 hover:underline"
                   >
-                    <span
-                      aria-hidden
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ background: providerColor(name) }}
-                    />
+                    {provider.company ? (
+                      <CompanyLogo company={provider.company} size="sm" decorative />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-muted"
+                      />
+                    )}
                     <span>
-                      <span className="block text-[13px] font-medium">
+                      <span className="flex items-center gap-1.5 text-[13px] font-medium">
+                        <span
+                          aria-hidden
+                          className="size-1.5 shrink-0 rounded-full"
+                          style={{ background: providerColor(name) }}
+                        />
                         {providerLabel(name)}
+                        {run.sample && (
+                          <Badge
+                            variant="outline"
+                            className="h-4 px-1 text-[9px] font-normal text-warning"
+                          >
+                            sample
+                          </Badge>
+                        )}
                       </span>
                       <span className="block font-mono text-[10px] text-muted-foreground">
                         {run.provider.plan} · {run.provider.region} · {run.system.cpu_cores} vCPU

@@ -1,7 +1,15 @@
 import type { LucideIcon } from "lucide-react";
 import { Cpu, Database, Sparkles } from "lucide-react";
 
+import type { CompanySlug } from "@/lib/companies";
+
 export type CategoryStatus = "live" | "planned";
+
+export type PlannedCompany = {
+  company: CompanySlug;
+  /** Product label when it differs from the company name. */
+  label?: string;
+};
 
 export type Category = {
   slug: string;
@@ -12,8 +20,8 @@ export type Category = {
   icon: LucideIcon;
   /** Headline metrics this category measures (or will). */
   metrics: string[];
-  /** For planned categories: providers on the roadmap. */
-  plannedProviders?: string[];
+  /** For planned categories: companies/products on the roadmap. */
+  plannedCompanies?: PlannedCompany[];
 };
 
 // Adding a category = adding an entry here plus result files with a matching
@@ -50,7 +58,14 @@ export const CATEGORIES: Category[] = [
       "Cold start time",
       "Price per 1M tokens",
     ],
-    plannedProviders: ["OpenAI", "Anthropic", "Google", "Groq", "Together", "Fireworks"],
+    plannedCompanies: [
+      { company: "openai" },
+      { company: "anthropic" },
+      { company: "google" },
+      { company: "groq" },
+      { company: "together-ai" },
+      { company: "fireworks-ai" },
+    ],
   },
   {
     slug: "storage",
@@ -67,7 +82,13 @@ export const CATEGORIES: Category[] = [
       "List operations",
       "Egress cost per TB",
     ],
-    plannedProviders: ["Cloudflare R2", "AWS S3", "Backblaze B2", "Google Cloud Storage", "Tigris"],
+    plannedCompanies: [
+      { company: "cloudflare", label: "Cloudflare R2" },
+      { company: "aws", label: "AWS S3" },
+      { company: "backblaze", label: "Backblaze B2" },
+      { company: "google", label: "Google Cloud Storage" },
+      { company: "tigris" },
+    ],
   },
 ];
 

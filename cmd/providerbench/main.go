@@ -33,7 +33,8 @@ Usage:
 Run flags:
   -t, --tests cpu,disk    comma-separated tests to run (default: all)
       --quick             faster, less precise runs
-      --json FILE         write the full report as JSON (use "-" for stdout)
+      --json FILE         where to write the JSON report; "-" prints it to
+                          stdout with no table (default: providerbench-<provider>-<time>.json)
       --dir DIR           scratch directory for disk tests (default: current dir)
       --provider NAME     provider name for the report, e.g. hetzner
       --plan NAME         plan/instance type, e.g. cax21
@@ -134,6 +135,16 @@ func runCmd(args []string) int {
 
 	if !quiet {
 		output.PrintReport(os.Stdout, report)
+	}
+
+	// A machine-readable report is always written — the JSON is the product;
+	// the table above is just a human preview.
+	if *jsonPath == "" {
+		name := *provider
+		if name == "" {
+			name = "run"
+		}
+		*jsonPath = fmt.Sprintf("providerbench-%s-%s.json", name, report.CreatedAt.Format("20060102-150405"))
 	}
 
 	if *jsonPath != "" {

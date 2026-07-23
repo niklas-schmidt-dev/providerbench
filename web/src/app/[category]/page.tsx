@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GitPullRequest } from "lucide-react";
 
 import { ComparisonTable } from "@/components/comparison-table";
+import { CompanyBadge } from "@/components/company-logo";
 import { MetricBarChart, type BarDatum } from "@/components/metric-bar-chart";
 import { PageHeader } from "@/components/page-header";
 import { SampleBanner } from "@/components/sample-banner";
@@ -11,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CATEGORIES, getCategory } from "@/lib/categories";
-import { allSample, metricOf, runsByCategory, type Run } from "@/lib/data";
+import { anySample, metricOf, runsByCategory, type Run } from "@/lib/data";
 
 export const dynamicParams = false;
 
@@ -35,7 +36,9 @@ function series(runs: Run[], test: string, metric: string): BarDatum[] {
   return runs.flatMap((r) => {
     const m = metricOf(r, test, metric);
     if (!m || !r.provider.name) return [];
-    return [{ provider: r.provider.name, plan: r.provider.plan, value: m.value }];
+    return [
+      { provider: r.provider.name, plan: r.provider.plan, value: m.value, sample: r.sample },
+    ];
   });
 }
 
@@ -64,7 +67,7 @@ function LiveCategory({
   description: string;
 }) {
   const runs = runsByCategory(categorySlug);
-  const sample = allSample(runs);
+  const sample = anySample(runs);
 
   return (
     <main>
@@ -201,10 +204,12 @@ function PlannedCategory({ slug }: { slug: string }) {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {category.plannedProviders?.map((p) => (
-                  <Badge key={p} variant="secondary" className="font-normal">
-                    {p}
-                  </Badge>
+                {category.plannedCompanies?.map((planned) => (
+                  <CompanyBadge
+                    key={planned.company}
+                    company={planned.company}
+                    label={planned.label}
+                  />
                 ))}
               </div>
               <p className="mt-5 text-[13px] leading-relaxed text-muted-foreground">

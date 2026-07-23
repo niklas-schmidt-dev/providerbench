@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
+import { CompanyLogo } from "@/components/company-logo";
 import { PageHeader } from "@/components/page-header";
 import { SampleBanner } from "@/components/sample-banner";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,9 @@ import { getProvider, PROVIDERS } from "@/lib/providers";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return PROVIDERS.map((p) => ({ slug: p.slug }));
+  // Only providers with at least one published run get a page.
+  const withRuns = new Set(loadRuns().map((r) => r.provider.name));
+  return PROVIDERS.filter((p) => withRuns.has(p.slug)).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
@@ -136,6 +139,9 @@ export default async function ProviderPage({
       <PageHeader
         eyebrow={
           <span className="flex items-center gap-2">
+            {provider.company && (
+              <CompanyLogo company={provider.company} size="xs" decorative />
+            )}
             <span aria-hidden className="size-2 rounded-full" style={{ background: provider.color }} />
             Providers / {provider.name}
           </span>

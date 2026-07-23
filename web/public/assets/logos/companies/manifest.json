@@ -1,0 +1,186 @@
+{
+  "basePath": "/assets/logos/companies",
+  "updatedAt": "2026-07-24",
+  "companies": [
+    {
+      "slug": "hetzner",
+      "name": "Hetzner",
+      "labels": ["Hetzner"],
+      "usedBy": ["compute"],
+      "file": "hetzner.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/hetzner"
+      }
+    },
+    {
+      "slug": "netcup",
+      "name": "Netcup",
+      "labels": ["Netcup"],
+      "usedBy": ["compute"],
+      "file": "netcup.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/netcup"
+      }
+    },
+    {
+      "slug": "ovh",
+      "name": "OVHcloud",
+      "labels": ["OVH"],
+      "usedBy": ["compute"],
+      "file": "ovh.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/ovh"
+      }
+    },
+    {
+      "slug": "digitalocean",
+      "name": "DigitalOcean",
+      "labels": ["DigitalOcean"],
+      "usedBy": ["compute"],
+      "file": "digitalocean.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/digitalocean"
+      }
+    },
+    {
+      "slug": "aws",
+      "name": "Amazon Web Services",
+      "labels": ["AWS", "AWS S3"],
+      "usedBy": ["compute", "storage"],
+      "file": "aws.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Official icon package",
+        "url": "https://d1.awsstatic.com/onedam/marketing-channels/website/aws/en_US/architecture/approved/architecture-icons/Icon-package_04302026.4705b90f5aa45b019271a2699e9ce9b97b941ee1.zip"
+      }
+    },
+    {
+      "slug": "vercel",
+      "name": "Vercel",
+      "labels": ["Vercel Sandbox"],
+      "usedBy": ["compute"],
+      "file": "vercel.svg",
+      "recommendedSurface": "light",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/vercel"
+      }
+    },
+    {
+      "slug": "openai",
+      "name": "OpenAI",
+      "labels": ["OpenAI"],
+      "usedBy": ["ai"],
+      "file": "openai.svg",
+      "recommendedSurface": "light",
+      "source": {
+        "type": "Official logo package",
+        "url": "https://cdn.openai.com/brand/openai-logos.zip"
+      }
+    },
+    {
+      "slug": "anthropic",
+      "name": "Anthropic",
+      "labels": ["Anthropic"],
+      "usedBy": ["ai"],
+      "file": "anthropic.svg",
+      "recommendedSurface": "light",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/anthropic"
+      }
+    },
+    {
+      "slug": "google",
+      "name": "Google",
+      "labels": ["Google", "Google Cloud Storage"],
+      "usedBy": ["ai", "storage"],
+      "file": "google.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/google"
+      }
+    },
+    {
+      "slug": "groq",
+      "name": "Groq",
+      "labels": ["Groq"],
+      "usedBy": ["ai"],
+      "file": "groq.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Official site asset",
+        "url": "https://groq.com/favicon.svg"
+      }
+    },
+    {
+      "slug": "together-ai",
+      "name": "Together AI",
+      "labels": ["Together"],
+      "usedBy": ["ai"],
+      "file": "together-ai.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Official logo package",
+        "url": "https://cdn.prod.website-files.com/69654e88dce9154b5f1206dd/69a6dad66e8b98c718262888_together-ai-logo-suite.zip"
+      }
+    },
+    {
+      "slug": "fireworks-ai",
+      "name": "Fireworks AI",
+      "labels": ["Fireworks"],
+      "usedBy": ["ai"],
+      "file": "fireworks-ai.svg",
+      "recommendedSurface": "light",
+      "source": {
+        "type": "Official site asset",
+        "url": "https://cdn.sanity.io/images/pv37i0yn/production/46d329cfd46294a5986218e94752d5d283cbe16c-343x44.svg"
+      }
+    },
+    {
+      "slug": "cloudflare",
+      "name": "Cloudflare",
+      "labels": ["Cloudflare", "Cloudflare R2"],
+      "usedBy": ["storage", "methodology"],
+      "file": "cloudflare.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/cloudflare"
+      }
+    },
+    {
+      "slug": "backblaze",
+      "name": "Backblaze",
+      "labels": ["Backblaze B2"],
+      "usedBy": ["storage"],
+      "file": "backblaze.svg",
+      "recommendedSurface": "any",
+      "source": {
+        "type": "Simple Icons",
+        "url": "https://cdn.simpleicons.org/backblaze"
+      }
+    },
+    {
+      "slug": "tigris",
+      "name": "Tigris",
+      "labels": ["Tigris"],
+      "usedBy": ["storage"],
+      "file": "tigris.svg",
+      "recommendedSurface": "dark",
+      "source": {
+        "type": "Official site asset",
+        "url": "https://www.tigrisdata.com/images/tigris-logo.svg"
+      }
+    }
+  ]
+}
