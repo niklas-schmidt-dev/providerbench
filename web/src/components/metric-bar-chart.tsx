@@ -10,20 +10,14 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { formatMetricValue } from "@/lib/format";
-import { providerColor, providerLabel } from "@/lib/providers";
-
-export type BarDatum = {
-  provider: string;
-  plan?: string;
-  value: number;
-  sample?: boolean;
-};
+import { providerColor } from "@/lib/providers";
+import type { BarDatum } from "@/lib/series";
 
 const ROW_HEIGHT = 30;
 
-// Horizontal provider comparison built on the shadcn chart component
-// (Recharts v3). Marks follow the dataviz spec: thin bars, 4px rounded
-// data-end, square baseline, value labels in text tokens.
+// Horizontal comparison bars on the shadcn chart component (Recharts v3).
+// One bar per run; color follows the provider entity, so two plans from the
+// same provider share a hue and are told apart by their labels.
 export function MetricBarChart({
   title,
   unit,
@@ -40,94 +34,90 @@ export function MetricBarChart({
   const sorted = [...data].sort((a, b) =>
     higherIsBetter ? b.value - a.value : a.value - b.value,
   );
+  const labelOf = new Map(sorted.map((d) => [d.id, d.label]));
   const chartData = sorted.map((d) => ({
-    provider: d.provider,
-    plan: d.plan,
-    value: d.value,
+    ...d,
     sample: d.sample ?? false,
-    fill: `var(--color-${d.provider})`,
+    fill: `var(--color-${d.id})`,
   }));
   const config = Object.fromEntries(
-    sorted.map((d) => [
-      d.provider,
-      { label: providerLabel(d.provider), color: providerColor(d.provider) },
-    ]),
+    sorted.map((d) => [d.id, { label: d.label, color: providerColor(d.provider) }]),
   ) satisfies ChartConfig;
 
   return (
     <Card className="gap-3 py-4">
-        <CardHeader className="flex items-baseline justify-between gap-3 px-4">
-          <CardTitle className="text-[13px] font-medium">{title}</CardTitle>
-          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-            {unit} · {higherIsBetter ? "higher = better" : "lower = better"}
-          </span>
-        </CardHeader>
-        <CardContent className="px-4">
-          <ChartContainer
-            config={config}
-            className="w-full"
-            style={{ height: chartData.length * ROW_HEIGHT + 6 }}
+      <CardHeader className="flex items-baseline justify-between gap-3 px-4">
+        <CardTitle className="text-[13px] font-medium">{title}</CardTitle>
+        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+          {unit} · {higherIsBetter ? "higher = better" : "lower = better"}
+        </span>
+      </CardHeader>
+      <CardContent className="px-4">
+        <ChartContainer
+          config={config}
+          className="w-full"
+          style={{ height: chartData.length * ROW_HEIGHT + 6 }}
+        >
+          <BarChart
+            accessibilityLayer
+            layout="vertical"
+            data={chartData}
+            margin={{ top: 0, right: 48, bottom: 0, left: 0 }}
+            barSize={16}
           >
-            <BarChart
-              accessibilityLayer
-              layout="vertical"
-              data={chartData}
-              margin={{ top: 0, right: 48, bottom: 0, left: 0 }}
-              barSize={16}
-            >
-              <YAxis
-                type="category"
-                dataKey="provider"
-                tickLine={false}
-                axisLine={false}
-                width={100}
-                tick={{ fontSize: 11 }}
-                className="[&_text]:fill-muted-foreground"
-                tickFormatter={(v: string) => providerLabel(v)}
-              />
-              <XAxis type="number" hide domain={[0, "dataMax"]} />
-              <ChartTooltip
-                cursor={{ fill: "oklch(1 0 0 / 4%)" }}
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    nameKey="provider"
-                    formatter={(value, name, item) => (
-                      <span className="flex w-full items-center gap-2">
-                        <span
-                          aria-hidden
-                          className="size-2 shrink-0 rounded-[2px]"
-                          style={{ background: item?.payload?.fill }}
-                        />
-                        <span className="text-muted-foreground">
-                          {providerLabel(String(name))}
-                          {item?.payload?.plan ? ` · ${item.payload.plan}` : ""}
-                          {item?.payload?.sample ? " · sample" : ""}
-                        </span>
-                        <span className="ml-auto font-mono tabular-nums text-foreground">
-                          {formatMetricValue(Number(value))} {unit}
-                        </span>
+            <YAxis
+              type="category"
+              dataKey="id"
+              tickLine={false}
+              axisLine={false}
+              width={124}
+              tick={{ fontSize: 11 }}
+              className="[&_text]:fill-muted-foreground"
+              tickFormatter={(id: string) => labelOf.get(id) ?? id}
+            />
+            <XAxis type="number" hide domain={[0, "dataMax"]} />
+            <ChartTooltip
+              cursor={{ fill: "color-mix(in oklab, var(--foreground) 5%, transparent)" }}
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  nameKey="id"
+                  formatter={(value, _name, item) => (
+                    <span className="flex w-full items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="size-2 shrink-0 rounded-[2px]"
+                        style={{ background: item?.payload?.fill }}
+                      />
+                      <span className="text-muted-foreground">
+                        {item?.payload?.label}
+                        {item?.payload?.product ? ` · ${item.payload.product}` : ""}
+                        {item?.payload?.sample ? " · sample" : ""}
                       </span>
-                    )}
-                  />
-                }
-              />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]} isAnimationActive>
-                <LabelList
-                  dataKey="value"
-                  position="right"
-                  offset={8}
-                  formatter={(v: unknown) => formatMetricValue(Number(v))}
-                  className="fill-foreground font-mono"
-                  fontSize={11}
+                      <span className="ml-auto font-mono tabular-nums text-foreground">
+                        {formatMetricValue(Number(value))} {unit}
+                      </span>
+                    </span>
+                  )}
                 />
-              </Bar>
-            </BarChart>
-          </ChartContainer>
-          {note && (
-            <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{note}</p>
-          )}
-        </CardContent>
-      </Card>
+              }
+            />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} isAnimationActive>
+              <LabelList
+                dataKey="value"
+                position="right"
+                offset={8}
+                formatter={(v: unknown) => formatMetricValue(Number(v))}
+                className="fill-foreground font-mono"
+                fontSize={11}
+              />
+            </Bar>
+          </BarChart>
+        </ChartContainer>
+        {note && (
+          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{note}</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
