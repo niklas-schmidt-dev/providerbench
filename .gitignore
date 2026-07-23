@@ -17,3 +17,8 @@ web/*.tsbuildinfo
 # misc
 .DS_Store
 web/data/
+
+.vercel/
+web/.env.local
+.vercel
+.env*
