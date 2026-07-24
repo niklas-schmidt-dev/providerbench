@@ -20,12 +20,16 @@ import (
 )
 
 // version is overridden at release time via -ldflags "-X main.version=...".
-var version = "0.1.0-dev"
+var version = "0.2.0-dev"
 
 const usage = `providerbench — open benchmark for VPS & server providers
 
 Usage:
   providerbench run [flags]   run benchmarks
+  providerbench campaign hetzner [flags]
+                              create, benchmark, and remove a Hetzner cohort
+  providerbench campaign vercel [flags]
+                              benchmark fresh Vercel Sandbox samples
   providerbench list          list available tests
   providerbench system        show detected system info
   providerbench version       print version
@@ -39,8 +43,15 @@ Run flags:
       --provider NAME     provider company, e.g. hetzner, vercel, aws
       --product NAME      the offering tested, e.g. cloud-vps, sandbox, ec2
       --plan NAME         plan/instance type, e.g. cax21
+      --tier NAME         price tier: cheap, medium, dedicated, usage-based
       --region NAME       region, e.g. fsn1
-      --price EUR         monthly price in EUR
+      --price EUR         monthly price in EUR (deprecated alias)
+      --price-month EUR   monthly price in EUR
+      --price-hour EUR    hourly price in EUR
+      --campaign ID       benchmark campaign identifier
+      --sample-index N    independent host number inside the campaign
+      --repeat-index N    repeat number on that host
+      --fresh-instance    this sample ran on a newly created instance
       --env KEY=VALUE     reproducibility detail, repeatable,
                           e.g. --env os_image=ubuntu-24.04 --env postgres=16.3
 
@@ -48,6 +59,13 @@ Examples:
   providerbench run --provider hetzner --product cloud-vps --plan cax21 \
       --region fsn1 --env os_image=ubuntu-24.04 --json report.json
   providerbench run --quick -t cpu,steal
+  providerbench campaign hetzner --dry-run \
+      --campaign hetzner-2026q3 --plan cpx22 --tier medium --region fsn1 \
+      --price-hour 0.03808 --price-month 23.7881
+  providerbench campaign vercel --dry-run \
+      --campaign vercel-sandbox-2026q3 --vcpus 2 \
+      --price-hour 0.2991573034 --price-month 218.3848315 \
+      --pricing-as-of 2026-07-23
 `
 
 func main() {
@@ -58,6 +76,8 @@ func main() {
 	switch os.Args[1] {
 	case "run":
 		os.Exit(runCmd(os.Args[2:]))
+	case "campaign":
+		os.Exit(campaignCmd(os.Args[2:]))
 	case "list":
 		for _, b := range bench.All() {
 			fmt.Printf("  %-10s %s\n", b.Name(), b.Description())
@@ -74,6 +94,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n%s", os.Args[1], usage)
 		os.Exit(2)
 	}
+}
+
+// validTier reports whether tier is empty or one of the schema's price tiers.
+func validTier(tier string) bool {
+	switch tier {
+	case "", "cheap", "medium", "dedicated", "usage-based":
+		return true
+	}
+	return false
 }
 
 // envFlag collects repeatable --env KEY=VALUE pairs.
@@ -93,20 +122,41 @@ func (e envFlag) Set(s string) error {
 func runCmd(args []string) int {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	var (
-		testsFlag = fs.String("tests", "", "comma-separated tests to run")
-		quick     = fs.Bool("quick", false, "faster, less precise runs")
-		jsonPath  = fs.String("json", "", "write JSON report to file (- for stdout)")
-		dir       = fs.String("dir", "", "scratch directory for disk tests")
-		provider  = fs.String("provider", "", "provider company, e.g. hetzner")
-		product   = fs.String("product", "", "offering tested, e.g. cloud-vps")
-		plan      = fs.String("plan", "", "plan / instance type")
-		region    = fs.String("region", "", "region")
-		price     = fs.Float64("price", 0, "monthly price in EUR")
-		env       = envFlag{}
+		testsFlag     = fs.String("tests", "", "comma-separated tests to run")
+		quick         = fs.Bool("quick", false, "faster, less precise runs")
+		jsonPath      = fs.String("json", "", "write JSON report to file (- for stdout)")
+		dir           = fs.String("dir", "", "scratch directory for disk tests")
+		provider      = fs.String("provider", "", "provider company, e.g. hetzner")
+		product       = fs.String("product", "", "offering tested, e.g. cloud-vps")
+		plan          = fs.String("plan", "", "plan / instance type")
+		tier          = fs.String("tier", "", "price tier: cheap, medium, dedicated")
+		region        = fs.String("region", "", "region")
+		price         = fs.Float64("price", 0, "monthly price in EUR")
+		priceMonth    = fs.Float64("price-month", 0, "monthly price in EUR")
+		priceHour     = fs.Float64("price-hour", 0, "hourly price in EUR")
+		campaign      = fs.String("campaign", "", "benchmark campaign identifier")
+		sampleIndex   = fs.Int("sample-index", 0, "independent host number in campaign")
+		repeatIndex   = fs.Int("repeat-index", 0, "repeat number on the host")
+		freshInstance = fs.Bool("fresh-instance", false, "sample ran on a newly created instance")
+		env           = envFlag{}
 	)
 	fs.StringVar(testsFlag, "t", "", "alias for --tests")
 	fs.Var(env, "env", "KEY=VALUE reproducibility detail (repeatable)")
 	fs.Parse(args)
+
+	// Campaign coordinates travel together. Without an explicit sample index,
+	// repeats on one machine would be indistinguishable from independent hosts
+	// and could inflate a cohort's evidence.
+	if *campaign != "" || *sampleIndex != 0 || *repeatIndex != 0 {
+		if *campaign == "" || *sampleIndex < 1 || *repeatIndex < 1 {
+			fmt.Fprintln(os.Stderr, "--campaign, --sample-index (>= 1), and --repeat-index (>= 1) must be used together")
+			return 2
+		}
+	}
+	if !validTier(*tier) {
+		fmt.Fprintln(os.Stderr, "--tier must be one of: cheap, medium, dedicated, usage-based")
+		return 2
+	}
 
 	selected := bench.All()
 	if *testsFlag != "" {
@@ -127,13 +177,32 @@ func runCmd(args []string) int {
 	}
 	opts := bench.Options{Quick: *quick, Dir: *dir, Log: logf}
 
+	monthlyPrice := *priceMonth
+	if monthlyPrice == 0 {
+		monthlyPrice = *price
+	}
 	report := &bench.Report{
 		SchemaVersion: bench.SchemaVersion,
 		CLIVersion:    version,
 		Category:      "compute",
 		CreatedAt:     time.Now().UTC(),
-		Provider:      bench.Provider{Name: *provider, Product: *product, Plan: *plan, Region: *region, PriceEURMonth: *price},
-		System:        sysinfo.Collect(),
+		Quick:         *quick,
+		Provider: bench.Provider{
+			Name:          *provider,
+			Product:       *product,
+			Plan:          *plan,
+			Tier:          *tier,
+			Region:        *region,
+			PriceEURHour:  *priceHour,
+			PriceEURMonth: monthlyPrice,
+		},
+		System: sysinfo.Collect(),
+		Measurement: bench.Measurement{
+			CampaignID:    *campaign,
+			SampleIndex:   *sampleIndex,
+			RepeatIndex:   *repeatIndex,
+			FreshInstance: *freshInstance,
+		},
 	}
 	if len(env) > 0 {
 		report.Environment = env

@@ -13,10 +13,18 @@
       "description": "benchmark category, e.g. compute, ai, storage",
       "default": "compute"
     },
-    "created_at": { "type": "string", "format": "date-time" },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp at which this individual benchmark run began. Historical comparisons must never combine different measurement campaigns."
+    },
     "sample": {
       "type": "boolean",
       "description": "true = illustrative placeholder data, not a real measurement"
+    },
+    "quick": {
+      "type": "boolean",
+      "description": "true = produced with --quick. Quick workloads are smaller and shorter; quick reports never enter ranked aggregates."
     },
     "provider": {
       "type": "object",
@@ -24,8 +32,30 @@
         "name": { "type": "string", "description": "provider company slug, e.g. hetzner, vercel, aws" },
         "product": { "type": "string", "description": "the offering tested, e.g. cloud-vps, sandbox, ec2" },
         "plan": { "type": "string", "description": "plan or instance type, e.g. cax21" },
+        "tier": { "type": "string", "enum": ["cheap", "medium", "dedicated", "usage-based"] },
         "region": { "type": "string" },
+        "price_eur_hour": { "type": "number", "minimum": 0 },
         "price_eur_month": { "type": "number", "minimum": 0 }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "description": "Coordinates repeated runs. Aggregate repeats to a per-host median before calculating cross-host percentiles.",
+      "dependentRequired": {
+        "campaign_id": ["sample_index", "repeat_index"]
+      },
+      "properties": {
+        "campaign_id": {
+          "type": "string",
+          "description": "Stable identifier for one dated measurement cohort. A new re-measurement period must use a new campaign ID so changes over time remain visible."
+        },
+        "sample_index": { "type": "integer", "minimum": 1 },
+        "repeat_index": { "type": "integer", "minimum": 1 },
+        "fresh_instance": { "type": "boolean" },
+        "exclude_from_aggregate": {
+          "type": "boolean",
+          "description": "true for pilots or known-invalid observations retained for audit but excluded when ranked data exists"
+        }
       }
     },
     "environment": {
@@ -53,7 +83,11 @@
         "required": ["test", "started_at", "duration_seconds", "metrics"],
         "properties": {
           "test": { "type": "string" },
-          "started_at": { "type": "string", "format": "date-time" },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp at which this specific benchmark workload began."
+          },
           "duration_seconds": { "type": "number", "minimum": 0 },
           "metrics": {
             "type": "array",
