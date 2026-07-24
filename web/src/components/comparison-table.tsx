@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { metricSummary, type ScoredGroup } from "@/lib/aggregate";
 import { formatMeasurementWindow } from "@/lib/dates";
+import { planCpuParts } from "@/lib/format";
 import { getProvider, providerColor, providerLabel } from "@/lib/providers";
 
 type Column = {
@@ -36,6 +37,13 @@ const COLUMNS: Column[] = [
 ];
 
 const fmt = (v: number) => v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+function planLine(group: ScoredGroup): string {
+  const { tier, cpu } = planCpuParts(group.provider.tier, group.system.cpu_cores);
+  return [group.provider.product, group.provider.plan, tier, group.provider.region, cpu]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 export function ComparisonTable({ groups }: { groups: ScoredGroup[] }) {
   const bests = COLUMNS.map((c) => {
@@ -120,15 +128,7 @@ export function ComparisonTable({ groups }: { groups: ScoredGroup[] }) {
                         )}
                       </span>
                       <span className="block font-mono text-[10px] text-muted-foreground">
-                        {[
-                          group.provider.product,
-                          group.provider.plan,
-                          group.provider.tier,
-                          group.provider.region,
-                          `${group.system.cpu_cores} vCPU`,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
+                        {planLine(group)}
                       </span>
                       <span className="block font-mono text-[9px] text-muted-foreground/75">
                         {group.hostCount} independent host{group.hostCount === 1 ? "" : "s"} ·{" "}

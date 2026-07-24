@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { metricSummary, type ScoredGroup } from "@/lib/aggregate";
 import { formatMeasurementWindow } from "@/lib/dates";
-import { formatMetricValue } from "@/lib/format";
+import { formatMetricValue, planCpuParts } from "@/lib/format";
 import { getMetricDef } from "@/lib/metrics";
 import { providerColor, providerLabel } from "@/lib/providers";
 import { cn } from "@/lib/utils";
@@ -173,6 +173,7 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
         )?.distribution.p50;
         if (!price || !provider || value === undefined || value <= 0) return [];
         const region = group.provider.region?.toUpperCase();
+        const cpuParts = planCpuParts(group.provider.tier, group.system.cpu_cores);
         return [
           {
             id: group.id,
@@ -183,11 +184,7 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
             ]
               .filter(Boolean)
               .join(" "),
-            detail: [
-              group.provider.tier,
-              group.provider.region,
-              `${group.system.cpu_cores} vCPU`,
-            ]
+            detail: [cpuParts.tier, group.provider.region, cpuParts.cpu]
               .filter(Boolean)
               .join(" · "),
             provider,
