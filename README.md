@@ -135,7 +135,8 @@ PostgreSQL TPS, Redis ops/s, build-time benchmarks, sustained-load runs.
    CLI refuses a campaign run without explicit coordinates.
 3. Add every raw file under
    `data/results/<provider>-<product>-<plan>-<region>-<campaign>-<sample>-<repeat>.json`.
-4. Open a PR. Reports include full system info so others can verify.
+4. Run `providerbench validate data/results`, then open a PR — CI enforces the
+   same check. Reports include full system info so others can verify.
 
 Prices are **net EUR, excluding VAT** — tax depends on the buyer's country,
 not the provider. `--quick` runs are recorded as such in the report and never

@@ -32,6 +32,9 @@ Usage:
                               benchmark fresh Vercel Sandbox samples
   providerbench list          list available tests
   providerbench system        show detected system info
+  providerbench validate [--dataset] FILE|DIR ...
+                              check reports against the schema; directories
+                              are checked as data/results submissions
   providerbench version       print version
 
 Run flags:
@@ -78,6 +81,8 @@ func main() {
 		os.Exit(runCmd(os.Args[2:]))
 	case "campaign":
 		os.Exit(campaignCmd(os.Args[2:]))
+	case "validate":
+		os.Exit(validateCmd(os.Args[2:]))
 	case "list":
 		for _, b := range bench.All() {
 			fmt.Printf("  %-10s %s\n", b.Name(), b.Description())
@@ -94,15 +99,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n%s", os.Args[1], usage)
 		os.Exit(2)
 	}
-}
-
-// validTier reports whether tier is empty or one of the schema's price tiers.
-func validTier(tier string) bool {
-	switch tier {
-	case "", "cheap", "medium", "dedicated", "usage-based":
-		return true
-	}
-	return false
 }
 
 // envFlag collects repeatable --env KEY=VALUE pairs.
@@ -153,7 +149,7 @@ func runCmd(args []string) int {
 			return 2
 		}
 	}
-	if !validTier(*tier) {
+	if !bench.ValidTier(*tier) {
 		fmt.Fprintln(os.Stderr, "--tier must be one of: cheap, medium, dedicated, usage-based")
 		return 2
 	}
