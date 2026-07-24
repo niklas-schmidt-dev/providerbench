@@ -1,13 +1,16 @@
 {
   "schema_version": 1,
-  "cli_version": "0.1.0",
+  "cli_version": "0.2.0-dev",
   "category": "compute",
-  "created_at": "2026-07-23T23:38:50.2633981Z",
+  "created_at": "2026-07-24T14:53:29.518765978Z",
   "provider": {
     "name": "vercel",
     "product": "Sandbox",
     "plan": "2 vCPU / 4 GB",
-    "region": "iad1"
+    "tier": "usage-based",
+    "region": "iad1",
+    "price_eur_hour": 0.2991573034,
+    "price_eur_month": 218.3848315
   },
   "system": {
     "os": "linux",
@@ -18,33 +21,41 @@
     "mem_total_mb": 4283
   },
   "measurement": {
-    "exclude_from_aggregate": true
+    "campaign_id": "vercel-sandbox-2026-07-24-v2",
+    "sample_index": 3,
+    "repeat_index": 2,
+    "fresh_instance": true
   },
   "environment": {
+    "host_strategy": "fresh-vercel-sandbox-per-sample",
+    "pricing_as_of": "2026-07-23",
+    "pricing_basis": "2*$0.128 active-vCPU-hour + 4GB*$0.0212 GB-hour; ECB 2026-07-23 EUR/USD 1.1392; 730h continuous full utilization; excludes included quota, creation, and network",
     "runtime": "node24",
-    "invoked_via": "@vercel/sandbox SDK"
+    "sandbox_memory_gb": "4",
+    "sandbox_vcpus": "2",
+    "vercel_cli_version": "56.4.1"
   },
   "results": [
     {
       "test": "cpu",
-      "started_at": "2026-07-23T23:38:50.263611498Z",
+      "started_at": "2026-07-24T14:53:29.519104567Z",
       "duration_seconds": 6,
       "metrics": [
         {
           "name": "single_core_hash",
-          "value": 1324.72,
+          "value": 1327.43,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "multi_core_hash",
-          "value": 2646.86,
+          "value": 2660.94,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "scaling_efficiency",
-          "value": 99.9,
+          "value": 100.23,
           "unit": "%",
           "higher_is_better": true
         }
@@ -55,24 +66,24 @@
     },
     {
       "test": "disk",
-      "started_at": "2026-07-23T23:38:56.265863187Z",
-      "duration_seconds": 3.13,
+      "started_at": "2026-07-24T14:53:35.519763548Z",
+      "duration_seconds": 3.02,
       "metrics": [
         {
           "name": "seq_write",
-          "value": 1389.71,
+          "value": 1645.54,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "seq_read",
-          "value": 3464.09,
+          "value": 2976.33,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "rand_read_4k",
-          "value": 73757.22,
+          "value": 78142.49,
           "unit": "IOPS",
           "higher_is_better": true
         },
@@ -90,18 +101,18 @@
     },
     {
       "test": "memory",
-      "started_at": "2026-07-23T23:38:59.396781655Z",
-      "duration_seconds": 5.45,
+      "started_at": "2026-07-24T14:53:38.545771843Z",
+      "duration_seconds": 5.18,
       "metrics": [
         {
           "name": "copy_bandwidth",
-          "value": 6.64,
+          "value": 6.72,
           "unit": "GB/s",
           "higher_is_better": true
         },
         {
           "name": "random_access_latency",
-          "value": 110.04,
+          "value": 109.37,
           "unit": "ns",
           "higher_is_better": false
         }
@@ -112,58 +123,59 @@
     },
     {
       "test": "network",
-      "started_at": "2026-07-23T23:39:04.842492373Z",
-      "duration_seconds": 1.34,
+      "started_at": "2026-07-24T14:53:43.72757264Z",
+      "duration_seconds": 3.08,
       "metrics": [
         {
           "name": "latency_p50",
-          "value": 27.89,
+          "value": 3.97,
           "unit": "ms",
           "higher_is_better": false
         },
         {
           "name": "download",
-          "value": 3093.27,
+          "value": 1883.01,
           "unit": "Mbps",
           "higher_is_better": true
         },
         {
           "name": "upload",
-          "value": 845.07,
+          "value": 246.31,
           "unit": "Mbps",
           "higher_is_better": true
         }
       ],
       "notes": [
-        "measured against the nearest Cloudflare edge"
+        "measured against Cloudflare edge IAD",
+        "latency excludes server processing time (Cloudflare Server-Timing)"
       ]
     },
     {
       "test": "steal",
-      "started_at": "2026-07-23T23:39:06.178854759Z",
-      "duration_seconds": 10.94,
+      "started_at": "2026-07-24T14:53:46.803777676Z",
+      "duration_seconds": 10.99,
       "metrics": [
         {
           "name": "unit_time_p50",
-          "value": 14.62,
+          "value": 14.92,
           "unit": "ms",
           "higher_is_better": false
         },
         {
           "name": "consistency_cv",
-          "value": 10.49,
+          "value": 1.93,
           "unit": "%",
           "higher_is_better": false
         },
         {
           "name": "p99_over_p50",
-          "value": 1.36,
+          "value": 1.09,
           "unit": "ratio",
           "higher_is_better": false
         },
         {
           "name": "cpu_steal",
-          "value": 0.3,
+          "value": 1.3,
           "unit": "%",
           "higher_is_better": false
         }

@@ -1,50 +1,59 @@
 {
   "schema_version": 1,
-  "cli_version": "0.1.0",
+  "cli_version": "0.1.0-dev",
   "category": "compute",
-  "created_at": "2026-07-23T23:38:50.2633981Z",
+  "created_at": "2026-07-24T09:13:13.059211616Z",
   "provider": {
-    "name": "vercel",
-    "product": "Sandbox",
-    "plan": "2 vCPU / 4 GB",
-    "region": "iad1"
+    "name": "hetzner",
+    "product": "cloud-vps",
+    "plan": "ccx13",
+    "tier": "dedicated",
+    "region": "nbg1",
+    "price_eur_hour": 0.0697,
+    "price_eur_month": 43.49
   },
   "system": {
     "os": "linux",
     "arch": "amd64",
-    "kernel": "6.12.76",
-    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.90GHz",
+    "kernel": "6.8.0-71-generic",
+    "cpu_model": "AMD EPYC-Milan Processor",
     "cpu_cores": 2,
-    "mem_total_mb": 4283
+    "mem_total_mb": 7747,
+    "virtualization": "kvm"
   },
   "measurement": {
-    "exclude_from_aggregate": true
+    "campaign_id": "hetzner-2026q3",
+    "sample_index": 7,
+    "repeat_index": 1,
+    "fresh_instance": true
   },
   "environment": {
-    "runtime": "node24",
-    "invoked_via": "@vercel/sandbox SDK"
+    "host_strategy": "hetzner-spread-placement-group",
+    "os_image": "ubuntu-24.04",
+    "pricing_as_of": "2026-07-24",
+    "pricing_basis": "server+primary-ipv4-net-excl-vat"
   },
   "results": [
     {
       "test": "cpu",
-      "started_at": "2026-07-23T23:38:50.263611498Z",
+      "started_at": "2026-07-24T09:13:13.0669895Z",
       "duration_seconds": 6,
       "metrics": [
         {
           "name": "single_core_hash",
-          "value": 1324.72,
+          "value": 1782.59,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "multi_core_hash",
-          "value": 2646.86,
+          "value": 3467.34,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "scaling_efficiency",
-          "value": 99.9,
+          "value": 97.26,
           "unit": "%",
           "higher_is_better": true
         }
@@ -55,30 +64,30 @@
     },
     {
       "test": "disk",
-      "started_at": "2026-07-23T23:38:56.265863187Z",
-      "duration_seconds": 3.13,
+      "started_at": "2026-07-24T09:13:19.067785717Z",
+      "duration_seconds": 3.24,
       "metrics": [
         {
           "name": "seq_write",
-          "value": 1389.71,
+          "value": 1241.42,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "seq_read",
-          "value": 3464.09,
+          "value": 3121.75,
           "unit": "MB/s",
           "higher_is_better": true
         },
         {
           "name": "rand_read_4k",
-          "value": 73757.22,
+          "value": 25758.76,
           "unit": "IOPS",
           "higher_is_better": true
         },
         {
           "name": "fsync_latency_p50",
-          "value": 0.03,
+          "value": 0.27,
           "unit": "ms",
           "higher_is_better": false
         }
@@ -90,18 +99,18 @@
     },
     {
       "test": "memory",
-      "started_at": "2026-07-23T23:38:59.396781655Z",
-      "duration_seconds": 5.45,
+      "started_at": "2026-07-24T09:13:22.477639982Z",
+      "duration_seconds": 5.06,
       "metrics": [
         {
           "name": "copy_bandwidth",
-          "value": 6.64,
+          "value": 24.63,
           "unit": "GB/s",
           "higher_is_better": true
         },
         {
           "name": "random_access_latency",
-          "value": 110.04,
+          "value": 109.18,
           "unit": "ns",
           "higher_is_better": false
         }
@@ -112,24 +121,24 @@
     },
     {
       "test": "network",
-      "started_at": "2026-07-23T23:39:04.842492373Z",
-      "duration_seconds": 1.34,
+      "started_at": "2026-07-24T09:13:27.539166434Z",
+      "duration_seconds": 2.71,
       "metrics": [
         {
           "name": "latency_p50",
-          "value": 27.89,
+          "value": 46.62,
           "unit": "ms",
           "higher_is_better": false
         },
         {
           "name": "download",
-          "value": 3093.27,
+          "value": 2312.63,
           "unit": "Mbps",
           "higher_is_better": true
         },
         {
           "name": "upload",
-          "value": 845.07,
+          "value": 270.43,
           "unit": "Mbps",
           "higher_is_better": true
         }
@@ -140,30 +149,30 @@
     },
     {
       "test": "steal",
-      "started_at": "2026-07-23T23:39:06.178854759Z",
-      "duration_seconds": 10.94,
+      "started_at": "2026-07-24T09:13:30.253896157Z",
+      "duration_seconds": 7.99,
       "metrics": [
         {
           "name": "unit_time_p50",
-          "value": 14.62,
+          "value": 7.39,
           "unit": "ms",
           "higher_is_better": false
         },
         {
           "name": "consistency_cv",
-          "value": 10.49,
+          "value": 11.35,
           "unit": "%",
           "higher_is_better": false
         },
         {
           "name": "p99_over_p50",
-          "value": 1.36,
+          "value": 1.01,
           "unit": "ratio",
           "higher_is_better": false
         },
         {
           "name": "cpu_steal",
-          "value": 0.3,
+          "value": 0,
           "unit": "%",
           "higher_is_better": false
         }
