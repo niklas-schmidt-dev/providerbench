@@ -60,7 +60,9 @@ function CommandDialog({
         )}
         showCloseButton={showCloseButton}
       >
-        {children}
+        {/* cmdk primitives (Input, List, …) read their store from a Command
+            ancestor — without this wrapper the dialog crashes on open. */}
+        <Command>{children}</Command>
       </DialogContent>
     </Dialog>
   )

@@ -442,9 +442,10 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
             aria-labelledby="price-performance-chart-title"
             className="size-full overflow-visible"
           >
+            {/* A single text node: multiple JSX children inside <title> break
+                hydration (server flattens them, the client does not). */}
             <title id="price-performance-chart-title">
-              {activeMetric.label} versus monthly price. Lower prices and
-              higher values are better. Points are not connected.
+              {`${activeMetric.label} versus monthly price. Lower prices and higher values are better. Points are not connected.`}
             </title>
             {xTicks.map((tick) => (
               <text
