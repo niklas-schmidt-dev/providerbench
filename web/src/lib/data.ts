@@ -10,6 +10,7 @@ export type Metric = {
 
 export type TestResult = {
   test: string;
+  started_at: string;
   duration_seconds: number;
   metrics: Metric[];
   notes?: string[];
@@ -22,12 +23,22 @@ export type Report = {
   category?: string;
   created_at: string;
   sample?: boolean;
+  quick?: boolean; // smaller --quick workloads; never enters ranked aggregates
   provider: {
     name?: string; // the company: hetzner, vercel, aws
     product?: string; // the offering tested: Cloud VPS, Sandbox, EC2
     plan?: string;
+    tier?: "cheap" | "medium" | "dedicated" | "usage-based";
     region?: string;
+    price_eur_hour?: number;
     price_eur_month?: number;
+  };
+  measurement?: {
+    campaign_id?: string;
+    sample_index?: number;
+    repeat_index?: number;
+    fresh_instance?: boolean;
+    exclude_from_aggregate?: boolean;
   };
   environment?: Record<string, string>;
   system: {

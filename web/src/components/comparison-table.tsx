@@ -10,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { metricOf, type Run } from "@/lib/data";
+import { metricSummary, type ScoredGroup } from "@/lib/aggregate";
+import { formatMeasurementWindow } from "@/lib/dates";
 import { getProvider, providerColor, providerLabel } from "@/lib/providers";
 
 type Column = {
@@ -36,10 +37,10 @@ const COLUMNS: Column[] = [
 
 const fmt = (v: number) => v.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
-export function ComparisonTable({ runs }: { runs: Run[] }) {
+export function ComparisonTable({ groups }: { groups: ScoredGroup[] }) {
   const bests = COLUMNS.map((c) => {
-    const values = runs
-      .map((r) => metricOf(r, c.test, c.metric)?.value)
+    const values = groups
+      .map((group) => metricSummary(group, c.test, c.metric)?.distribution.p50)
       .filter((v): v is number => v !== undefined);
     if (values.length === 0) return undefined;
     return c.higherIsBetter ? Math.max(...values) : Math.min(...values);
@@ -47,11 +48,23 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
 
   return (
     <div className="overflow-x-auto rounded-xl border bg-card">
-      <Table className="min-w-[900px]">
+      <Table className="min-w-[1280px]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="pl-4">Provider / plan</TableHead>
             <TableHead className="text-right">€/mo</TableHead>
+            <TableHead className="text-right">
+              <span className="block">Perf.</span>
+              <span className="block font-mono text-[10px] font-normal text-muted-foreground">
+                index
+              </span>
+            </TableHead>
+            <TableHead className="text-right">
+              <span className="block">Value</span>
+              <span className="block font-mono text-[10px] font-normal text-muted-foreground">
+                index
+              </span>
+            </TableHead>
             {COLUMNS.map((c) => (
               <TableHead key={c.metric} className="text-right">
                 <span className="block">{c.label}</span>
@@ -63,11 +76,11 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {runs.map((run) => {
-            const name = run.provider.name ?? run.slug;
+          {groups.map((group) => {
+            const name = group.provider.name ?? group.id;
             const provider = getProvider(name);
             return (
-              <TableRow key={run.slug}>
+              <TableRow key={group.id} className={!group.rankEligible ? "opacity-70" : undefined}>
                 <TableCell className="pl-4">
                   <Link
                     href={`/providers/${name}`}
@@ -89,7 +102,7 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
                           style={{ background: providerColor(name) }}
                         />
                         {providerLabel(name)}
-                        {run.sample && (
+                        {group.sample && (
                           <Badge
                             variant="outline"
                             className="h-4 px-1 text-[9px] font-normal text-warning"
@@ -97,25 +110,67 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
                             sample
                           </Badge>
                         )}
+                        {!group.rankEligible && !group.sample && (
+                          <Badge
+                            variant="outline"
+                            className="h-4 px-1 text-[9px] font-normal text-warning"
+                          >
+                            provisional
+                          </Badge>
+                        )}
                       </span>
                       <span className="block font-mono text-[10px] text-muted-foreground">
-                        {[run.provider.product, run.provider.plan, run.provider.region, `${run.system.cpu_cores} vCPU`]
+                        {[
+                          group.provider.product,
+                          group.provider.plan,
+                          group.provider.tier,
+                          group.provider.region,
+                          `${group.system.cpu_cores} vCPU`,
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
+                      </span>
+                      <span className="block font-mono text-[9px] text-muted-foreground/75">
+                        {group.hostCount} independent host{group.hostCount === 1 ? "" : "s"} ·{" "}
+                        {group.runCount} run{group.runCount === 1 ? "" : "s"}
+                      </span>
+                      <span className="block font-mono text-[9px] text-brand/85">
+                        measured{" "}
+                        {formatMeasurementWindow(
+                          group.measuredFrom,
+                          group.measuredTo,
+                        )}
                       </span>
                     </span>
                   </Link>
                 </TableCell>
                 <TableCell className="text-right font-mono text-xs tabular-nums text-muted-foreground">
-                  {run.provider.price_eur_month ? run.provider.price_eur_month.toFixed(2) : "—"}
+                  <span className="block">
+                    {group.provider.price_eur_month
+                      ? group.provider.price_eur_month.toFixed(2)
+                      : "—"}
+                  </span>
+                  {group.provider.price_eur_hour ? (
+                    <span className="block text-[9px] text-muted-foreground/70">
+                      {group.provider.price_eur_hour.toFixed(4)}/h
+                    </span>
+                  ) : null}
+                </TableCell>
+                <TableCell className="text-right font-mono text-xs tabular-nums">
+                  {group.performanceScore.toFixed(1)}
+                </TableCell>
+                <TableCell className="text-right font-mono text-xs tabular-nums text-brand">
+                  {group.valueIndex?.toFixed(1) ?? "—"}
                 </TableCell>
                 {COLUMNS.map((c, i) => {
-                  const m = metricOf(run, c.test, c.metric);
-                  const isBest = m !== undefined && m.value === bests[i];
+                  const summary = metricSummary(group, c.test, c.metric);
+                  const distribution = summary?.distribution;
+                  const isBest =
+                    distribution !== undefined && distribution.p50 === bests[i];
                   return (
                     <TableCell key={c.metric} className="text-right font-mono text-xs tabular-nums">
                       <span className={isBest ? "text-foreground" : "text-muted-foreground"}>
-                        {m ? (c.format ?? fmt)(m.value) : "—"}
+                        {distribution ? (c.format ?? fmt)(distribution.p50) : "—"}
                       </span>
                       {isBest && (
                         <Badge
@@ -124,6 +179,27 @@ export function ComparisonTable({ runs }: { runs: Run[] }) {
                         >
                           best
                         </Badge>
+                      )}
+                      {distribution && (
+                        <span
+                          className="mt-0.5 block text-[9px] text-muted-foreground/65"
+                          title={`mean ${distribution.mean}; p10 ${distribution.p10}; p90 ${distribution.p90}; p99 ${distribution.p99}`}
+                        >
+                          {/* Always surface the BAD tail: the slowest hosts
+                              for throughput, the worst latencies for delays. */}
+                          {c.higherIsBetter ? (
+                            <>
+                              μ{(c.format ?? fmt)(distribution.mean)} · p10{" "}
+                              {(c.format ?? fmt)(distribution.p10)}
+                            </>
+                          ) : (
+                            <>
+                              μ{(c.format ?? fmt)(distribution.mean)} · p90{" "}
+                              {(c.format ?? fmt)(distribution.p90)} · p99{" "}
+                              {(c.format ?? fmt)(distribution.p99)}
+                            </>
+                          )}
+                        </span>
                       )}
                     </TableCell>
                   );

@@ -7,12 +7,19 @@ import { ComparisonTable } from "@/components/comparison-table";
 import { CompanyBadge } from "@/components/company-logo";
 import { MetricChart } from "@/components/metric-chart";
 import { PageHeader } from "@/components/page-header";
+import { PricePerformanceChart } from "@/components/price-performance-chart";
 import { SampleBanner } from "@/components/sample-banner";
+import { SectionHeading } from "@/components/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  aggregateRuns,
+  bestRegionPerPlan,
+  currentScoredGroups,
+} from "@/lib/aggregate";
 import { CATEGORIES, getCategory } from "@/lib/categories";
-import { anySample, metricOf, runsByCategory, type Run } from "@/lib/data";
+import { anySample, runsByCategory } from "@/lib/data";
 
 export const dynamicParams = false;
 
@@ -58,6 +65,9 @@ function LiveCategory({
   description: string;
 }) {
   const runs = runsByCategory(categorySlug);
+  const groups = bestRegionPerPlan(
+    currentScoredGroups(aggregateRuns(runs)),
+  );
   const sample = anySample(runs);
 
   return (
@@ -74,43 +84,42 @@ function LiveCategory({
           </div>
         )}
 
-        <h2 className="mt-12 text-lg font-semibold text-foreground">
-          Raw performance
-        </h2>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">
-          Identical deterministic workloads on every machine — differences are
-          the hardware, never the benchmark.
-        </p>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <MetricChart runs={runs} test="cpu" metric="single_core_hash" />
-          <MetricChart runs={runs} test="cpu" metric="multi_core_hash" />
-          <MetricChart runs={runs} test="memory" metric="copy_bandwidth" />
-          <MetricChart runs={runs} test="memory" metric="random_access_latency" />
-          <MetricChart runs={runs} test="disk" metric="rand_read_4k" />
-          <MetricChart runs={runs} test="network" metric="download" />
+        <div className="mt-8">
+          <PricePerformanceChart groups={groups} />
         </div>
 
-        <h2 className="mt-16 text-lg font-semibold text-foreground">
-          The overselling report
-        </h2>
-        <p className="mt-1 mb-6 max-w-2xl text-sm text-muted-foreground">
-          On honest hardware, identical work takes identical time. These metrics
-          catch the difference between the cores you rent and the cores you get.
-        </p>
+        <SectionHeading
+          className="mt-12 mb-6"
+          title="Raw performance"
+          description="Identical deterministic workloads on every machine — differences are the hardware, never the benchmark."
+        />
         <div className="grid gap-4 lg:grid-cols-2">
-          <MetricChart runs={runs} test="steal" metric="consistency_cv" />
-          <MetricChart runs={runs} test="steal" metric="cpu_steal" />
-          <MetricChart runs={runs} test="steal" metric="p99_over_p50" />
-          <MetricChart runs={runs} test="disk" metric="fsync_latency_p50" />
+          <MetricChart groups={groups} test="cpu" metric="single_core_hash" />
+          <MetricChart groups={groups} test="cpu" metric="multi_core_hash" />
+          <MetricChart groups={groups} test="memory" metric="copy_bandwidth" />
+          <MetricChart groups={groups} test="memory" metric="random_access_latency" />
+          <MetricChart groups={groups} test="disk" metric="rand_read_4k" />
+          <MetricChart groups={groups} test="network" metric="download" />
         </div>
 
-        <h2 className="mt-16 text-lg font-semibold text-foreground">
-          Full comparison
-        </h2>
-        <p className="mt-1 mb-6 text-sm text-muted-foreground">
-          Every headline metric side by side — click a provider for its full report.
-        </p>
-        <ComparisonTable runs={runs} />
+        <SectionHeading
+          className="mt-16 mb-6"
+          title="The overselling report"
+          description="On honest hardware, identical work takes identical time. These metrics catch the difference between the cores you rent and the cores you get."
+        />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <MetricChart groups={groups} test="steal" metric="consistency_cv" />
+          <MetricChart groups={groups} test="steal" metric="cpu_steal" />
+          <MetricChart groups={groups} test="steal" metric="p99_over_p50" />
+          <MetricChart groups={groups} test="disk" metric="fsync_latency_p50" />
+        </div>
+
+        <SectionHeading
+          className="mt-16 mb-6"
+          title="Full comparison"
+          description="Every headline metric side by side — click a provider for its full report."
+        />
+        <ComparisonTable groups={groups} />
         <p className="mt-3 font-mono text-xs text-muted-foreground">
           Raw reports:{" "}
           <a
