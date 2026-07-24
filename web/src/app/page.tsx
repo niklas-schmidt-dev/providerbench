@@ -45,7 +45,7 @@ export default function Home() {
       )}
 
       {/* Leaderboard charts */}
-      <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <MetricChart runs={runs} test="cpu" metric="single_core_hash" />
         <MetricChart runs={runs} test="cpu" metric="multi_core_hash" />
         <MetricChart runs={runs} test="disk" metric="rand_read_4k" />

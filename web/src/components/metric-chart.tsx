@@ -24,6 +24,8 @@ export function MetricChart({
       higherIsBetter={def.higherIsBetter}
       description={def.workload}
       sourceHref={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/${def.category}/${def.test}.go`}
+      command={`providerbench run -t ${def.test}`}
+      anchorId={`${def.test}-${def.metric}`}
       note={def.note}
       data={metricSeries(runs, test, metric)}
     />

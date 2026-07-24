@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import Link from "next/link";
 
+import { CommandMenu } from "@/components/command-menu";
 import { buttonVariants } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { loadRuns } from "@/lib/data";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -36,6 +38,9 @@ const nav = [
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const providersWithRuns = [
+    ...new Set(loadRuns().flatMap((r) => (r.provider.name ? [r.provider.name] : []))),
+  ];
   return (
     <html lang="en" className={`dark ${plexSans.variable} ${plexMono.variable}`}>
       <body className="min-h-screen">
@@ -59,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </nav>
               </div>
               <div className="flex items-center gap-2">
+                <CommandMenu providersWithRuns={providersWithRuns} />
                 <a
                   href="https://github.com/niklas-schmidt-dev/providerbench"
                   className={buttonVariants({ variant: "ghost", size: "sm" })}
