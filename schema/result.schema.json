@@ -42,7 +42,9 @@
       "type": "object",
       "description": "Coordinates repeated runs. Aggregate repeats to a per-host median before calculating cross-host percentiles.",
       "dependentRequired": {
-        "campaign_id": ["sample_index", "repeat_index"]
+        "campaign_id": ["sample_index", "repeat_index"],
+        "sample_index": ["campaign_id", "repeat_index"],
+        "repeat_index": ["campaign_id", "sample_index"]
       },
       "properties": {
         "campaign_id": {

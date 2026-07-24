@@ -40,8 +40,9 @@ providerbench run \
 - Reports include full system info (never your hostname) so others can verify.
 - Every report and individual benchmark must retain its UTC timestamp. Re-runs
   at a later date use a new campaign ID; historical cohorts are never pooled.
-- Don't hand-edit the JSON — reports that don't match the schema in
-  `schema/result.schema.json` are rejected in review.
+- Don't hand-edit the JSON. Run `providerbench validate data/results` before
+  opening the PR — CI runs the same check and rejects reports that fail the
+  schema in `schema/result.schema.json` or the naming convention.
 
 For supported provider lifecycles, use the managed Go commands instead of an
 ad-hoc shell script:
@@ -84,10 +85,19 @@ Ground rules for tests (the benchmark source is the methodology):
 ## 3. Propose a category
 
 Categories group benchmarks on the site (`compute` is live; `ai` and
-`storage` are planned). A category needs: a test suite in the CLI (or a
-dedicated runner), a `category` value in the report JSON, and an entry in
-`web/src/lib/categories.ts`. Open an issue with proposed metrics first —
-methodology gets debated before code.
+`storage` are planned). The architectural rule is **category = runner,
+schema = contract**: a category is not required to extend this CLI. `compute`
+runs as one zero-dependency static binary because the host itself is being
+measured; a category whose workload doesn't fit that shape gets its own
+runner (`ai` hits provider APIs from a client, `storage` drives object stores
+from a fixed vantage point).
+
+Every runner must satisfy the same contract: emit reports that pass
+`providerbench validate`, carry campaign/sample/repeat coordinates, and land
+as one JSON file per run in `data/results/`. The dataset is the interface —
+the site never knows which runner produced a report, only its `category`
+value and an entry in `web/src/lib/categories.ts`. Open an issue with
+proposed metrics first — methodology gets debated before code.
 
 ## Website
 
