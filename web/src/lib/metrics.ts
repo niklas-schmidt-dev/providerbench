@@ -125,7 +125,7 @@ export const METRICS: MetricDef[] = [
     unit: "ms",
     higherIsBetter: false,
     workload:
-      "Median of 8 tiny requests on a warm connection to the nearest Cloudflare edge — effectively the round-trip time out of the datacenter.",
+      "Median of 8 tiny requests on a warm connection to the nearest Cloudflare edge, minus the server processing time Cloudflare reports via its cfReq*/cfSpeed* Server-Timing metrics — effectively the round-trip time out of the datacenter.",
   },
   {
     category: "compute",

@@ -17,6 +17,9 @@
     "cpu_cores": 2,
     "mem_total_mb": 4283
   },
+  "measurement": {
+    "exclude_from_aggregate": true
+  },
   "environment": {
     "runtime": "node24",
     "invoked_via": "@vercel/sandbox SDK"

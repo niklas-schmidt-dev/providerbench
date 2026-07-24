@@ -16,8 +16,22 @@ type Provider struct {
 	Name          string  `json:"name,omitempty"`
 	Product       string  `json:"product,omitempty"`
 	Plan          string  `json:"plan,omitempty"`
+	Tier          string  `json:"tier,omitempty"`
 	Region        string  `json:"region,omitempty"`
+	PriceEURHour  float64 `json:"price_eur_hour,omitempty"`
 	PriceEURMonth float64 `json:"price_eur_month,omitempty"`
+}
+
+// Measurement identifies repeated observations without exposing a hostname.
+// A campaign can run the benchmark multiple times on each fresh instance.
+// Consumers should first reduce repeats to one median per sample_index, then
+// calculate percentiles across those independent hosts.
+type Measurement struct {
+	CampaignID           string `json:"campaign_id,omitempty"`
+	SampleIndex          int    `json:"sample_index,omitempty"`
+	RepeatIndex          int    `json:"repeat_index,omitempty"`
+	FreshInstance        bool   `json:"fresh_instance,omitempty"`
+	ExcludeFromAggregate bool   `json:"exclude_from_aggregate,omitempty"`
 }
 
 // Report is the full output of a run — this is what gets submitted to the
@@ -27,11 +41,16 @@ type Report struct {
 	CLIVersion    string `json:"cli_version"`
 	// Category groups reports on providerbench.dev: "compute" for this CLI's
 	// built-in tests; future suites (ai, storage, ...) use their own.
-	Category  string       `json:"category"`
-	CreatedAt time.Time    `json:"created_at"`
-	Sample    bool         `json:"sample,omitempty"` // true = illustrative data, not a real measurement
-	Provider  Provider     `json:"provider"`
-	System    sysinfo.Info `json:"system"`
+	Category  string    `json:"category"`
+	CreatedAt time.Time `json:"created_at"`
+	Sample    bool      `json:"sample,omitempty"` // true = illustrative data, not a real measurement
+	// Quick marks reports produced with --quick. Quick workloads are smaller
+	// and shorter, so their numbers are not comparable to full runs and are
+	// excluded from ranked aggregates.
+	Quick       bool         `json:"quick,omitempty"`
+	Provider    Provider     `json:"provider"`
+	System      sysinfo.Info `json:"system"`
+	Measurement Measurement  `json:"measurement,omitzero"`
 	// Environment holds user-supplied reproducibility detail beyond what
 	// sysinfo detects: OS image, database versions, config choices, ...
 	Environment map[string]string `json:"environment,omitempty"`

@@ -1,6 +1,11 @@
 # binaries
 /providerbench
+/bin/
 *.exe
+
+# build and campaign scratch
+/.cache/
+*.partial
 
 # benchmark scratch files
 .providerbench-disk.tmp

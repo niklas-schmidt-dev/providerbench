@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "cli_version": "0.2.0-dev",
+  "category": "compute",
+  "created_at": "2026-07-24T14:17:49.609183778Z",
+  "provider": {
+    "name": "hetzner",
+    "product": "cloud-vps",
+    "plan": "cpx22",
+    "tier": "medium",
+    "region": "sin",
+    "price_eur_hour": 0.0433,
+    "price_eur_month": 26.99
+  },
+  "system": {
+    "os": "linux",
+    "arch": "amd64",
+    "kernel": "6.8.0-117-generic",
+    "cpu_model": "AMD EPYC-Genoa Processor",
+    "cpu_cores": 2,
+    "mem_total_mb": 3814,
+    "virtualization": "kvm"
+  },
+  "measurement": {
+    "campaign_id": "hetzner-2026-07-24-v2",
+    "sample_index": 5,
+    "repeat_index": 2,
+    "fresh_instance": true
+  },
+  "environment": {
+    "host_strategy": "hetzner-spread-placement-group",
+    "os_image": "ubuntu-24.04",
+    "pricing_as_of": "2026-07-24",
+    "pricing_basis": "server+primary-ipv4-net-excl-vat"
+  },
+  "results": [
+    {
+      "test": "cpu",
+      "started_at": "2026-07-24T14:17:49.613928629Z",
+      "duration_seconds": 6,
+      "metrics": [
+        {
+          "name": "single_core_hash",
+          "value": 1766.71,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "multi_core_hash",
+          "value": 3563.58,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "scaling_efficiency",
+          "value": 100.85,
+          "unit": "%",
+          "higher_is_better": true
+        }
+      ],
+      "notes": [
+        "SHA-256 over 64 KiB buffers; uses CPU crypto extensions where available"
+      ]
+    },
+    {
+      "test": "disk",
+      "started_at": "2026-07-24T14:17:55.614826323Z",
+      "duration_seconds": 3.33,
+      "metrics": [
+        {
+          "name": "seq_write",
+          "value": 1365.41,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "seq_read",
+          "value": 2122.57,
+          "unit": "MB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "rand_read_4k",
+          "value": 21122.46,
+          "unit": "IOPS",
+          "higher_is_better": true
+        },
+        {
+          "name": "fsync_latency_p50",
+          "value": 0.77,
+          "unit": "ms",
+          "higher_is_better": false
+        }
+      ],
+      "notes": [
+        "reads bypass the page cache (direct I/O)",
+        "test file: 1024 MiB, random reads at queue depth 4"
+      ]
+    },
+    {
+      "test": "memory",
+      "started_at": "2026-07-24T14:17:59.11776317Z",
+      "duration_seconds": 5.13,
+      "metrics": [
+        {
+          "name": "copy_bandwidth",
+          "value": 23.18,
+          "unit": "GB/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "random_access_latency",
+          "value": 119.1,
+          "unit": "ns",
+          "higher_is_better": false
+        }
+      ],
+      "notes": [
+        "bandwidth counts bytes copied (read+write traffic is ~2x)"
+      ]
+    },
+    {
+      "test": "network",
+      "started_at": "2026-07-24T14:18:04.251775641Z",
+      "duration_seconds": 2.59,
+      "metrics": [
+        {
+          "name": "latency_p50",
+          "value": 4.51,
+          "unit": "ms",
+          "higher_is_better": false
+        },
+        {
+          "name": "download",
+          "value": 1537.91,
+          "unit": "Mbps",
+          "higher_is_better": true
+        },
+        {
+          "name": "upload",
+          "value": 408.68,
+          "unit": "Mbps",
+          "higher_is_better": true
+        }
+      ],
+      "notes": [
+        "measured against Cloudflare edge SIN",
+        "latency excludes server processing time (Cloudflare Server-Timing)"
+      ]
+    },
+    {
+      "test": "steal",
+      "started_at": "2026-07-24T14:18:06.845591927Z",
+      "duration_seconds": 8.22,
+      "metrics": [
+        {
+          "name": "unit_time_p50",
+          "value": 7.69,
+          "unit": "ms",
+          "higher_is_better": false
+        },
+        {
+          "name": "consistency_cv",
+          "value": 21.32,
+          "unit": "%",
+          "higher_is_better": false
+        },
+        {
+          "name": "p99_over_p50",
+          "value": 2.54,
+          "unit": "ratio",
+          "higher_is_better": false
+        },
+        {
+          "name": "cpu_steal",
+          "value": 0,
+          "unit": "%",
+          "higher_is_better": false
+        }
+      ],
+      "notes": [
+        "consistency_cv near 0% and p99_over_p50 near 1.0 indicate a quiet host; high values suggest noisy neighbors or throttling"
+      ]
+    }
+  ]
+}

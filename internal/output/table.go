@@ -21,6 +21,7 @@ func PrintReport(w io.Writer, r *bench.Report) {
 		fmt.Fprintf(w, ", %.1f GiB RAM", float64(r.System.MemTotalMB)/1024)
 	}
 	fmt.Fprintln(w)
+	fmt.Fprintf(w, "measured: %s UTC\n", r.CreatedAt.UTC().Format("2006-01-02 15:04:05"))
 	if r.Provider.Name != "" {
 		fmt.Fprintf(w, "provider: %s", r.Provider.Name)
 		if r.Provider.Plan != "" {
@@ -34,7 +35,13 @@ func PrintReport(w io.Writer, r *bench.Report) {
 
 	tw := tabwriter.NewWriter(w, 2, 4, 2, ' ', 0)
 	for _, res := range r.Results {
-		fmt.Fprintf(tw, "\n%s\t(%.1fs)\t\n", strings.ToUpper(res.Test), res.DurationSeconds)
+		fmt.Fprintf(
+			tw,
+			"\n%s\t(%.1fs · %s UTC)\t\n",
+			strings.ToUpper(res.Test),
+			res.DurationSeconds,
+			res.StartedAt.UTC().Format("2006-01-02 15:04:05"),
+		)
 		if res.Error != "" {
 			fmt.Fprintf(tw, "  error\t%s\t\n", res.Error)
 			continue

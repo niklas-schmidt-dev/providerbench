@@ -1,5 +1,5 @@
 import { MetricBarChart } from "@/components/metric-bar-chart";
-import type { Run } from "@/lib/data";
+import type { BenchmarkGroup } from "@/lib/aggregate";
 import { getMetricDef } from "@/lib/metrics";
 import { metricSeries } from "@/lib/series";
 
@@ -7,11 +7,11 @@ import { metricSeries } from "@/lib/series";
 // its workload description and source-code link — a number is never shown
 // without saying what was measured.
 export function MetricChart({
-  runs,
+  groups,
   test,
   metric,
 }: {
-  runs: Run[];
+  groups: BenchmarkGroup[];
   test: string;
   metric: string;
 }) {
@@ -27,7 +27,7 @@ export function MetricChart({
       command={`providerbench run -t ${def.test}`}
       anchorId={`${def.test}-${def.metric}`}
       note={def.note}
-      data={metricSeries(runs, test, metric)}
+      data={metricSeries(groups, test, metric)}
     />
   );
 }
