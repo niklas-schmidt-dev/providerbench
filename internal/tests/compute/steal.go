@@ -12,14 +12,13 @@ import (
 
 func init() { bench.Register(stealTest{}) }
 
-// stealTest looks for signs of overselling: CPU time stolen by the
-// hypervisor and run-to-run variance of a fixed workload. On honest
-// hardware, identical work takes identical time.
+// stealTest measures contention and consistency signals: CPU time stolen by
+// the hypervisor and run-to-run variance of a fixed workload.
 type stealTest struct{}
 
 func (stealTest) Name() string { return "steal" }
 func (stealTest) Description() string {
-	return "Overselling indicators: CPU steal time and performance consistency"
+	return "Contention and consistency signals: CPU steal time and fixed-workload variance"
 }
 
 func (stealTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {

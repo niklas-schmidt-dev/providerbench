@@ -6,24 +6,22 @@ import { ChartWatermark } from "@/components/chart-frame";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { metricSummary, type ScoredGroup } from "@/lib/aggregate";
+import { getCategory } from "@/lib/categories";
 import { formatMeasurementWindow } from "@/lib/dates";
 import { formatMetricValue, planCpuParts } from "@/lib/format";
 import { getMetricDef } from "@/lib/metrics";
 import { providerColor, providerLabel } from "@/lib/providers";
+import { resolveScatterMetrics, type ScatterMetric } from "@/lib/report";
 import { cn } from "@/lib/utils";
 
 // The scatter plots price against REAL measured metrics — no synthetic
 // composite index in a chart. Only higher-is-better metrics belong here so
-// "up and to the left wins" always reads true.
-const SCATTER_METRICS = [
-  { id: "cpu-multi", test: "cpu", metric: "multi_core_hash", label: "CPU all-core" },
-  { id: "cpu-single", test: "cpu", metric: "single_core_hash", label: "CPU 1-core" },
-  { id: "memory", test: "memory", metric: "copy_bandwidth", label: "Memory BW" },
-  { id: "disk", test: "disk", metric: "rand_read_4k", label: "4K read" },
-  { id: "network", test: "network", metric: "download", label: "Download" },
-] as const;
-
-type ScatterMetric = (typeof SCATTER_METRICS)[number];
+// "up and to the left wins" always reads true. The axes come from the
+// category's report spec; compute is the default while it is the only
+// live category.
+const DEFAULT_METRICS = resolveScatterMetrics(
+  getCategory("compute")!.report!.scatterMetrics,
+);
 
 type Point = {
   id: string;
@@ -151,13 +149,20 @@ function efficientFrontier(points: Point[]): Point[] {
     });
 }
 
-export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
+export function PricePerformanceChart({
+  groups,
+  metrics,
+}: {
+  groups: ScoredGroup[];
+  metrics?: ScatterMetric[];
+}) {
+  const scatterMetrics = metrics ?? DEFAULT_METRICS;
   const [metricId, setMetricId] = useState<ScatterMetric["id"]>(
-    SCATTER_METRICS[0].id,
+    scatterMetrics[0].id,
   );
   const activeMetric =
-    SCATTER_METRICS.find((candidate) => candidate.id === metricId) ??
-    SCATTER_METRICS[0];
+    scatterMetrics.find((candidate) => candidate.id === metricId) ??
+    scatterMetrics[0];
   const metricDef = getMetricDef(activeMetric.test, activeMetric.metric);
   const unit = metricDef?.unit ?? "";
 
@@ -309,20 +314,20 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
   return (
     <Card className="overflow-hidden py-0">
       <div
-        className="flex items-center gap-1 overflow-x-auto border-b px-2 py-1.5"
+        className="no-scrollbar flex items-center gap-0.5 overflow-x-auto border-b border-(--border-hairline) bg-(--surface-inset) px-2 py-1.5"
         aria-label="Scatter metric"
         role="group"
       >
-        {SCATTER_METRICS.map((option) => (
+        {scatterMetrics.map((option) => (
           <button
             key={option.id}
             type="button"
             onClick={() => setMetricId(option.id)}
             aria-pressed={activeMetric.id === option.id}
             className={cn(
-              "rounded-md px-2.5 py-1.5 text-[12px] whitespace-nowrap transition-colors",
+              "rounded-(--radius-xs) px-2.5 py-1 text-[12.5px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors",
               activeMetric.id === option.id
-                ? "bg-secondary font-medium text-foreground"
+                ? "bg-card text-foreground shadow-(--shadow-xs) ring-1 ring-(--border-hairline)"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -330,12 +335,12 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
           </button>
         ))}
       </div>
-      <CardHeader className="gap-1.5 border-b px-5 py-4">
+      <CardHeader className="gap-1.5 border-b border-(--border-hairline) px-5 py-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <CardTitle className="text-[15px] font-semibold">
+          <CardTitle className="text-[17px] font-semibold tracking-[-0.01em]">
             {activeMetric.label} vs. monthly price
           </CardTitle>
-          <span className="font-mono text-[11px] text-muted-foreground">
+          <span className="pb-label text-[10px] text-muted-foreground">
             {visiblePoints.length} / {points.length} plans
           </span>
         </div>
@@ -386,7 +391,7 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
                 ? `Outliers on · ${detectedOutliers.size}`
                 : `${detectedOutliers.size} outlier${detectedOutliers.size === 1 ? "" : "s"} hidden`}
             </Button>
-            <div className="flex rounded-lg border border-white/8 bg-background/35 p-0.5">
+            <div className="flex rounded-sm border border-border bg-card p-0.5">
               {(["linear", "log"] as const).map((scale) => (
                 <Button
                   key={scale}
@@ -395,7 +400,7 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
                   variant={priceScale === scale ? "secondary" : "ghost"}
                   aria-pressed={priceScale === scale}
                   onClick={() => setPriceScale(scale)}
-                  className="h-5.5 rounded-md px-2 capitalize"
+                  className="h-5.5 rounded-sm px-2 capitalize"
                 >
                   {scale}
                 </Button>
@@ -454,7 +459,8 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
                 y={CHART_MARGIN.top + plotHeight + 23}
                 textAnchor="middle"
                 fill="var(--muted-foreground)"
-                fontSize="11"
+                fontSize="10.5"
+                fontFamily="var(--font-mono)"
               >
                 €{tick < 10 ? tick.toFixed(0) : Math.round(tick)}
               </text>
@@ -469,7 +475,7 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
                     y1={y}
                     y2={y}
                     stroke="var(--foreground)"
-                    strokeOpacity="0.08"
+                    strokeOpacity="0.1"
                     strokeDasharray="2 6"
                   />
                   <text
@@ -477,7 +483,8 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
                     y={y + 4}
                     textAnchor="end"
                     fill="var(--muted-foreground)"
-                    fontSize="11"
+                    fontSize="10.5"
+                    fontFamily="var(--font-mono)"
                   >
                     {tick === 0 ? "0" : formatMetricValue(tick)}
                   </text>
@@ -489,9 +496,11 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
               y={CHART_HEIGHT - 7}
               textAnchor="middle"
               fill="var(--muted-foreground)"
-              fontSize="10.5"
+              fontSize="9.5"
+              fontFamily="var(--font-mono)"
+              letterSpacing="0.08em"
             >
-              Monthly price (EUR net of VAT, {priceScale} scale)
+              MONTHLY PRICE (EUR NET OF VAT, {priceScale.toUpperCase()})
             </text>
             <text
               x="14"
@@ -499,7 +508,9 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
               transform={`rotate(-90 14 ${CHART_MARGIN.top + plotHeight / 2})`}
               textAnchor="middle"
               fill="var(--muted-foreground)"
-              fontSize="10.5"
+              fontSize="9.5"
+              fontFamily="var(--font-mono)"
+              letterSpacing="0.08em"
             >
               {activeMetric.label} ({unit})
             </text>
@@ -553,7 +564,9 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
                       y={y - 15}
                       textAnchor="middle"
                       fill="var(--foreground)"
-                      fontSize="10"
+                      fillOpacity="0.8"
+                      fontSize="9.5"
+                      fontFamily="var(--font-mono)"
                       pointerEvents="none"
                     >
                       {point.label}
@@ -565,7 +578,7 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
           </svg>
           {hoveredPoint ? (
             <div
-              className={`pointer-events-none absolute z-10 grid min-w-56 grid-cols-[auto_auto] gap-x-4 gap-y-1 rounded-lg border bg-background px-3 py-2.5 text-xs shadow-xl ${
+              className={`pointer-events-none absolute z-10 grid min-w-56 grid-cols-[auto_auto] gap-x-4 gap-y-1 rounded-md border border-foreground/15 bg-card px-3 py-2.5 text-xs shadow-[0_8px_24px_rgb(41_38_30/0.12)] ${
                 xPosition(hoveredPoint.price) > chartWidth * 0.68
                   ? "-translate-x-full -ml-3"
                   : "ml-3"
@@ -612,12 +625,12 @@ export function PricePerformanceChart({ groups }: { groups: ScoredGroup[] }) {
             </div>
           ) : null}
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3 pt-1 text-[11px] text-muted-foreground">
-          <span>
-            Ringed dots are on the efficient frontier for this metric.
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-(--border-hairline) px-3 py-2 text-[11px] text-muted-foreground">
+          <span className="pb-label text-[9.5px]">
+            Ringed dots sit on the efficient frontier for this metric
           </span>
-          <span className="text-warning">
-            Faded points need 10 independent fresh hosts before ranking.
+          <span className="pb-label text-[9.5px] text-warning">
+            Faded points need 10 independent fresh hosts before ranking
           </span>
         </div>
       </CardContent>

@@ -1,9 +1,10 @@
 // Provider registry. Categorical color follows the entity, never its rank —
-// the slot order is the validated CVD-safe ordering, do not re-shuffle.
+// slots map onto the design system's categorical series palette (--series-*),
+// chosen for legibility on white at 2px stroke and 8px bar width.
 // New providers: add an entry with the next free slot color.
 import type { CompanySlug } from "@/lib/companies";
 
-const SLOTS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300"];
+const SLOTS = ["#2b6cb0", "#b6741a", "#0f6e63", "#5f7a11", "#8e4585", "#4d5459"];
 
 export type ProviderMeta = {
   slug: string;
@@ -78,7 +79,7 @@ export function getProvider(slug: string): ProviderMeta {
       // neutral swatch until they get one — never a generated hue.
       slug,
       name: slug,
-      color: "#898781",
+      color: "#9aa3a8",
       website: "",
       blurb: "",
     }

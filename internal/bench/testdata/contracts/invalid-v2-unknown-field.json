@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "protocol_version": "compute-v2",
+  "profile": "standard",
+  "cli_version": "test",
+  "category": "compute",
+  "created_at": "2026-07-24T12:00:00Z",
+  "unexpected": true,
+  "provider": {
+    "name": "provider",
+    "product": "vps",
+    "plan": "two-core",
+    "region": "eu-1"
+  },
+  "measurement": {},
+  "system": {
+    "os": "linux",
+    "arch": "amd64",
+    "cpu_cores": 2
+  },
+  "results": [
+    {
+      "test": "cpu",
+      "started_at": "2026-07-24T12:00:00Z",
+      "duration_seconds": 1,
+      "metrics": [
+        {
+          "name": "single_core_hash",
+          "value": 1,
+          "unit": "MB/s",
+          "higher_is_better": true
+        }
+      ]
+    }
+  ]
+}

@@ -10,8 +10,8 @@ import {
 } from "recharts";
 
 import { ChartWatermark } from "@/components/chart-frame";
-import { SectionHeading } from "@/components/section-heading";
-import { Badge } from "@/components/ui/badge";
+import { DsBadge } from "@/components/ds/badge";
+import { SectionHead } from "@/components/ds/section-head";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -79,18 +79,25 @@ const HISTORY_METRICS: HistoryMetric[] = [
 ];
 
 const SERIES_COLORS = [
-  "#3987e5",
-  "#e66e39",
-  "#3db98b",
-  "#d5a12c",
-  "#d96b9b",
-  "#9d7bea",
-  "#72a6b8",
-  "#d16e68",
+  "#1f6fd0",
+  "#c75a1d",
+  "#2f9c77",
+  "#b8922a",
+  "#c25578",
+  "#7a5fd0",
+  "#5f93a3",
+  "#b85f59",
 ];
 
 function seriesLabel(group: ScoredGroup): string {
-  return [group.provider.plan, group.provider.region].filter(Boolean).join(" · ");
+  return [
+    group.provider.plan,
+    group.provider.region,
+    group.protocolVersion,
+    group.profile,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function PerformanceHistoryChart({
@@ -169,20 +176,21 @@ export function PerformanceHistoryChart({
   if (chartData.length === 0) return null;
 
   return (
-    <section className="mt-14">
-      <SectionHeading
+    <section className="mt-8">
+      <SectionHead
+        eyebrow="History"
         title="Performance history"
-        description="Every campaign is a separate point in time. Old hardware is retained, never averaged into a newer campaign, so generation changes remain visible."
-        meta={
-          <Badge variant="outline" className="font-mono text-muted-foreground">
+        note="Every campaign is a separate point in time. Old hardware is retained, never averaged into a newer campaign, so generation changes remain visible."
+        right={
+          <DsBadge tone="outline" mono>
             {cohortCount} dated {cohortCount === 1 ? "cohort" : "cohorts"}
-          </Badge>
+          </DsBadge>
         }
       />
 
       <Card className="mt-5 overflow-hidden py-0">
         <div
-          className="flex items-center gap-1 overflow-x-auto border-b px-2 py-1.5"
+          className="no-scrollbar flex items-center gap-0.5 overflow-x-auto border-b border-(--border-hairline) bg-(--surface-inset) px-2 py-1.5"
           aria-label="Historical metric"
           role="group"
         >
@@ -193,9 +201,9 @@ export function PerformanceHistoryChart({
               onClick={() => setMetricId(option.id)}
               aria-pressed={metric.id === option.id}
               className={cn(
-                "rounded-md px-2.5 py-1.5 text-[12px] whitespace-nowrap transition-colors",
+                "rounded-(--radius-xs) px-2.5 py-1 text-[12.5px] font-medium tracking-[-0.005em] whitespace-nowrap transition-colors",
                 metric.id === option.id
-                  ? "bg-secondary font-medium text-foreground"
+                  ? "bg-card text-foreground shadow-(--shadow-xs) ring-1 ring-(--border-hairline)"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -205,10 +213,10 @@ export function PerformanceHistoryChart({
         </div>
         <CardHeader className="gap-2 px-5 pt-4 pb-0">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <CardTitle className="text-[15px] font-semibold">
+            <CardTitle className="text-[17px] font-semibold tracking-[-0.01em]">
               {metric.label} over time
             </CardTitle>
-            <span className="font-mono text-[11px] text-muted-foreground">
+            <span className="pb-label text-[10px] text-muted-foreground">
               P50 per campaign · {metric.unit}
             </span>
           </div>
@@ -284,7 +292,7 @@ export function PerformanceHistoryChart({
                     (candidate) => candidate.id === item.dataKey,
                   );
                   return (
-                    <div className="min-w-64 rounded-lg border bg-background px-3 py-2.5 text-xs shadow-xl">
+                    <div className="min-w-64 rounded-md border border-foreground/15 bg-card px-3 py-2.5 text-xs shadow-[0_8px_24px_rgb(41_38_30/0.12)]">
                       <p className="font-medium text-foreground">
                         {line?.label}
                       </p>
@@ -339,8 +347,8 @@ export function PerformanceHistoryChart({
         </CardContent>
       </Card>
 
-      <div className="mt-3 overflow-hidden rounded-xl border bg-card">
-        <div className="grid grid-cols-[minmax(9rem,1fr)_minmax(8rem,1fr)_minmax(12rem,2fr)_auto] gap-3 border-b px-4 py-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+      <div className="mt-3 overflow-hidden rounded-md border border-foreground/15 bg-card">
+        <div className="stamp grid grid-cols-[minmax(9rem,1fr)_minmax(8rem,1fr)_minmax(12rem,2fr)_auto] gap-3 border-b border-foreground/12 px-4 py-2 text-[9px] text-muted-foreground">
           <span>Measured</span>
           <span>Plan / region</span>
           <span>Hardware observed</span>
@@ -351,7 +359,7 @@ export function PerformanceHistoryChart({
           .map((group) => (
             <div
               key={group.id}
-              className="grid grid-cols-[minmax(9rem,1fr)_minmax(8rem,1fr)_minmax(12rem,2fr)_auto] gap-3 border-b px-4 py-2.5 text-[11px] last:border-b-0"
+              className="grid grid-cols-[minmax(9rem,1fr)_minmax(8rem,1fr)_minmax(12rem,2fr)_auto] gap-3 border-b border-foreground/10 px-4 py-2.5 text-[11px] last:border-b-0"
             >
               <span
                 className="font-mono text-foreground"

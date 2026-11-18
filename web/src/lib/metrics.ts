@@ -21,7 +21,7 @@ export const TEST_SUMMARIES: Record<string, string> = {
   memory: "Big-buffer copies and a prefetch-proof pointer chase with a fixed random seed.",
   disk: "1 GiB test file with unique-stamped blocks; reads bypass the page cache via direct I/O.",
   network: "Timed transfers against speed.cloudflare.com — the nearest neutral edge, no hand-picked peering.",
-  steal: "Identical work units plus /proc/stat steal ticks — overselling shows up as variance and stolen time.",
+  steal: "Identical work units plus /proc/stat steal ticks — signals for contention, throttling and run-to-run consistency.",
 };
 
 export const METRICS: MetricDef[] = [
@@ -53,8 +53,8 @@ export const METRICS: MetricDef[] = [
     unit: "%",
     higherIsBetter: true,
     workload:
-      "All-cores throughput divided by single-core × core count. 100% = every vCPU is a real, un-shared core.",
-    note: "Collapses when 'cores' are time slices of somebody else's workload.",
+      "All-cores throughput divided by single-core throughput × reported vCPU count. 100% means the workload scaled linearly across the available logical CPUs.",
+    note: "Lower values can reflect shared-host contention, SMT, frequency changes, memory limits or benchmark overhead; they do not identify one cause by themselves.",
   },
   {
     category: "compute",
@@ -149,6 +149,16 @@ export const METRICS: MetricDef[] = [
   {
     category: "compute",
     test: "steal",
+    metric: "unit_time_p50",
+    title: "Consistency · unit time (p50)",
+    unit: "ms",
+    higherIsBetter: false,
+    workload:
+      "Median runtime of 400 calibrated, identical hashing work units. The absolute value is a supporting latency measure for the distribution-based consistency signals.",
+  },
+  {
+    category: "compute",
+    test: "steal",
     metric: "consistency_cv",
     title: "Consistency · variation",
     unit: "CV %",
@@ -166,7 +176,7 @@ export const METRICS: MetricDef[] = [
     higherIsBetter: false,
     workload:
       "How much slower the worst 1% of those 400 identical units ran compared to the median. 1.0 is perfect.",
-    note: "Burstable instances show their credit cliff here.",
+    note: "A high ratio is a tail-latency signal. It can indicate contention, throttling, scheduling pauses or other transient effects; it does not prove a CPU-credit cliff.",
   },
   {
     category: "compute",
@@ -177,7 +187,7 @@ export const METRICS: MetricDef[] = [
     higherIsBetter: false,
     workload:
       "Steal ticks from /proc/stat while all cores are saturated for 5 s — the kernel's own record of CPU time the hypervisor gave to other tenants.",
-    note: "Above ~2% sustained is an oversold host. Linux only.",
+    note: "Linux only. Interpret the measured percentage together with consistency and repeated campaigns; no universal threshold proves overselling.",
   },
 ];
 

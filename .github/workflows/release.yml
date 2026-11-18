@@ -1,0 +1,50 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: linux-release
+    needs: checks
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Build Linux archives
+        shell: bash
+        run: |
+          mkdir -p dist
+          version="${GITHUB_REF_NAME#v}"
+          for arch in amd64 arm64; do
+            binary="providerbench_${version}_linux_${arch}"
+            CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build \
+              -trimpath \
+              -ldflags="-s -w -X main.version=${version}" \
+              -o "dist/${binary}/providerbench" \
+              ./cmd/providerbench
+            tar -C "dist/${binary}" -czf "dist/${binary}.tar.gz" providerbench
+            rm -r "dist/${binary}"
+          done
+          cd dist
+          sha256sum ./*.tar.gz > SHA256SUMS
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes
+

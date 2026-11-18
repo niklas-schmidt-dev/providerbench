@@ -7,7 +7,27 @@ import (
 	"github.com/niklas-schmidt-dev/providerbench/internal/sysinfo"
 )
 
-const SchemaVersion = 1
+const (
+	LegacySchemaVersion = 1
+	SchemaVersion       = 2
+	ComputeProtocol     = "compute-v2"
+	StorageProtocol     = "storage-v1"
+	StandardProfile     = "standard"
+	SustainedProfile    = "sustained"
+)
+
+// ProtocolFor returns the pinned protocol version for a category. The
+// protocol is the immutable method identity: results are only comparable
+// inside one protocol, so a category bumps it when its workload changes.
+func ProtocolFor(category string) (string, bool) {
+	switch category {
+	case "compute":
+		return ComputeProtocol, true
+	case "storage":
+		return StorageProtocol, true
+	}
+	return "", false
+}
 
 // Provider describes where the benchmark ran. All fields are user-supplied.
 // Name is the company (hetzner, vercel, aws); Product is the specific
@@ -37,8 +57,10 @@ type Measurement struct {
 // Report is the full output of a run — this is what gets submitted to the
 // public dataset. Its shape is described in schema/result.schema.json.
 type Report struct {
-	SchemaVersion int    `json:"schema_version"`
-	CLIVersion    string `json:"cli_version"`
+	SchemaVersion   int    `json:"schema_version"`
+	ProtocolVersion string `json:"protocol_version,omitempty"`
+	Profile         string `json:"profile,omitempty"`
+	CLIVersion      string `json:"cli_version"`
 	// Category groups reports on providerbench.dev: "compute" for this CLI's
 	// built-in tests; future suites (ai, storage, ...) use their own.
 	Category  string    `json:"category"`
@@ -50,7 +72,7 @@ type Report struct {
 	Quick       bool         `json:"quick,omitempty"`
 	Provider    Provider     `json:"provider"`
 	System      sysinfo.Info `json:"system"`
-	Measurement Measurement  `json:"measurement,omitzero"`
+	Measurement Measurement  `json:"measurement"`
 	// Environment holds user-supplied reproducibility detail beyond what
 	// sysinfo detects: OS image, database versions, config choices, ...
 	Environment map[string]string `json:"environment,omitempty"`

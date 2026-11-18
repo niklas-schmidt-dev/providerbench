@@ -92,7 +92,7 @@ export function CompanyBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-lg border bg-card/50 py-1 pr-2.5 text-[12px] text-foreground/85",
+        "inline-flex items-center gap-2 rounded-md border border-foreground/15 bg-card py-1 pr-2.5 text-[12px] text-foreground/85",
         company.logoKind === "wordmark" ? "pl-1" : "pl-1.5",
         className,
       )}

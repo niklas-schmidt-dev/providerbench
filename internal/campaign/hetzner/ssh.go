@@ -1,6 +1,7 @@
 package hetzner
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -97,6 +98,22 @@ func (s *OpenSSH) Run(ctx context.Context, server Server, binary string, args []
 	command.Stderr = s.stderr
 	if err := command.Run(); err != nil {
 		return err
+	}
+	return nil
+}
+
+// WriteFile creates a root-only (0600) file on the host with the given
+// contents. The data travels over the encrypted channel via stdin — never
+// through process arguments, where it would be visible in `ps` on either
+// side, and never through a local temporary file.
+func (s *OpenSSH) WriteFile(ctx context.Context, server Server, remote string, data []byte) error {
+	script := "umask 077 && cat > " + shellQuote(remote)
+	sshArgs := append(s.options(10*time.Second), target(server), script)
+	command := exec.CommandContext(ctx, "ssh", sshArgs...)
+	command.Stdin = bytes.NewReader(data)
+	output, err := command.CombinedOutput()
+	if err != nil {
+		return commandError(err, output)
 	}
 	return nil
 }

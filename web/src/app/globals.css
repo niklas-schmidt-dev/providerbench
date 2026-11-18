@@ -1,12 +1,82 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant data-open (&:where([data-state="open"], [data-open]:not([data-open="false"])));
+@custom-variant data-closed (&:where([data-state="closed"], [data-closed]:not([data-closed="false"])));
+@custom-variant data-selected (&:where([data-selected="true"]));
+@custom-variant data-active (&:where([data-state="active"], [data-active]:not([data-active="false"])));
+@custom-variant data-horizontal (&:where([data-orientation="horizontal"]));
+@custom-variant data-vertical (&:where([data-orientation="vertical"]));
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ——— ProviderBench design system motifs ————————————————— */
+
+/* Dark instrument panel: graphite with faint vertical rules every 64px.
+   Used by hero sections and the footer. */
+@utility hero-dark {
+  background-color: var(--surface-inverse);
+  background-image: repeating-linear-gradient(
+    to right,
+    rgb(255 255 255 / 0.045) 0 1px,
+    transparent 1px 64px
+  );
+}
+
+/* The live-status dot. One slow pulse, never a strobe. */
+@utility led {
+  animation: led-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes led-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .led {
+    animation: none;
+  }
+}
+
+/* Label / eyebrow — uppercase, wide, small. Plain classes (not utilities) so
+   text-* utilities can override size and color. `.stamp` stays as an alias for
+   components that predate the rework. */
+@layer components {
+  .pb-label,
+  .stamp {
+    font-family: var(--font-sans);
+    font-size: var(--label-size);
+    line-height: var(--label-line);
+    letter-spacing: var(--label-track);
+    font-weight: var(--label-weight);
+    text-transform: uppercase;
+  }
+  .pb-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--mono-track);
+  }
+}
 
 @theme inline {
-  --font-sans: var(--font-plex-sans);
-  --font-mono: var(--font-plex-mono);
+  --font-sans: "Geist Sans", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -26,66 +96,237 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --color-chart-1: var(--series-1);
+  --color-chart-2: var(--series-2);
+  --color-chart-3: var(--series-3);
+  --color-chart-4: var(--series-4);
+  --color-chart-5: var(--series-5);
 
+  --color-signal: var(--signal-400);
   --color-brand: var(--brand);
-  --color-warning: var(--warning);
-  --color-success: var(--success);
+  --color-warning: var(--warn-500);
+  --color-success: var(--pass-500);
+  --color-fail: var(--fail-500);
+  --color-console: var(--console);
+  --color-console-foreground: var(--console-foreground);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-gray-0: var(--gray-0);
+  --color-gray-25: var(--gray-25);
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
+  --color-gray-950: var(--gray-950);
+
+  /* Radii — small and consistent. Nothing is a pill except tags/switches. */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
 }
 
-/* Minimal dark: near-black neutrals, hairline borders, one blue accent.
-   Color belongs to the data. */
+/* ProviderBench: cool graphite neutrals, one instrument-lime signal channel.
+   Numbers are mono; data surfaces sit flat; only overlays lift. */
 :root,
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.93 0 0);
-  --card: oklch(0.185 0 0);
-  --card-foreground: oklch(0.93 0 0);
-  --popover: oklch(0.185 0 0);
-  --popover-foreground: oklch(0.93 0 0);
-  --primary: oklch(0.93 0 0);
-  --primary-foreground: oklch(0.165 0 0);
-  --secondary: oklch(0.23 0 0);
-  --secondary-foreground: oklch(0.93 0 0);
-  --muted: oklch(0.23 0 0);
-  --muted-foreground: oklch(0.68 0 0);
-  --accent: oklch(0.23 0 0);
-  --accent-foreground: oklch(0.93 0 0);
-  --destructive: oklch(0.628 0.207 25.8);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.62 0.17 255);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.25rem;
+  /* ── Base neutrals: cool graphite, never pure black ── */
+  --gray-0: #ffffff;
+  --gray-25: #fbfcfc;
+  --gray-50: #f5f7f7;
+  --gray-100: #eceff0;
+  --gray-200: #dfe3e5;
+  --gray-300: #c6cccf;
+  --gray-400: #9aa3a8;
+  --gray-500: #6f797f;
+  --gray-600: #4d5459;
+  --gray-700: #343a3e;
+  --gray-800: #22272a;
+  --gray-900: #14181a;
+  --gray-950: #0c0f10;
 
-  --brand: oklch(0.66 0.16 255);
-  --warning: oklch(0.76 0.15 75);
-  --success: oklch(0.72 0.17 150);
+  /* ── Signal: the one brand accent. Instrument lime on graphite. ── */
+  --signal-100: #f0fbcf;
+  --signal-200: #e2f8a4;
+  --signal-300: #d3f56d;
+  --signal-400: #c8f135;
+  --signal-500: #b0d92a;
+  --signal-600: #8aae1c;
+  --signal-700: #5f7a11;
 
-  /* Validated categorical provider palette (dark-surface steps).
-     Slot order is the CVD-safe ordering; do not re-shuffle. */
-  --provider-hetzner: #3987e5;
-  --provider-netcup: #d95926;
-  --provider-ovh: #199e70;
-  --provider-digitalocean: #c98500;
-  --provider-aws: #d55181;
-  --provider-vercel: #008300;
+  /* ── Semantic status ── */
+  --pass-500: #12876a;
+  --pass-100: #dcf2ec;
+  --warn-500: #b6741a;
+  --warn-100: #fbeed6;
+  --fail-500: #c0392f;
+  --fail-100: #fbe4e1;
+  --info-500: #2b6cb0;
+  --info-100: #e2edf8;
+
+  /* ── Semantic aliases: surfaces ── */
+  --surface-page: var(--gray-50);
+  --surface-card: var(--gray-0);
+  --surface-sunken: var(--gray-100);
+  --surface-inset: var(--gray-25);
+  --surface-inverse: var(--gray-950);
+  --surface-inverse-raised: var(--gray-900);
+  --surface-hover: var(--gray-50);
+  --surface-active: var(--gray-100);
+  --surface-selected: var(--signal-100);
+
+  /* ── Semantic aliases: text ── */
+  --text-primary: var(--gray-950);
+  --text-body: var(--gray-700);
+  --text-muted: var(--gray-500);
+  --text-faint: var(--gray-400);
+  --text-inverse: var(--gray-0);
+  --text-inverse-muted: var(--gray-400);
+  --text-link: var(--gray-950);
+  --text-pass: var(--pass-500);
+  --text-warn: var(--warn-500);
+  --text-fail: var(--fail-500);
+
+  /* ── Semantic aliases: lines ── */
+  --border-hairline: var(--gray-200);
+  --border-strong: var(--gray-300);
+  --border-inverse: #2b3134;
+  --border-focus: var(--gray-950);
+  --grid-line: var(--gray-100);
+
+  /* ── Interactive ── */
+  --action-solid-bg: var(--gray-950);
+  --action-solid-bg-hover: var(--gray-800);
+  --action-solid-fg: var(--gray-0);
+  --action-signal-bg: var(--signal-400);
+  --action-signal-bg-hover: var(--signal-300);
+  --action-signal-fg: var(--gray-950);
+  --focus-ring: var(--gray-950);
+  --focus-ring-offset: var(--gray-0);
+
+  /* ── Charts: categorical series (assigned per provider, never by rank) ── */
+  --series-1: #0f6e63;
+  --series-2: #2b6cb0;
+  --series-3: #b6741a;
+  --series-4: #8e4585;
+  --series-5: #c0392f;
+  --series-6: #4d5459;
+  --series-7: #5f7a11;
+  --series-8: #9aa3a8;
+  --series-1-soft: #dcefec;
+  --series-2-soft: #e2edf8;
+  --series-3-soft: #fbeed6;
+  --series-4-soft: #f3e7f1;
+  --series-5-soft: #fbe4e1;
+  --series-6-soft: #e7eaeb;
+  --series-7-soft: #eef4dc;
+  --series-8-soft: #eceff0;
+
+  /* ── Performance ramp — worse → better (heatmaps + score cells) ── */
+  --ramp-0: #c0392f;
+  --ramp-1: #d97b45;
+  --ramp-2: #e0b04c;
+  --ramp-3: #9dbb4a;
+  --ramp-4: #4f9a5f;
+  --ramp-5: #12876a;
+
+  /* ── Chart furniture ── */
+  --axis-line: var(--gray-300);
+  --axis-text: var(--gray-500);
+  --gridline: var(--gray-100);
+  --gridline-strong: var(--gray-200);
+  --bar-track: var(--gray-100);
+  --annotation: var(--gray-950);
+  --chart-bar-height: 10px;
+  --chart-bar-gap: 6px;
+
+  /* ── Typography rhythm ── */
+  --label-size: 11px;
+  --label-line: 14px;
+  --label-track: 0.08em;
+  --label-weight: 600;
+  --mono-lg-size: 28px;
+  --mono-lg-line: 32px;
+  --mono-lg-track: -0.02em;
+  --mono-size: 14px;
+  --mono-line: 20px;
+  --mono-track: -0.01em;
+  --mono-sm-size: 12px;
+  --mono-sm-line: 16px;
+  --body-sm-size: 13px;
+  --body-sm-line: 19px;
+  --heading-1-size: 22px;
+  --heading-1-line: 28px;
+  --heading-1-track: -0.015em;
+  --heading-2-size: 17px;
+  --heading-2-line: 24px;
+  --heading-2-track: -0.01em;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* ── Component rhythm ── */
+  --pad-cell-y: 10px;
+  --pad-cell-x: 14px;
+  --pad-card: 20px;
+  --gutter-site: 32px;
+  --content-max: 1320px;
+  --row-height: 44px;
+  --row-height-compact: 36px;
+
+  /* ── Shadows — restrained. Data surfaces sit flat; only overlays lift. ── */
+  --shadow-xs: 0 1px 1px rgb(12 15 16 / 0.04);
+  --shadow-sm: 0 1px 2px rgb(12 15 16 / 0.06), 0 1px 1px rgb(12 15 16 / 0.04);
+  --shadow-md: 0 4px 12px rgb(12 15 16 / 0.08), 0 1px 2px rgb(12 15 16 / 0.06);
+  --shadow-lg: 0 16px 40px rgb(12 15 16 / 0.14), 0 2px 6px rgb(12 15 16 / 0.08);
+  --ring-focus: 0 0 0 2px var(--focus-ring-offset), 0 0 0 4px var(--focus-ring);
+
+  /* ── Motion ── */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-chart: 700ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-control: background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+  --transition-bar: width var(--dur-chart) var(--ease-out);
+
+  /* ── shadcn semantic mapping ── */
+  --background: var(--gray-50);
+  --foreground: var(--gray-950);
+  --card: var(--gray-0);
+  --card-foreground: var(--gray-950);
+  --popover: var(--gray-0);
+  --popover-foreground: var(--gray-950);
+  --primary: var(--gray-950);
+  --primary-foreground: var(--gray-0);
+  --secondary: var(--gray-100);
+  --secondary-foreground: var(--gray-800);
+  --muted: var(--gray-100);
+  --muted-foreground: var(--gray-500);
+  --accent: var(--gray-100);
+  --accent-foreground: var(--gray-950);
+  --destructive: var(--fail-500);
+  --border: var(--gray-200);
+  --input: var(--gray-300);
+  --ring: var(--gray-950);
+
+  --brand: var(--signal-600);
+  --console: var(--gray-950);
+  --console-foreground: var(--gray-100);
+
+  /* Provider colors live in lib/providers.ts (assigned series slots — the
+     single source of truth). */
 }
 
 @layer base {
@@ -94,15 +335,17 @@
   }
   html {
     @apply font-sans;
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
   }
   body {
     @apply bg-background text-foreground antialiased;
     text-rendering: optimizeLegibility;
+    font-size: 15px;
+    line-height: 23px;
   }
   ::selection {
-    background: var(--brand);
-    color: var(--background);
+    background: var(--signal-400);
+    color: var(--gray-950);
   }
 }

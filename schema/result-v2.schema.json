@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://providerbench.dev/schema/result-v2.schema.json",
+  "title": "providerbench report v2",
+  "description": "Strict report contract for ProviderBench runners. Dataset eligibility is checked separately across the complete cohort.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_version",
+    "profile",
+    "cli_version",
+    "category",
+    "created_at",
+    "provider",
+    "measurement",
+    "system",
+    "results"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "profile": { "enum": ["standard", "sustained"] },
+    "cli_version": { "type": "string", "minLength": 1 },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "not": { "const": "0001-01-01T00:00:00Z" }
+    },
+    "sample": { "type": "boolean" },
+    "quick": { "type": "boolean" },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "product", "plan", "region"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "product": { "type": "string", "minLength": 1 },
+        "plan": { "type": "string", "minLength": 1 },
+        "tier": {
+          "type": "string",
+          "enum": ["cheap", "medium", "dedicated", "usage-based"]
+        },
+        "region": { "type": "string", "minLength": 1 },
+        "price_eur_hour": { "type": "number", "minimum": 0 },
+        "price_eur_month": { "type": "number", "minimum": 0 }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "dependentRequired": {
+        "campaign_id": ["sample_index", "repeat_index"],
+        "sample_index": ["campaign_id", "repeat_index"],
+        "repeat_index": ["campaign_id", "sample_index"]
+      },
+      "properties": {
+        "campaign_id": { "type": "string", "minLength": 1 },
+        "sample_index": { "type": "integer", "minimum": 1 },
+        "repeat_index": { "type": "integer", "minimum": 1 },
+        "fresh_instance": { "type": "boolean" },
+        "exclude_from_aggregate": { "type": "boolean" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os", "arch", "cpu_cores"],
+      "properties": {
+        "os": { "type": "string", "minLength": 1 },
+        "arch": { "type": "string", "minLength": 1 },
+        "kernel": { "type": "string" },
+        "cpu_model": { "type": "string" },
+        "cpu_cores": { "type": "integer", "minimum": 1 },
+        "mem_total_mb": { "type": "integer", "minimum": 0 },
+        "virtualization": { "type": "string" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["test", "started_at", "duration_seconds", "metrics"],
+        "properties": {
+          "test": { "type": "string", "minLength": 1 },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "not": { "const": "0001-01-01T00:00:00Z" }
+          },
+          "duration_seconds": { "type": "number", "minimum": 0 },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "value", "unit", "higher_is_better"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "value": { "type": "number" },
+                "unit": { "type": "string", "minLength": 1 },
+                "higher_is_better": { "type": "boolean" }
+              }
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "error": { "type": "string", "minLength": 1 }
+        },
+        "oneOf": [
+          {
+            "not": { "required": ["error"] },
+            "properties": {
+              "metrics": { "minItems": 1 }
+            }
+          },
+          {
+            "required": ["error"],
+            "properties": {
+              "metrics": { "maxItems": 0 }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "category": { "const": "compute" } },
+        "required": ["category"]
+      },
+      "then": {
+        "properties": { "protocol_version": { "const": "compute-v2" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "category": { "const": "storage" } },
+        "required": ["category"]
+      },
+      "then": {
+        "properties": { "protocol_version": { "const": "storage-v1" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "profile": { "const": "sustained" } },
+        "required": ["profile"]
+      },
+      "then": {
+        "properties": { "quick": { "const": false } }
+      }
+    }
+  ]
+}

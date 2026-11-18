@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync } from "fs";
+import { createHash } from "crypto";
+import { readFileSync } from "fs";
 import path from "path";
 
 export type Metric = {
@@ -19,6 +20,8 @@ export type TestResult = {
 
 export type Report = {
   schema_version: number;
+  protocol_version?: string;
+  profile?: "standard" | "sustained";
   cli_version: string;
   category?: string;
   created_at: string;
@@ -53,33 +56,80 @@ export type Report = {
   results: TestResult[];
 };
 
-export type Run = Report & { slug: string };
+export type ManifestEntry = {
+  file: string;
+  sha256: string;
+  schema_version: number;
+  protocol_version: string;
+  profile: "standard" | "sustained";
+  category: string;
+  cohort_id: string;
+  rank_eligible: boolean;
+  eligibility_reasons?: string[];
+};
 
-// Canonical data lives at the repo root in data/results. The prebuild step
-// copies it to web/data so builds only read inside the app root; the ../
-// fallback covers `next dev` without a prior build.
-function dataDir(): string {
-  for (const p of [
-    path.join(process.cwd(), "data", "results"),
-    path.join(process.cwd(), "..", "data", "results"),
-  ]) {
-    try {
-      readdirSync(p);
-      return p;
-    } catch {
-      /* try next */
-    }
+type ReportManifest = {
+  manifest_version: number;
+  reports: ManifestEntry[];
+};
+
+export type Run = Report & {
+  slug: string;
+  manifest: ManifestEntry;
+};
+
+function contractSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^[-._]+|[-._]+$/g, "");
+}
+
+function loadManifest(dataRoot: string): ReportManifest {
+  const manifestPath = path.join(dataRoot, "report-manifest.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as ReportManifest;
+  if (manifest.manifest_version !== 1 || !Array.isArray(manifest.reports)) {
+    throw new Error(`unsupported report manifest: ${manifestPath}`);
   }
-  throw new Error("data/results directory not found");
+  return manifest;
 }
 
 export function loadRuns(): Run[] {
-  const dir = dataDir();
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => {
-      const report = JSON.parse(readFileSync(path.join(dir, f), "utf8")) as Report;
-      return { ...report, slug: f.replace(/\.json$/, "") };
+  const dataRoot = path.join(process.cwd(), "data");
+  const manifest = loadManifest(dataRoot);
+  const resultsDir = path.join(dataRoot, "results");
+  return manifest.reports
+    .map((entry) => {
+      if (path.basename(entry.file) !== entry.file || !entry.file.endsWith(".json")) {
+        throw new Error(`unsafe report manifest path: ${entry.file}`);
+      }
+      const reportPath = path.join(resultsDir, entry.file);
+      const raw = readFileSync(reportPath);
+      const digest = createHash("sha256").update(raw).digest("hex");
+      if (digest !== entry.sha256) {
+        throw new Error(`report hash mismatch: ${entry.file}`);
+      }
+      const report = JSON.parse(raw.toString("utf8")) as Report;
+      const category = report.category ?? "compute";
+      const protocol =
+        report.protocol_version ??
+        contractSlug(`${category}-cli-${report.cli_version}`);
+      const profile = report.profile ?? "standard";
+      const cohort = report.measurement?.campaign_id ?? "";
+      if (
+        report.schema_version !== entry.schema_version ||
+        category !== entry.category ||
+        protocol !== entry.protocol_version ||
+        profile !== entry.profile ||
+        cohort !== entry.cohort_id
+      ) {
+        throw new Error(`report manifest metadata mismatch: ${entry.file}`);
+      }
+      return {
+        ...report,
+        slug: entry.file.replace(/\.json$/, ""),
+        manifest: entry,
+      };
     })
     .sort((a, b) => (a.provider.name ?? "").localeCompare(b.provider.name ?? ""));
 }

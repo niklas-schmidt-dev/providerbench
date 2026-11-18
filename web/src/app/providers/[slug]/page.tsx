@@ -4,27 +4,20 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
 import { CompanyLogo } from "@/components/company-logo";
+import { DsBadge } from "@/components/ds/badge";
+import { DsCard } from "@/components/ds/card";
+import { DeltaValue } from "@/components/ds/delta-value";
+import { MetricStat } from "@/components/ds/metric-stat";
 import { LocationComparison } from "@/components/location-comparison";
-import { PageHeader } from "@/components/page-header";
 import { PerformanceHistoryChart } from "@/components/performance-history-chart";
 import { PricePerformanceChart } from "@/components/price-performance-chart";
 import { SampleBanner } from "@/components/sample-banner";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   aggregateRuns,
+  bestGroupPerProvider,
   bestRegionPerPlan,
   currentScoredGroups,
   metricSummary,
-  P99_RECOMMENDED_HOSTS,
   scoreGroups,
   type ScoredGroup,
   type TestSummary,
@@ -72,43 +65,47 @@ function bestOf(
 
 function TestCard({ result, peers }: { result: TestSummary; peers: ScoredGroup[] }) {
   return (
-    <Card className="gap-3">
-      <CardHeader className="flex-row items-center justify-between gap-3">
-        <CardTitle className="font-mono text-sm">
-          <a
-            href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/compute/${result.test}.go`}
-            className="hover:text-brand hover:underline"
-            title="benchmark source code"
-          >
-            {result.test}
-          </a>
-        </CardTitle>
-        <span className="font-mono text-[10px] text-muted-foreground">
+    <DsCard
+      flush
+      title={
+        <a
+          href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/compute/${result.test}.go`}
+          className="font-mono text-[14px] hover:underline"
+          title="benchmark source code"
+        >
+          {result.test}
+        </a>
+      }
+      actions={
+        <span className="pb-label text-[10px] text-(--text-faint)">
           measured {formatMeasurementWindow(result.measuredFrom, result.measuredTo)}
         </span>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="h-8">Metric</TableHead>
-              <TableHead className="h-8 text-right">P50</TableHead>
-              <TableHead className="h-8 text-right">Mean</TableHead>
-              <TableHead className="h-8 text-right">P10</TableHead>
-              <TableHead className="h-8 text-right">P90</TableHead>
-              <TableHead className="h-8 text-right">P99</TableHead>
-              <TableHead className="h-8 text-right">vs best</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      }
+      footer={
+        result.notes.length > 0 ? (
+          <span className="text-[11.5px] leading-[17px]">{result.notes.join(" · ")}</span>
+        ) : undefined
+      }
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-[13px]">
+          <thead>
+            <tr>
+              {["Metric", "P50", "Mean", "P10", "P90", "P99", "vs best"].map((h, i) => (
+                <th
+                  key={h}
+                  className="pb-label h-8 border-b border-(--border-hairline) px-(--pad-cell-x) whitespace-nowrap text-muted-foreground"
+                  style={{ textAlign: i === 0 ? "left" : "right" }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
             {result.metrics.map((metric) => {
               const distribution = metric.distribution;
-              const best = bestOf(
-                peers,
-                result.test,
-                metric.name,
-                metric.higherIsBetter,
-              );
+              const best = bestOf(peers, result.test, metric.name, metric.higherIsBetter);
               const isBest = best !== undefined && distribution.p50 === best;
               const gap =
                 best === undefined || best === 0 || isBest
@@ -117,53 +114,46 @@ function TestCard({ result, peers }: { result: TestSummary; peers: ScoredGroup[]
                     ? (1 - distribution.p50 / best) * 100
                     : (distribution.p50 / best - 1) * 100;
               return (
-                <TableRow key={metric.name}>
-                  <TableCell className="py-2 font-mono text-xs text-muted-foreground">
+                <tr
+                  key={metric.name}
+                  className="border-b border-(--border-hairline) last:border-b-0"
+                >
+                  <td className="px-(--pad-cell-x) py-2 font-mono text-[12px] text-muted-foreground">
                     {metric.name}
-                  </TableCell>
-                  {[distribution.p50, distribution.mean, distribution.p10, distribution.p90, distribution.p99].map(
-                    (value, index) => (
-                      <TableCell
-                        key={index}
-                        className="py-2 text-right font-mono text-xs tabular-nums text-foreground"
-                      >
-                        {formatMetricValue(value)}
-                        {index === 0 && (
-                          <span className="ml-1 text-muted-foreground">
-                            {metric.unit}
-                          </span>
-                        )}
-                      </TableCell>
-                    ),
-                  )}
-                  <TableCell className="py-2 text-right">
+                  </td>
+                  {[
+                    distribution.p50,
+                    distribution.mean,
+                    distribution.p10,
+                    distribution.p90,
+                    distribution.p99,
+                  ].map((value, index) => (
+                    <td
+                      key={index}
+                      className="pb-num px-(--pad-cell-x) py-2 text-right text-[12px] text-foreground"
+                    >
+                      {formatMetricValue(value)}
+                      {index === 0 && (
+                        <span className="ml-1 text-(--text-faint)">{metric.unit}</span>
+                      )}
+                    </td>
+                  ))}
+                  <td className="px-(--pad-cell-x) py-2 text-right whitespace-nowrap">
                     {isBest ? (
-                      <Badge
-                        variant="secondary"
-                        className="h-5 px-1.5 text-[10px] text-success"
-                      >
-                        best
-                      </Badge>
+                      <DsBadge tone="pass">best</DsBadge>
                     ) : best !== undefined ? (
-                      <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
-                        −{gap.toFixed(0)}%
-                      </span>
+                      <DeltaValue value={-gap} decimals={0} showArrow={false} />
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-(--text-faint)">—</span>
                     )}
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               );
             })}
-          </TableBody>
-        </Table>
-        {result.notes.length > 0 && (
-          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-            {result.notes.join(" · ")}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          </tbody>
+        </table>
+      </div>
+    </DsCard>
   );
 }
 
@@ -186,57 +176,141 @@ export default async function ProviderPage({
   const history = allCohorts.filter((group) => group.provider.name === slug);
   const planLeaders = bestRegionPerPlan(groups);
   const globalPlanLeaders = bestRegionPerPlan(allGroups);
-  const observationCount = groups.reduce(
-    (sum, group) => sum + group.hostCount,
-    0,
+  const observationCount = groups.reduce((sum, group) => sum + group.hostCount, 0);
+  const auditRuns = rawRuns.filter(
+    (run) =>
+      !run.manifest.rank_eligible ||
+      run.results.some((result) => Boolean(result.error)),
   );
+
+  const providerLeaders = bestGroupPerProvider(allGroups)
+    .filter((g) => g.rankEligible)
+    .sort((a, b) => b.performanceScore - a.performanceScore);
+  const rank = providerLeaders.findIndex((g) => g.provider.name === slug) + 1;
+  const bestGroup = [...groups].sort(
+    (a, b) => b.performanceScore - a.performanceScore,
+  )[0];
+  const minPrice = Math.min(
+    ...groups.flatMap((g) => (g.provider.price_eur_month ? [g.provider.price_eur_month] : [])),
+  );
+  const sinceYear = rawRuns
+    .map((r) => new Date(r.created_at).getUTCFullYear())
+    .sort()[0];
 
   return (
     <main>
-      <PageHeader
-        eyebrow={
-          <span className="flex items-center gap-2">
-            {provider.company && (
-              <CompanyLogo company={provider.company} size="xs" decorative />
-            )}
-            <span
-              aria-hidden
-              className="size-2 rounded-full"
-              style={{ background: provider.color }}
-            />
-            Providers / {provider.name}
-          </span>
-        }
-        title={provider.name}
-        lede={provider.blurb}
-      >
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          {provider.website && (
-            <a
-              href={provider.website}
-              className="inline-flex items-center gap-1 text-[13px] text-brand hover:underline"
-            >
-              {provider.website.replace("https://", "")}
-              <ArrowUpRight className="size-3.5" />
-            </a>
-          )}
-          <Badge variant="outline" className="font-mono text-muted-foreground">
-            {observationCount} fresh-host{" "}
-            {observationCount === 1 ? "observation" : "observations"}
-          </Badge>
-        </div>
-      </PageHeader>
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        {allSample(rawRuns) && (
-          <div className="mt-8">
-            <SampleBanner />
+      {/* ——— Identity hero ——— */}
+      <section className="border-b border-(--border-hairline) bg-card">
+        <div className="mx-auto max-w-(--content-max) px-4 pt-6 sm:px-8">
+          <div className="mb-3.5 text-[12.5px] text-(--text-faint)">
+            <Link href="/providers" className="hover:text-foreground">
+              Providers
+            </Link>{" "}
+            / {provider.name}
           </div>
+          <div className="flex flex-wrap items-start gap-6">
+            <div className="min-w-[280px] flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                {provider.company && (
+                  <CompanyLogo company={provider.company} size="sm" decorative />
+                )}
+                <h1 className="text-[34px] leading-[40px] font-semibold tracking-[-0.025em] text-foreground sm:text-[40px] sm:leading-[44px]">
+                  {provider.name}
+                </h1>
+                <span
+                  aria-hidden
+                  className="size-2.5 rounded-[3px]"
+                  style={{ background: provider.color }}
+                />
+                {sinceYear && (
+                  <DsBadge tone="pass" dot>
+                    Measured since {sinceYear}
+                  </DsBadge>
+                )}
+                {rank > 0 && <DsBadge tone="neutral">#{rank} of {providerLeaders.length} on the composite</DsBadge>}
+              </div>
+              <p className="mt-2.5 max-w-[620px] text-[15px] leading-[23px] text-muted-foreground">
+                {provider.blurb}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1.5">
+              {provider.website && (
+                <a
+                  href={provider.website}
+                  className="inline-flex h-[34px] items-center gap-1.5 rounded-(--radius-sm) border border-(--border-strong) bg-card px-3.5 text-[14px] font-medium text-foreground shadow-(--shadow-xs) transition-colors hover:bg-(--surface-hover)"
+                >
+                  {provider.website.replace("https://", "")}
+                  <ArrowUpRight className="size-3.5 text-(--text-faint)" />
+                </a>
+              )}
+              <Link
+                href="/compute"
+                className="inline-flex h-[34px] items-center rounded-(--radius-sm) bg-(--action-solid-bg) px-3.5 text-[14px] font-medium text-(--action-solid-fg) transition-colors hover:bg-(--action-solid-bg-hover)"
+              >
+                Compare in Compute
+              </Link>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-6 py-6 sm:grid-cols-3 lg:grid-cols-6">
+            <MetricStat
+              label="Best score"
+              value={bestGroup ? bestGroup.performanceScore.toFixed(1) : "—"}
+              accent={provider.color}
+              note={bestGroup?.provider.plan ?? undefined}
+            />
+            <MetricStat
+              label="Value index"
+              value={bestGroup?.valueIndex?.toFixed(1) ?? "—"}
+            />
+            <MetricStat label="Fresh hosts" value={String(observationCount)} />
+            <MetricStat label="Raw runs" value={String(rawRuns.length)} />
+            <MetricStat label="Plans measured" value={String(planLeaders.length)} />
+            <MetricStat
+              label="From € / mo"
+              value={Number.isFinite(minPrice) ? minPrice.toFixed(2) : "—"}
+              note="net, excl. VAT"
+            />
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto grid max-w-(--content-max) gap-6 px-4 pt-8 pb-4 sm:px-8">
+        {allSample(rawRuns) && <SampleBanner />}
+
+        {auditRuns.length > 0 && (
+          <DsCard
+            title="Audit reports"
+            subtitle="Preserved for traceability, but excluded from ranking by the validator-owned manifest."
+          >
+            <ul className="grid gap-2 pt-1 text-[12.5px]">
+              {auditRuns.map((run) => {
+                const failures = run.results
+                  .filter((result) => result.error)
+                  .map((result) => `${result.test}: ${result.error}`);
+                const reasons = [
+                  ...(run.manifest.eligibility_reasons ?? []),
+                  ...failures,
+                ];
+                return (
+                  <li key={run.slug} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <DsBadge tone="warn">excluded</DsBadge>
+                    <a
+                      href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/data/results/${run.slug}.json`}
+                      className="border-b border-(--border-strong) font-mono text-[12px] text-foreground hover:border-foreground"
+                    >
+                      {run.slug}.json
+                    </a>
+                    <span className="text-muted-foreground">
+                      {reasons.join(" · ") || "not ranking-eligible"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </DsCard>
         )}
 
-        <div className="mt-8">
-          <PricePerformanceChart groups={planLeaders} />
-        </div>
+        <PricePerformanceChart groups={planLeaders} />
 
         <PerformanceHistoryChart groups={history} />
 
@@ -248,81 +322,61 @@ export default async function ProviderPage({
             (peer) => peer.category === group.category,
           );
           return (
-            <section key={group.id} className="mt-14">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-lg font-semibold text-foreground">
+            <section key={group.id} className="mt-8">
+              <div className="flex flex-wrap items-center gap-2.5 border-t border-(--border-hairline) pt-5">
+                <h2 className="text-[22px] leading-7 font-semibold tracking-[-0.015em] text-foreground">
                   {group.provider.plan}
                 </h2>
-                {group.provider.tier && (
-                  <Badge variant="secondary" className="font-mono font-normal">
-                    {group.provider.tier}
-                  </Badge>
-                )}
+                {group.provider.tier && <DsBadge tone="neutral">{group.provider.tier}</DsBadge>}
                 {group.provider.product && (
-                  <Badge variant="secondary" className="font-normal">
-                    {group.provider.product}
-                  </Badge>
+                  <DsBadge tone="neutral">{group.provider.product}</DsBadge>
                 )}
-                <Badge
-                  variant="outline"
-                  className="font-mono font-normal text-muted-foreground"
-                >
+                <DsBadge tone="outline" mono>
                   {group.provider.region}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="font-mono font-normal text-brand"
-                >
-                  measured{" "}
-                  {formatMeasurementWindow(group.measuredFrom, group.measuredTo)}
-                </Badge>
+                </DsBadge>
+                <DsBadge tone="info" mono>
+                  measured {formatMeasurementWindow(group.measuredFrom, group.measuredTo)}
+                </DsBadge>
+                <DsBadge tone="outline" mono>
+                  {group.protocolVersion} · {group.profile}
+                </DsBadge>
                 {group.provider.price_eur_month ? (
-                  <Badge
-                    variant="outline"
-                    className="font-mono font-normal text-muted-foreground"
-                  >
+                  <DsBadge tone="outline" mono>
                     €{group.provider.price_eur_month.toFixed(2)}/mo
                     {group.provider.price_eur_hour
                       ? ` · €${group.provider.price_eur_hour.toFixed(4)}/h`
                       : ""}
-                  </Badge>
+                  </DsBadge>
                 ) : null}
-                <Badge
-                  variant="outline"
-                  className={
-                    group.rankEligible
-                      ? "font-mono font-normal text-success"
-                      : "font-mono font-normal text-warning"
-                  }
-                >
+                <DsBadge tone={group.rankEligible ? "pass" : "warn"} dot>
                   {group.rankEligible ? "ranked" : "provisional"} · {group.hostCount}{" "}
                   {group.hostCount === 1 ? "host" : "hosts"}
-                </Badge>
+                </DsBadge>
                 <Link
                   href={`/${group.category}`}
-                  className="ml-auto text-[13px] font-medium text-brand hover:underline"
+                  className="ml-auto text-[13px] font-medium text-foreground hover:underline"
                 >
                   Compare in {category?.name ?? group.category} →
                 </Link>
               </div>
 
-              <div className="mt-4 grid gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  ["Performance", group.performanceScore.toFixed(1)],
-                  ["Value index", group.valueIndex?.toFixed(1) ?? "—"],
-                  ["Independent hosts", String(group.hostCount)],
-                  ["Raw runs", String(group.runCount)],
-                ].map(([label, value]) => (
+              <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-(--border-hairline) bg-(--border-hairline) sm:grid-cols-4">
+                {(
+                  [
+                    ["Score", group.performanceScore.toFixed(1)],
+                    ["Value index", group.valueIndex?.toFixed(1) ?? "—"],
+                    ["Independent hosts", String(group.hostCount)],
+                    ["Raw runs", String(group.runCount)],
+                  ] as const
+                ).map(([label, value]) => (
                   <div key={label} className="bg-card px-4 py-3">
-                    <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {label}
-                    </p>
-                    <p className="mt-1 font-mono text-lg text-foreground">{value}</p>
+                    <p className="pb-label text-[10px] text-muted-foreground">{label}</p>
+                    <p className="pb-num mt-1.5 text-[18px] text-foreground">{value}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-3 rounded-xl border bg-card px-5 py-4">
+              <div className="mt-3 rounded-md border border-(--border-hairline) bg-card px-5 py-4 shadow-(--shadow-xs)">
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
                   {[
                     ["CPU", group.system.cpu_model || "—"],
@@ -339,9 +393,9 @@ export default async function ProviderPage({
                     ...Object.entries(group.environment ?? {}),
                   ].map(([label, value]) => (
                     <div key={label}>
-                      <dt className="text-[11px] text-muted-foreground">{label}</dt>
+                      <dt className="pb-label text-[10px] text-muted-foreground">{label}</dt>
                       <dd
-                        className="mt-0.5 truncate font-mono text-xs text-foreground"
+                        className="mt-1 truncate font-mono text-[12px] text-foreground"
                         title={value}
                       >
                         {value}
@@ -351,29 +405,35 @@ export default async function ProviderPage({
                 </dl>
               </div>
 
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
                 {group.results.map((result) => (
                   <TestCard key={result.test} result={result} peers={peers} />
                 ))}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-muted-foreground">
-                <span>
-                  P99{" "}
-                  {group.hostCount >= P99_RECOMMENDED_HOSTS
-                    ? "meets the 100-host evidence target"
-                    : `is an estimate until ${P99_RECOMMENDED_HOSTS} independent hosts`}
-                </span>
-                {group.runs.map((run) => (
-                  <a
-                    key={run.slug}
-                    href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/data/results/${run.slug}.json`}
-                    className="text-brand hover:underline"
+              <details className="group mt-3">
+                <summary className="pb-label flex cursor-pointer items-center gap-2 text-[10.5px] text-muted-foreground transition-colors select-none hover:text-foreground [&::-webkit-details-marker]:hidden">
+                  <span
+                    aria-hidden
+                    className="inline-block transition-transform group-open:rotate-90"
                   >
-                    {run.slug}.json
-                  </a>
-                ))}
-              </div>
+                    ▸
+                  </span>
+                  {group.runs.length} raw reports · P99 is a descriptive observed-tail
+                  estimate for the fixed {group.hostCount}-host standard profile
+                </summary>
+                <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5 border-l border-(--border-hairline) pl-4 font-mono text-[10.5px]">
+                  {group.runs.map((run) => (
+                    <a
+                      key={run.slug}
+                      href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/data/results/${run.slug}.json`}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      {run.slug}.json
+                    </a>
+                  ))}
+                </div>
+              </details>
             </section>
           );
         })}

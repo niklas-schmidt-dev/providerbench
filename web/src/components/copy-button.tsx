@@ -5,13 +5,22 @@ import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export function CopyButton({ text, label }: { text: string; label?: string }) {
+export function CopyButton({
+  text,
+  label,
+  className,
+}: {
+  text: string;
+  label?: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
   return (
     <Button
       variant="ghost"
       size="icon-sm"
       aria-label={label ?? "Copy to clipboard"}
+      className={className}
       onClick={async () => {
         await navigator.clipboard.writeText(text);
         setCopied(true);
