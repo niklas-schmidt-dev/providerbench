@@ -1,75 +1,75 @@
 import type { Metadata } from "next";
 
 import { CodeBlock } from "@/components/code-block";
-import { DsCard } from "@/components/ds/card";
-import { SectionHead } from "@/components/ds/section-head";
 
 export const metadata: Metadata = {
   title: "CLI",
-  description:
-    "Install and run the ProviderBench CLI, extend it with your own benchmarks, and submit results.",
+  description: "Install and run the ProviderBench CLI, extend it with your own benchmarks, and submit results.",
 };
+
+function Step({ index, title, children }: { index: string; title: string; children: React.ReactNode }) {
+  return (
+    <section aria-labelledby={`step-${index}`} className="grid gap-4 border-b border-border px-4 py-8 sm:px-7 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
+      <div className="flex items-baseline gap-3 lg:flex-col lg:gap-1">
+        <span className="num text-[12px] text-subtle">{index}</span>
+        <h2 id={`step-${index}`} className="text-base font-medium tracking-tight">
+          {title}
+        </h2>
+      </div>
+      <div className="flex min-w-0 max-w-3xl flex-col gap-4">{children}</div>
+    </section>
+  );
+}
 
 export default function CliPage() {
   return (
-    <main>
-      <section className="hero-dark">
-        <div className="mx-auto max-w-(--content-max) px-4 pt-9 pb-8 sm:px-8">
-          <span className="pb-label inline-flex items-center gap-[7px] text-signal">
-            <span aria-hidden className="led size-1.5 rounded-full bg-signal" />
-            The instrument
-          </span>
-          <h1 className="mt-3 max-w-3xl text-[34px] leading-[40px] font-semibold tracking-[-0.025em] text-gray-0 sm:text-[40px] sm:leading-[44px]">
-            One binary, ninety seconds, every number on this site
-          </h1>
-          <p className="mt-2.5 max-w-[560px] text-[15px] leading-[23px] text-gray-400">
-            A static Go binary with no dependencies, no daemon and no account.
-            Point it at a fresh VPS and get a shareable JSON report.
-          </p>
-        </div>
-      </section>
+    <main id="main">
+      <header className="border-b border-border px-4 pt-8 pb-7 sm:px-7">
+        <p className="text-[12px] text-subtle">The instrument</p>
+        <h1 className="mt-1.5 max-w-[24ch] text-[28px] leading-[34px] font-medium tracking-[-0.03em] text-balance sm:text-[32px] sm:leading-[38px]">
+          One binary, ninety seconds, every number on this site
+        </h1>
+        <p className="mt-2 max-w-[62ch] text-[14px] leading-[22px] text-pretty text-muted-foreground">
+          A static Go binary with no dependencies, no daemon and no account. Point it at a fresh VPS and get a
+          shareable JSON report.
+        </p>
+      </header>
 
-      <div className="mx-auto grid max-w-(--content-max) gap-5 px-4 pt-8 pb-4 sm:px-8">
-        <SectionHead eyebrow="01" title="Install" />
-        <div className="grid gap-4">
-          <CodeBlock title="with Go 1.26+">
-            {`go install github.com/niklas-schmidt-dev/providerbench/cmd/providerbench@latest`}
-          </CodeBlock>
-          <CodeBlock title="or build from source">
-            {`git clone https://github.com/niklas-schmidt-dev/providerbench
+      <Step index="01" title="Install">
+        <CodeBlock title="with Go 1.27+">
+          {`go install github.com/niklas-schmidt-dev/providerbench/cmd/providerbench@latest`}
+        </CodeBlock>
+        <CodeBlock title="or build from source">
+          {`git clone https://github.com/niklas-schmidt-dev/providerbench
 cd providerbench && go build -o providerbench ./cmd/providerbench`}
-          </CodeBlock>
-        </div>
+        </CodeBlock>
+      </Step>
 
-        <SectionHead className="mt-8" eyebrow="02" title="Run" />
-        <div className="grid gap-4">
-          <CodeBlock title="full run with a shareable report">
-            {`providerbench run \\
+      <Step index="02" title="Run">
+        <CodeBlock title="full run with a shareable report">
+          {`providerbench run \\
   --provider hetzner --product cloud-vps --plan cax21 \\
   --region fsn1 --price 7.55 --env os_image=ubuntu-24.04 \\
   --json report.json`}
-          </CodeBlock>
-          <CodeBlock title="pick your tests, go faster">
-            {`providerbench run --quick -t cpu,steal     # 20 seconds: compute + consistency signals
+        </CodeBlock>
+        <CodeBlock title="pick your tests, go faster">
+          {`providerbench run --quick -t cpu,steal     # 20 seconds: compute + consistency signals
 providerbench run -t disk --dir /mnt/data  # benchmark a specific volume
 providerbench list                         # every available test
 providerbench system                       # detected hardware & virtualization`}
-          </CodeBlock>
-        </div>
-        <p className="max-w-2xl text-[13px] leading-[19px] text-muted-foreground">
-          For honest numbers: use a <em>fresh</em> instance, run at least twice at
-          different times of day, and run nothing else while measuring. The disk
-          test writes a 1 GiB file in the working directory (or{" "}
-          <code className="font-mono text-xs">--dir</code>) and removes it
-          afterwards.
+        </CodeBlock>
+        <p className="text-[13px] leading-[20px] text-pretty text-muted-foreground">
+          For honest numbers use a fresh instance, run at different times of day, and run nothing else while
+          measuring. The disk test writes a 1 GiB file in the working directory (or{" "}
+          <code className="font-mono text-[12px] text-foreground">--dir</code>) and removes it afterwards.
         </p>
+      </Step>
 
-        <SectionHead
-          className="mt-8"
-          eyebrow="03"
-          title="Extend it"
-          note="Every test implements one interface and registers itself. Adding a benchmark — PostgreSQL transactions, Redis ops, S3 upload speed, LLM time-to-first-token — is one file."
-        />
+      <Step index="03" title="Extend it">
+        <p className="text-[13px] leading-[20px] text-pretty text-muted-foreground">
+          Every test implements one interface and registers itself. Adding a benchmark (PostgreSQL transactions, Redis
+          ops, S3 upload speed) is one file.
+        </p>
         <CodeBlock title="internal/tests/mytest.go">
           {`package tests
 
@@ -88,52 +88,38 @@ func (myTest) Description() string { return "what this measures, one line" }
 
 func (myTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
     res := newResult("mytest")
-
     // ... measure something ...
     res.Add("my_metric", 42.0, "ops/s", true) // name, value, unit, higher-is-better
-
     finish(res)
     return res, ctx.Err()
 }`}
         </CodeBlock>
-        <p className="max-w-2xl text-[13px] leading-[19px] text-muted-foreground">
-          That&rsquo;s the whole contract. The test now shows up in{" "}
-          <code className="font-mono text-xs">providerbench list</code>, runs with
-          everything else, and lands in the JSON report.
+        <p className="text-[13px] leading-[20px] text-pretty text-muted-foreground">
+          That is the whole contract. The test shows up in{" "}
+          <code className="font-mono text-[12px] text-foreground">providerbench list</code>, runs with everything else
+          and lands in the JSON report.
         </p>
+      </Step>
 
-        <SectionHead className="mt-8" eyebrow="04" title="Submit your results" />
-        <div className="grid gap-4 md:grid-cols-3">
+      <Step index="04" title="Submit your results">
+        <ol className="flex flex-col">
           {(
             [
-              [
-                "Run",
-                "Benchmark with --json report.json and the --provider / --plan / --region / --price flags filled in.",
-              ],
-              [
-                "Add",
-                "Rename the file provider-plan.json and drop it into data/results/ in the repository.",
-              ],
-              [
-                "Open a PR",
-                "Reports carry full system info, so anyone can sanity-check them — or rerun the same plan to verify.",
-              ],
+              ["Run", "Benchmark 10 fresh hosts with 3 repeats each, with --campaign, --sample-index and --repeat-index set."],
+              ["Validate", "Run providerbench validate --manifest data/report-manifest.json data/results before you commit."],
+              ["Open a pull request", "Reports carry full system info, so anyone can check them or rerun the same plan."],
             ] as const
           ).map(([title, body], i) => (
-            <DsCard key={title} padding="18px">
-              <p className="pb-num text-[12px] font-medium text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
-              </p>
-              <p className="mt-2.5 text-[15px] font-semibold tracking-[-0.01em] text-foreground">
-                {title}
-              </p>
-              <p className="mt-1.5 text-[13px] leading-[19px] text-muted-foreground">
-                {body}
-              </p>
-            </DsCard>
+            <li key={title} className="grid grid-cols-[28px_1fr] gap-x-3 border-t border-border py-3 first:border-t-0 first:pt-0">
+              <span className="num text-[12px] leading-5 text-subtle">{i + 1}</span>
+              <span className="flex flex-col gap-0.5">
+                <span className="text-[14px] font-medium">{title}</span>
+                <span className="text-[13px] leading-[20px] text-muted-foreground">{body}</span>
+              </span>
+            </li>
           ))}
-        </div>
-      </div>
+        </ol>
+      </Step>
     </main>
   );
 }

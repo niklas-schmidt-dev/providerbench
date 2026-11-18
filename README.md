@@ -199,7 +199,7 @@ cmd/providerbench/   CLI entrypoint
 internal/            benchmark framework + built-in tests (zero dependencies)
 schema/              JSON schema for reports
 data/results/        the public dataset, one JSON file per run
-web/                 providerbench.dev (Next.js + local Base UI components)
+web/                 providerbench.dev (Next.js 16, monochrome UI, hand-drawn SVG charts)
 ```
 
 Benchmarks are organized in **categories** — `compute` is live; `ai`

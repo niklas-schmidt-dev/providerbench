@@ -1,10 +1,10 @@
-// Provider registry. Categorical color follows the entity, never its rank —
-// slots map onto the design system's categorical series palette (--series-*),
-// chosen for legibility on white at 2px stroke and 8px bar width.
-// New providers: add an entry with the next free slot color.
+// Provider registry. Categorical color follows the entity, never its rank:
+// every provider owns a `--provider-<slug>` token in globals.css, defined once
+// per theme and validated as one categorical palette. New providers add an
+// entry here and a token pair there.
 import type { CompanySlug } from "@/lib/companies";
 
-const SLOTS = ["#2b6cb0", "#b6741a", "#0f6e63", "#5f7a11", "#8e4585", "#4d5459"];
+const swatch = (slug: string) => `var(--provider-${slug})`;
 
 export type ProviderMeta = {
   slug: string;
@@ -24,7 +24,7 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     slug: "hetzner",
     company: "hetzner",
     name: "Hetzner",
-    color: SLOTS[0],
+    color: swatch("hetzner"),
     website: "https://www.hetzner.com",
     blurb: "German cloud & dedicated hosting, famously aggressive price/performance.",
   },
@@ -32,7 +32,7 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     slug: "netcup",
     company: "netcup",
     name: "Netcup",
-    color: SLOTS[1],
+    color: swatch("netcup"),
     website: "https://www.netcup.com",
     blurb: "Budget German VPS and root servers with generous specs on paper.",
   },
@@ -40,7 +40,7 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     slug: "ovh",
     company: "ovh",
     name: "OVH",
-    color: SLOTS[2],
+    color: swatch("ovh"),
     website: "https://www.ovhcloud.com",
     blurb: "Europe's largest hosting provider, VPS through bare metal.",
   },
@@ -48,7 +48,7 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     slug: "digitalocean",
     company: "digitalocean",
     name: "DigitalOcean",
-    color: SLOTS[3],
+    color: swatch("digitalocean"),
     website: "https://www.digitalocean.com",
     blurb: "Developer-focused cloud with simple droplets and predictable pricing.",
   },
@@ -56,7 +56,7 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     slug: "aws",
     company: "aws",
     name: "AWS",
-    color: SLOTS[4],
+    color: swatch("aws"),
     website: "https://aws.amazon.com",
     blurb: "EC2 — the default. Burstable instances make benchmarking interesting.",
   },
@@ -64,7 +64,7 @@ export const PROVIDERS: RegisteredProviderMeta[] = [
     slug: "vercel",
     company: "vercel",
     name: "Vercel",
-    color: SLOTS[5],
+    color: swatch("vercel"),
     website: "https://vercel.com",
     blurb: "Frontend cloud; measured here via Sandbox, its ephemeral microVM compute.",
   },
@@ -79,7 +79,7 @@ export function getProvider(slug: string): ProviderMeta {
       // neutral swatch until they get one — never a generated hue.
       slug,
       name: slug,
-      color: "#9aa3a8",
+      color: swatch("other"),
       website: "",
       blurb: "",
     }

@@ -1,32 +1,25 @@
 import type * as React from "react";
 
-import {
-  getCompany,
-  type CompanyLogoKind,
-  type CompanySlug,
-} from "@/lib/companies";
+import { getCompany, type CompanySlug } from "@/lib/companies";
 import { cn } from "@/lib/utils";
 
-const LOGO_SIZES = {
-  xs: {
-    mark: "size-6 rounded-md",
-    wordmark: "h-6 w-[4.5rem] rounded-md",
-  },
-  sm: {
-    mark: "size-8 rounded-lg",
-    wordmark: "h-8 w-24 rounded-lg",
-  },
-  md: {
-    mark: "size-11 rounded-xl",
-    wordmark: "h-11 w-32 rounded-xl",
-  },
-  lg: {
-    mark: "size-14 rounded-2xl",
-    wordmark: "h-14 w-40 rounded-2xl",
-  },
+const SIZES = {
+  xs: "size-3.5",
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-7",
+  xl: "size-10",
 } as const;
 
-export type CompanyLogoSize = keyof typeof LOGO_SIZES;
+const WORDMARK_SIZES = {
+  xs: "h-3 w-12",
+  sm: "h-3.5 w-14",
+  md: "h-4 w-16",
+  lg: "h-6 w-24",
+  xl: "h-8 w-32",
+} satisfies Record<keyof typeof SIZES, string>;
+
+export type CompanyLogoSize = keyof typeof SIZES;
 
 type CompanyLogoProps = Omit<React.ComponentProps<"span">, "children"> & {
   company: CompanySlug;
@@ -34,42 +27,34 @@ type CompanyLogoProps = Omit<React.ComponentProps<"span">, "children"> & {
   decorative?: boolean;
 };
 
-function sizeClass(size: CompanyLogoSize, kind: CompanyLogoKind) {
-  return LOGO_SIZES[size][kind];
-}
-
+/**
+ * A company mark drawn in the current text color. The SVG is used as a mask,
+ * so every logo reads as one monochrome ink on both themes — brand colors
+ * would compete with the data series.
+ */
 export function CompanyLogo({
   company: companySlug,
   size = "sm",
   decorative = false,
   className,
+  style,
   ...props
 }: CompanyLogoProps) {
   const company = getCompany(companySlug);
-  const darkSurface = company.logoSurface === "dark";
-
+  const mask = `url(${company.logoPath}) center / contain no-repeat`;
   return (
     <span
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : `${company.name} logo`}
+      aria-hidden={decorative || undefined}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center overflow-hidden border shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]",
-        darkSurface ? "border-white/10 bg-[#111318]" : "border-black/10 bg-[#f7f7f4]",
-        sizeClass(size, company.logoKind),
+        "inline-block shrink-0 bg-current",
+        company.logoKind === "wordmark" ? WORDMARK_SIZES[size] : SIZES[size],
         className,
       )}
+      style={{ mask, WebkitMask: mask, ...style }}
       {...props}
-    >
-      {/* SVGs live in public assets so the same source can be reused by metadata and static pages. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={company.logoPath}
-        alt={decorative ? "" : `${company.name} logo`}
-        aria-hidden={decorative || undefined}
-        className={cn(
-          "block object-contain",
-          company.logoKind === "wordmark" ? "h-[52%] w-[78%]" : "size-[68%]",
-        )}
-      />
-    </span>
+    />
   );
 }
 
@@ -78,32 +63,20 @@ type CompanyBadgeProps = Omit<React.ComponentProps<"span">, "children"> & {
   label?: string;
 };
 
-export function CompanyBadge({
-  company: companySlug,
-  label,
-  className,
-  ...props
-}: CompanyBadgeProps) {
+export function CompanyBadge({ company: companySlug, label, className, ...props }: CompanyBadgeProps) {
   const company = getCompany(companySlug);
   const visibleLabel = label ?? company.name;
-  const wordmarkRepeatsLabel =
-    company.logoKind === "wordmark" && visibleLabel === company.name;
-
+  const wordmarkOnly = company.logoKind === "wordmark" && visibleLabel === company.name;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-md border border-foreground/15 bg-card py-1 pr-2.5 text-[12px] text-foreground/85",
-        company.logoKind === "wordmark" ? "pl-1" : "pl-1.5",
+        "inline-flex h-8 items-center gap-2 rounded-md border border-border px-2.5 text-[13px] text-foreground",
         className,
       )}
       {...props}
     >
-      <CompanyLogo company={companySlug} size="xs" decorative />
-      {wordmarkRepeatsLabel ? (
-        <span className="sr-only">{visibleLabel}</span>
-      ) : (
-        <span>{visibleLabel}</span>
-      )}
+      <CompanyLogo company={companySlug} size="sm" decorative={!wordmarkOnly} />
+      {wordmarkOnly ? null : visibleLabel}
     </span>
   );
 }

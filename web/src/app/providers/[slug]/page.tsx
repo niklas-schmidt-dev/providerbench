@@ -3,58 +3,42 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
+import { formatEuro } from "@/components/charts/scales";
 import { CompanyLogo } from "@/components/company-logo";
-import { DsBadge } from "@/components/ds/badge";
-import { DsCard } from "@/components/ds/card";
-import { DeltaValue } from "@/components/ds/delta-value";
-import { MetricStat } from "@/components/ds/metric-stat";
-import { LocationComparison } from "@/components/location-comparison";
-import { PerformanceHistoryChart } from "@/components/performance-history-chart";
-import { PricePerformanceChart } from "@/components/price-performance-chart";
-import { SampleBanner } from "@/components/sample-banner";
+import { ProviderCharts } from "@/components/provider/provider-charts";
+import { Badge } from "@/components/reui/badge";
 import {
   aggregateRuns,
   bestGroupPerProvider,
   bestRegionPerPlan,
   currentScoredGroups,
   metricSummary,
-  scoreGroups,
   type ScoredGroup,
-  type TestSummary,
 } from "@/lib/aggregate";
-import { getCategory } from "@/lib/categories";
 import { allSample, loadRuns, runsForProvider } from "@/lib/data";
 import { formatMeasurementWindow } from "@/lib/dates";
 import { formatMetricValue } from "@/lib/format";
+import { getMetricDef } from "@/lib/metrics";
+import { rawReportUrl, sortPlans, sourceUrl, toPlanDatum } from "@/lib/plans";
 import { getProvider, PROVIDERS } from "@/lib/providers";
+import { cn } from "@/lib/utils";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
   const withRuns = new Set(loadRuns().map((run) => run.provider.name));
-  return PROVIDERS.filter((provider) => withRuns.has(provider.slug)).map(
-    (provider) => ({ slug: provider.slug }),
-  );
+  return PROVIDERS.filter((provider) => withRuns.has(provider.slug)).map((provider) => ({ slug: provider.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const provider = getProvider((await params).slug);
   return {
     title: provider.name,
-    description: `Aggregated ProviderBench results for ${provider.name}.`,
+    description: `Aggregated ProviderBench results for ${provider.name}: every plan, region and raw report.`,
   };
 }
 
-function bestOf(
-  peers: ScoredGroup[],
-  test: string,
-  metric: string,
-  higherIsBetter: boolean,
-) {
+function bestOf(peers: ScoredGroup[], test: string, metric: string, higherIsBetter: boolean) {
   const values = peers.flatMap((group) => {
     const value = metricSummary(group, test, metric)?.distribution.p50;
     return value === undefined ? [] : [value];
@@ -63,381 +47,291 @@ function bestOf(
   return higherIsBetter ? Math.max(...values) : Math.min(...values);
 }
 
-function TestCard({ result, peers }: { result: TestSummary; peers: ScoredGroup[] }) {
+function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <DsCard
-      flush
-      title={
-        <a
-          href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/internal/tests/compute/${result.test}.go`}
-          className="font-mono text-[14px] hover:underline"
-          title="benchmark source code"
-        >
-          {result.test}
-        </a>
-      }
-      actions={
-        <span className="pb-label text-[10px] text-(--text-faint)">
-          measured {formatMeasurementWindow(result.measuredFrom, result.measuredTo)}
-        </span>
-      }
-      footer={
-        result.notes.length > 0 ? (
-          <span className="text-[11.5px] leading-[17px]">{result.notes.join(" · ")}</span>
-        ) : undefined
-      }
-    >
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[13px]">
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-[12px] text-subtle">{label}</dt>
+      <dd className="text-[20px] leading-7 font-medium tracking-tight">{value}</dd>
+      {note && <dd className="text-[12px] text-subtle">{note}</dd>}
+    </div>
+  );
+}
+
+function GroupDetail({ group, peers }: { group: ScoredGroup; peers: ScoredGroup[] }) {
+  const facts = [
+    group.provider.tier,
+    group.provider.product,
+    group.provider.region,
+    `${group.system.cpu_cores} vCPU`,
+    group.system.mem_total_mb ? `${Math.round(group.system.mem_total_mb / 1024)} GB RAM` : undefined,
+    group.provider.price_eur_month ? `${formatEuro(group.provider.price_eur_month)} / mo` : undefined,
+  ].filter(Boolean);
+
+  return (
+    <section aria-labelledby={`plan-${group.id}`} className="border-b border-border px-4 py-7 sm:px-7">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h3 id={`plan-${group.id}`} className="text-base font-medium tracking-tight">
+          {group.provider.plan}
+          {group.provider.region && <span className="ml-2 font-normal text-subtle">{group.provider.region}</span>}
+        </h3>
+        {group.rankEligible ? (
+          <Badge variant="secondary">Ranked</Badge>
+        ) : (
+          <Badge variant="outline" className="text-muted-foreground">
+            Provisional
+          </Badge>
+        )}
+        <span className="text-[12px] text-subtle">{facts.join(" · ")}</span>
+      </div>
+      <p className="mt-1.5 text-[12px] text-subtle">
+        Score <span className="num text-foreground">{group.performanceScore.toFixed(1)}</span>
+        {group.valueIndex !== undefined && (
+          <>
+            {" · "}value <span className="num text-foreground">{group.valueIndex.toFixed(0)}</span>
+          </>
+        )}
+        {" · "}
+        {group.hostCount} fresh hosts · {group.runCount} raw runs · {group.protocolVersion} · measured{" "}
+        {formatMeasurementWindow(group.measuredFrom, group.measuredTo)}
+      </p>
+
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse text-[13px]">
           <thead>
-            <tr>
-              {["Metric", "P50", "Mean", "P10", "P90", "P99", "vs best"].map((h, i) => (
+            <tr className="text-[12px] text-subtle">
+              {["Metric", "P50", "P10", "P90", "P99", "vs best"].map((heading, i) => (
                 <th
-                  key={h}
-                  className="pb-label h-8 border-b border-(--border-hairline) px-(--pad-cell-x) whitespace-nowrap text-muted-foreground"
-                  style={{ textAlign: i === 0 ? "left" : "right" }}
+                  key={heading}
+                  scope="col"
+                  className={cn("h-8 border-b border-border font-normal", i === 0 ? "text-left" : "text-right")}
                 >
-                  {h}
+                  {heading}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {result.metrics.map((metric) => {
-              const distribution = metric.distribution;
-              const best = bestOf(peers, result.test, metric.name, metric.higherIsBetter);
-              const isBest = best !== undefined && distribution.p50 === best;
-              const gap =
-                best === undefined || best === 0 || isBest
-                  ? 0
-                  : metric.higherIsBetter
-                    ? (1 - distribution.p50 / best) * 100
-                    : (distribution.p50 / best - 1) * 100;
-              return (
-                <tr
-                  key={metric.name}
-                  className="border-b border-(--border-hairline) last:border-b-0"
-                >
-                  <td className="px-(--pad-cell-x) py-2 font-mono text-[12px] text-muted-foreground">
-                    {metric.name}
-                  </td>
-                  {[
-                    distribution.p50,
-                    distribution.mean,
-                    distribution.p10,
-                    distribution.p90,
-                    distribution.p99,
-                  ].map((value, index) => (
-                    <td
-                      key={index}
-                      className="pb-num px-(--pad-cell-x) py-2 text-right text-[12px] text-foreground"
-                    >
-                      {formatMetricValue(value)}
-                      {index === 0 && (
-                        <span className="ml-1 text-(--text-faint)">{metric.unit}</span>
+          {group.results.map((result) => (
+            <tbody key={result.test}>
+              <tr>
+                <th colSpan={6} scope="rowgroup" className="pt-4 pb-1 text-left text-[12px] font-medium">
+                  <a
+                    href={sourceUrl(group.category, result.test)}
+                    className="font-mono underline decoration-border-strong underline-offset-3 transition-colors hover:decoration-foreground"
+                  >
+                    {result.test}
+                  </a>
+                  {result.notes.length > 0 && (
+                    <span className="ml-2 font-normal text-subtle">{result.notes.join(" · ")}</span>
+                  )}
+                </th>
+              </tr>
+              {result.metrics.map((metric) => {
+                const d = metric.distribution;
+                const best = bestOf(peers, result.test, metric.name, metric.higherIsBetter);
+                const isBest = best !== undefined && d.p50 === best;
+                const gap =
+                  best === undefined || best === 0 || isBest
+                    ? 0
+                    : metric.higherIsBetter
+                      ? (d.p50 / best - 1) * 100
+                      : (best / d.p50 - 1) * 100;
+                const title = getMetricDef(result.test, metric.name)?.title;
+                return (
+                  <tr key={metric.name} className="border-b border-border last:border-b-0">
+                    <td className="py-1.5 pr-4 text-muted-foreground">{title ?? metric.name}</td>
+                    {[d.p50, d.p10, d.p90, d.p99].map((value, index) => (
+                      <td key={index} className={cn("num py-1.5 text-right", index === 0 ? "font-medium" : "text-muted-foreground")}>
+                        {formatMetricValue(value)}
+                        {index === 0 && <span className="ml-1 text-[11px] font-normal text-faint">{metric.unit}</span>}
+                      </td>
+                    ))}
+                    <td className="num py-1.5 text-right">
+                      {isBest ? (
+                        <span className="font-medium">best</span>
+                      ) : best !== undefined ? (
+                        <span className="text-muted-foreground">{gap.toFixed(0)}%</span>
+                      ) : (
+                        <span className="text-faint">—</span>
                       )}
                     </td>
-                  ))}
-                  <td className="px-(--pad-cell-x) py-2 text-right whitespace-nowrap">
-                    {isBest ? (
-                      <DsBadge tone="pass">best</DsBadge>
-                    ) : best !== undefined ? (
-                      <DeltaValue value={-gap} decimals={0} showArrow={false} />
-                    ) : (
-                      <span className="text-(--text-faint)">—</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+                  </tr>
+                );
+              })}
+            </tbody>
+          ))}
         </table>
       </div>
-    </DsCard>
+    </section>
   );
 }
 
-export default async function ProviderPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ProviderPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const provider = getProvider(slug);
   const rawRuns = runsForProvider(slug);
   if (rawRuns.length === 0) notFound();
 
-  const aggregated = aggregateRuns(loadRuns());
-  // Current plan cards use the same current-only normalization as the main
-  // comparison. History gets its own stable all-cohort normalization.
-  const allGroups = currentScoredGroups(aggregated);
-  const allCohorts = scoreGroups(aggregated);
-  const groups = allGroups.filter((group) => group.provider.name === slug);
-  const history = allCohorts.filter((group) => group.provider.name === slug);
+  const allGroups = currentScoredGroups(aggregateRuns(loadRuns()));
+  const groups = allGroups
+    .filter((group) => group.provider.name === slug)
+    .sort(
+      (a, b) =>
+        (a.provider.price_eur_month ?? Infinity) - (b.provider.price_eur_month ?? Infinity) ||
+        (a.provider.region ?? "").localeCompare(b.provider.region ?? ""),
+    );
   const planLeaders = bestRegionPerPlan(groups);
   const globalPlanLeaders = bestRegionPerPlan(allGroups);
-  const observationCount = groups.reduce((sum, group) => sum + group.hostCount, 0);
-  const auditRuns = rawRuns.filter(
-    (run) =>
-      !run.manifest.rank_eligible ||
-      run.results.some((result) => Boolean(result.error)),
-  );
+  const order = PROVIDERS.map((p) => p.slug);
+  const plans = sortPlans(planLeaders.map(toPlanDatum), order);
+  const regions = sortPlans(groups.map(toPlanDatum), order);
 
   const providerLeaders = bestGroupPerProvider(allGroups)
     .filter((g) => g.rankEligible)
     .sort((a, b) => b.performanceScore - a.performanceScore);
   const rank = providerLeaders.findIndex((g) => g.provider.name === slug) + 1;
-  const bestGroup = [...groups].sort(
-    (a, b) => b.performanceScore - a.performanceScore,
-  )[0];
-  const minPrice = Math.min(
-    ...groups.flatMap((g) => (g.provider.price_eur_month ? [g.provider.price_eur_month] : [])),
+  const best = [...groups].sort((a, b) => b.performanceScore - a.performanceScore)[0];
+  const prices = groups.flatMap((g) => (g.provider.price_eur_month ? [g.provider.price_eur_month] : []));
+  const hosts = groups.reduce((sum, group) => sum + group.hostCount, 0);
+  const auditRuns = rawRuns.filter(
+    (run) => !run.manifest.rank_eligible || run.results.some((result) => Boolean(result.error)),
   );
-  const sinceYear = rawRuns
-    .map((r) => new Date(r.created_at).getUTCFullYear())
-    .sort()[0];
 
   return (
-    <main>
-      {/* ——— Identity hero ——— */}
-      <section className="border-b border-(--border-hairline) bg-card">
-        <div className="mx-auto max-w-(--content-max) px-4 pt-6 sm:px-8">
-          <div className="mb-3.5 text-[12.5px] text-(--text-faint)">
-            <Link href="/providers" className="hover:text-foreground">
-              Providers
-            </Link>{" "}
-            / {provider.name}
-          </div>
-          <div className="flex flex-wrap items-start gap-6">
-            <div className="min-w-[280px] flex-1">
-              <div className="flex flex-wrap items-center gap-3">
-                {provider.company && (
-                  <CompanyLogo company={provider.company} size="sm" decorative />
-                )}
-                <h1 className="text-[34px] leading-[40px] font-semibold tracking-[-0.025em] text-foreground sm:text-[40px] sm:leading-[44px]">
-                  {provider.name}
-                </h1>
-                <span
-                  aria-hidden
-                  className="size-2.5 rounded-[3px]"
-                  style={{ background: provider.color }}
-                />
-                {sinceYear && (
-                  <DsBadge tone="pass" dot>
-                    Measured since {sinceYear}
-                  </DsBadge>
-                )}
-                {rank > 0 && <DsBadge tone="neutral">#{rank} of {providerLeaders.length} on the composite</DsBadge>}
-              </div>
-              <p className="mt-2.5 max-w-[620px] text-[15px] leading-[23px] text-muted-foreground">
-                {provider.blurb}
-              </p>
+    <main id="main">
+      <header className="border-b border-border px-4 pt-6 pb-7 sm:px-7">
+        <p className="text-[12px] text-subtle">
+          <Link href="/providers" className="transition-colors hover:text-foreground">
+            Providers
+          </Link>{" "}
+          / {provider.name}
+        </p>
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-6">
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex items-center gap-3">
+              {provider.company && <CompanyLogo company={provider.company} size="lg" decorative />}
+              <h1 className="text-[32px] leading-[38px] font-medium tracking-[-0.03em]">{provider.name}</h1>
+              <span aria-hidden className="size-2.5 rounded-full" style={{ background: provider.color }} />
             </div>
-            <div className="flex flex-wrap gap-2 pt-1.5">
-              {provider.website && (
-                <a
-                  href={provider.website}
-                  className="inline-flex h-[34px] items-center gap-1.5 rounded-(--radius-sm) border border-(--border-strong) bg-card px-3.5 text-[14px] font-medium text-foreground shadow-(--shadow-xs) transition-colors hover:bg-(--surface-hover)"
-                >
-                  {provider.website.replace("https://", "")}
-                  <ArrowUpRight className="size-3.5 text-(--text-faint)" />
-                </a>
-              )}
-              <Link
-                href="/compute"
-                className="inline-flex h-[34px] items-center rounded-(--radius-sm) bg-(--action-solid-bg) px-3.5 text-[14px] font-medium text-(--action-solid-fg) transition-colors hover:bg-(--action-solid-bg-hover)"
-              >
-                Compare in Compute
-              </Link>
-            </div>
+            <p className="max-w-[62ch] text-[14px] leading-[22px] text-pretty text-muted-foreground">{provider.blurb}</p>
           </div>
-          <div className="grid grid-cols-2 gap-6 py-6 sm:grid-cols-3 lg:grid-cols-6">
-            <MetricStat
-              label="Best score"
-              value={bestGroup ? bestGroup.performanceScore.toFixed(1) : "—"}
-              accent={provider.color}
-              note={bestGroup?.provider.plan ?? undefined}
-            />
-            <MetricStat
-              label="Value index"
-              value={bestGroup?.valueIndex?.toFixed(1) ?? "—"}
-            />
-            <MetricStat label="Fresh hosts" value={String(observationCount)} />
-            <MetricStat label="Raw runs" value={String(rawRuns.length)} />
-            <MetricStat label="Plans measured" value={String(planLeaders.length)} />
-            <MetricStat
-              label="From € / mo"
-              value={Number.isFinite(minPrice) ? minPrice.toFixed(2) : "—"}
-              note="net, excl. VAT"
-            />
+          <div className="flex items-center gap-4 text-[13px]">
+            {provider.website && (
+              <a href={provider.website} className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground">
+                {provider.website.replace("https://", "")}
+                <ArrowUpRight aria-hidden className="size-3.5" />
+              </a>
+            )}
+            <Link
+              href="/"
+              className="flex h-8 items-center rounded-md bg-foreground px-3 font-medium text-background transition-opacity hover:opacity-85"
+            >
+              Compare all providers
+            </Link>
           </div>
         </div>
-      </section>
-
-      <div className="mx-auto grid max-w-(--content-max) gap-6 px-4 pt-8 pb-4 sm:px-8">
-        {allSample(rawRuns) && <SampleBanner />}
-
-        {auditRuns.length > 0 && (
-          <DsCard
-            title="Audit reports"
-            subtitle="Preserved for traceability, but excluded from ranking by the validator-owned manifest."
-          >
-            <ul className="grid gap-2 pt-1 text-[12.5px]">
-              {auditRuns.map((run) => {
-                const failures = run.results
-                  .filter((result) => result.error)
-                  .map((result) => `${result.test}: ${result.error}`);
-                const reasons = [
-                  ...(run.manifest.eligibility_reasons ?? []),
-                  ...failures,
-                ];
-                return (
-                  <li key={run.slug} className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <DsBadge tone="warn">excluded</DsBadge>
-                    <a
-                      href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/data/results/${run.slug}.json`}
-                      className="border-b border-(--border-strong) font-mono text-[12px] text-foreground hover:border-foreground"
-                    >
-                      {run.slug}.json
-                    </a>
-                    <span className="text-muted-foreground">
-                      {reasons.join(" · ") || "not ranking-eligible"}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </DsCard>
+        <dl className="mt-7 flex flex-wrap gap-x-10 gap-y-4">
+          <Stat
+            label="Best score"
+            value={best ? best.performanceScore.toFixed(1) : "—"}
+            note={rank > 0 ? `#${rank} of ${providerLeaders.length} providers` : undefined}
+          />
+          <Stat label="Value index" value={best?.valueIndex?.toFixed(0) ?? "—"} note={best?.provider.plan} />
+          <Stat label="Plans" value={String(planLeaders.length)} note={`${groups.length} region cohorts`} />
+          <Stat label="Fresh hosts" value={String(hosts)} />
+          <Stat label="Raw runs" value={String(rawRuns.length)} />
+          <Stat label="From" value={prices.length ? `${formatEuro(Math.min(...prices))}/mo` : "—"} note="net, excl. VAT" />
+        </dl>
+        {allSample(rawRuns) && (
+          <p className="mt-5 text-[13px] text-muted-foreground">Sample data: illustrative, not measurements.</p>
         )}
+      </header>
 
-        <PricePerformanceChart groups={planLeaders} />
+      {auditRuns.length > 0 && (
+        <section aria-labelledby="audit-title" className="border-b border-border px-4 py-6 sm:px-7">
+          <h2 id="audit-title" className="text-base font-medium tracking-tight">
+            Audit reports
+          </h2>
+          <p className="mt-0.5 text-[13px] text-muted-foreground">
+            Kept for traceability and excluded from ranking by the validator-owned manifest.
+          </p>
+          <ul className="mt-3 flex flex-col gap-1.5 text-[12px]">
+            {auditRuns.map((run) => {
+              const reasons = [
+                ...(run.manifest.eligibility_reasons ?? []),
+                ...run.results.filter((r) => r.error).map((r) => `${r.test}: ${r.error}`),
+              ];
+              return (
+                <li key={run.slug} className="flex flex-wrap gap-x-3">
+                  <a href={rawReportUrl(`${run.slug}.json`)} className="font-mono underline decoration-border-strong underline-offset-3 hover:decoration-foreground">
+                    {run.slug}.json
+                  </a>
+                  <span className="text-subtle">{reasons.join(" · ") || "not ranking-eligible"}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
-        <PerformanceHistoryChart groups={history} />
+      <ProviderCharts plans={plans} regions={regions} />
 
-        <LocationComparison groups={groups} />
-
-        {groups.map((group) => {
-          const category = getCategory(group.category);
-          const peers = globalPlanLeaders.filter(
-            (peer) => peer.category === group.category,
-          );
-          return (
-            <section key={group.id} className="mt-8">
-              <div className="flex flex-wrap items-center gap-2.5 border-t border-(--border-hairline) pt-5">
-                <h2 className="text-[22px] leading-7 font-semibold tracking-[-0.015em] text-foreground">
-                  {group.provider.plan}
-                </h2>
-                {group.provider.tier && <DsBadge tone="neutral">{group.provider.tier}</DsBadge>}
-                {group.provider.product && (
-                  <DsBadge tone="neutral">{group.provider.product}</DsBadge>
-                )}
-                <DsBadge tone="outline" mono>
-                  {group.provider.region}
-                </DsBadge>
-                <DsBadge tone="info" mono>
-                  measured {formatMeasurementWindow(group.measuredFrom, group.measuredTo)}
-                </DsBadge>
-                <DsBadge tone="outline" mono>
-                  {group.protocolVersion} · {group.profile}
-                </DsBadge>
-                {group.provider.price_eur_month ? (
-                  <DsBadge tone="outline" mono>
-                    €{group.provider.price_eur_month.toFixed(2)}/mo
-                    {group.provider.price_eur_hour
-                      ? ` · €${group.provider.price_eur_hour.toFixed(4)}/h`
-                      : ""}
-                  </DsBadge>
-                ) : null}
-                <DsBadge tone={group.rankEligible ? "pass" : "warn"} dot>
-                  {group.rankEligible ? "ranked" : "provisional"} · {group.hostCount}{" "}
-                  {group.hostCount === 1 ? "host" : "hosts"}
-                </DsBadge>
-                <Link
-                  href={`/${group.category}`}
-                  className="ml-auto text-[13px] font-medium text-foreground hover:underline"
-                >
-                  Compare in {category?.name ?? group.category} →
-                </Link>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-(--border-hairline) bg-(--border-hairline) sm:grid-cols-4">
-                {(
-                  [
-                    ["Score", group.performanceScore.toFixed(1)],
-                    ["Value index", group.valueIndex?.toFixed(1) ?? "—"],
-                    ["Independent hosts", String(group.hostCount)],
-                    ["Raw runs", String(group.runCount)],
-                  ] as const
-                ).map(([label, value]) => (
-                  <div key={label} className="bg-card px-4 py-3">
-                    <p className="pb-label text-[10px] text-muted-foreground">{label}</p>
-                    <p className="pb-num mt-1.5 text-[18px] text-foreground">{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-3 rounded-md border border-(--border-hairline) bg-card px-5 py-4 shadow-(--shadow-xs)">
-                <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
-                  {[
-                    ["CPU", group.system.cpu_model || "—"],
-                    ["Cores", String(group.system.cpu_cores)],
-                    [
-                      "Memory",
-                      group.system.mem_total_mb
-                        ? `${(group.system.mem_total_mb / 1024).toFixed(0)} GiB`
-                        : "—",
-                    ],
-                    ["OS / arch", `${group.system.os}/${group.system.arch}`],
-                    ["Kernel", group.system.kernel || "—"],
-                    ["CLI", group.representative.cli_version],
-                    ...Object.entries(group.environment ?? {}),
-                  ].map(([label, value]) => (
-                    <div key={label}>
-                      <dt className="pb-label text-[10px] text-muted-foreground">{label}</dt>
-                      <dd
-                        className="mt-1 truncate font-mono text-[12px] text-foreground"
-                        title={value}
-                      >
-                        {value}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-
-              <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
-                {group.results.map((result) => (
-                  <TestCard key={result.test} result={result} peers={peers} />
-                ))}
-              </div>
-
-              <details className="group mt-3">
-                <summary className="pb-label flex cursor-pointer items-center gap-2 text-[10.5px] text-muted-foreground transition-colors select-none hover:text-foreground [&::-webkit-details-marker]:hidden">
-                  <span
-                    aria-hidden
-                    className="inline-block transition-transform group-open:rotate-90"
-                  >
-                    ▸
-                  </span>
-                  {group.runs.length} raw reports · P99 is a descriptive observed-tail
-                  estimate for the fixed {group.hostCount}-host standard profile
-                </summary>
-                <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5 border-l border-(--border-hairline) pl-4 font-mono text-[10.5px]">
-                  {group.runs.map((run) => (
-                    <a
-                      key={run.slug}
-                      href={`https://github.com/niklas-schmidt-dev/providerbench/blob/main/data/results/${run.slug}.json`}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      {run.slug}.json
-                    </a>
-                  ))}
-                </div>
-              </details>
-            </section>
-          );
-        })}
+      <div className="px-4 pt-8 sm:px-7">
+        <h2 className="text-base font-medium tracking-tight">Every cohort</h2>
+        <p className="mt-0.5 max-w-[68ch] text-[13px] text-pretty text-muted-foreground">
+          Cross-host distributions per plan and region. &ldquo;vs best&rdquo; compares the P50 with the best plan on the
+          bench.
+        </p>
       </div>
+      {groups.map((group) => (
+        <GroupDetail
+          key={group.id}
+          group={group}
+          peers={globalPlanLeaders.filter((peer) => peer.category === group.category)}
+        />
+      ))}
+
+      <section aria-labelledby="evidence-title" className="px-4 py-7 sm:px-7">
+        <h2 id="evidence-title" className="text-base font-medium tracking-tight">
+          Evidence
+        </h2>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">
+          Every number above comes from these dated raw reports. Rerun the same plan and open a pull request to dispute
+          one.
+        </p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[640px] border-collapse text-[13px]">
+            <thead>
+              <tr className="text-[12px] text-subtle">
+                {["Plan", "Region", "Campaign", "Protocol", "Hosts", "Runs", "First report"].map((heading, i) => (
+                  <th key={heading} scope="col" className={cn("h-8 border-b border-border font-normal", i >= 4 && i <= 5 ? "text-right" : "text-left")}>
+                    {heading}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <tr key={group.id} className="border-b border-border last:border-b-0">
+                  <td className="py-2 pr-4">{group.provider.plan}</td>
+                  <td className="py-2 pr-4 text-muted-foreground">{group.provider.region ?? "—"}</td>
+                  <td className="py-2 pr-4 font-mono text-[12px] text-muted-foreground">{group.cohortId}</td>
+                  <td className="py-2 pr-4 font-mono text-[12px] text-muted-foreground">{group.protocolVersion}</td>
+                  <td className="num py-2 pr-4 text-right">{group.hostCount}</td>
+                  <td className="num py-2 pr-4 text-right">{group.runCount}</td>
+                  <td className="py-2">
+                    <a
+                      href={rawReportUrl(`${group.runs[0].slug}.json`)}
+                      className="font-mono text-[12px] underline decoration-border-strong underline-offset-3 hover:decoration-foreground"
+                    >
+                      {group.runs[0].slug}.json
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   );
 }
