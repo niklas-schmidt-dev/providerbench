@@ -4,7 +4,12 @@ import { CompanyLogo } from "@/components/company-logo";
 import type { PlanDatum } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
-/** Hover card positioned in chart pixels; flips left near the right edge. */
+const TOOLTIP_WIDTH = 220;
+
+/**
+ * Hover card positioned in chart pixels: right of the mark when it fits,
+ * otherwise left of it, always clamped inside the chart.
+ */
 export function ChartTooltip({
   x,
   y,
@@ -16,19 +21,16 @@ export function ChartTooltip({
   width: number;
   children: ReactNode;
 }) {
-  const flip = x > width - 240;
+  const w = Math.min(TOOLTIP_WIDTH, width);
+  const left = x + 14 + w <= width ? x + 14 : Math.max(0, Math.min(x - 14 - w, width - w));
   return (
     <div
       role="status"
       className={cn(
-        "pointer-events-none absolute z-10 w-max max-w-[240px] rounded-md border border-border-strong bg-popover px-3 py-2.5 text-[12px] leading-[18px] text-popover-foreground shadow-[0_8px_24px_rgb(0_0_0/0.18)]",
+        "pointer-events-none absolute z-10 rounded-md border border-border-strong bg-popover px-3 py-2.5 text-[12px] leading-[18px] text-popover-foreground shadow-[0_8px_24px_rgb(0_0_0/0.18)]",
         "animate-in fade-in-0 duration-150",
       )}
-      style={{
-        left: flip ? undefined : x + 14,
-        right: flip ? width - x + 14 : undefined,
-        top: Math.max(0, y - 20),
-      }}
+      style={{ left, width: w, top: Math.max(0, y - 20) }}
     >
       {children}
     </div>

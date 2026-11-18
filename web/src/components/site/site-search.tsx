@@ -28,6 +28,15 @@ export function SiteSearch({ providersWithRuns }: { providersWithRuns: string[] 
 
   const items = useMemo<MorphicCommandItem[]>(() => {
     const go = (href: string) => () => router.push(href);
+    // Dashboard targets: on "/" set the hash natively so the browser scrolls
+    // and listeners (metric deep links) see a hashchange.
+    const goHash = (anchor: string) => () => {
+      if (window.location.pathname !== "/") return router.push(`/#${anchor}`);
+      if (window.location.hash !== `#${anchor}`) return void (window.location.hash = anchor);
+      // Same fragment: scroll and re-announce it so the metric is selected again.
+      document.getElementById(anchor)?.scrollIntoView();
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    };
     const withRuns = new Set(providersWithRuns);
     return [
       { id: "page-home", label: "Compute dashboard", group: "Pages", icon: LayoutDashboard, onSelect: go("/") },
@@ -54,7 +63,7 @@ export function SiteSearch({ providersWithRuns }: { providersWithRuns: string[] 
         group: "Charts",
         icon: LineChart,
         keywords: view.keywords,
-        onSelect: go(`/#${view.id}`),
+        onSelect: goHash(view.id),
       })),
       ...METRICS.map((m) => ({
         id: `metric-${m.test}-${m.metric}`,
@@ -63,7 +72,7 @@ export function SiteSearch({ providersWithRuns }: { providersWithRuns: string[] 
         group: "Benchmarks",
         icon: BarChart3,
         keywords: [m.test, m.metric],
-        onSelect: go(`/#${m.test}`),
+        onSelect: goHash(`${m.test}-${m.metric}`),
       })),
       ...PROVIDERS.map((p) => ({
         id: `provider-${p.slug}`,

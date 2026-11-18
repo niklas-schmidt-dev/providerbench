@@ -70,8 +70,8 @@ providerbench system                       # detected hardware & virtualization`
           Every test implements one interface and registers itself. Adding a benchmark (PostgreSQL transactions, Redis
           ops, S3 upload speed) is one file.
         </p>
-        <CodeBlock title="internal/tests/mytest.go">
-          {`package tests
+        <CodeBlock title="internal/tests/compute/mytest.go">
+          {`package compute
 
 import (
     "context"
@@ -105,7 +105,7 @@ func (myTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
         <ol className="flex flex-col">
           {(
             [
-              ["Run", "Benchmark 10 fresh hosts with 3 repeats each, with --campaign, --sample-index and --repeat-index set."],
+              ["Run", "Benchmark 10 fresh hosts with 3 repeats each, with --campaign, --sample-index, --repeat-index and --fresh-instance set. CONTRIBUTING.md has the full command."],
               ["Validate", "Run providerbench validate --manifest data/report-manifest.json data/results before you commit."],
               ["Open a pull request", "Reports carry full system info, so anyone can check them or rerun the same plan."],
             ] as const

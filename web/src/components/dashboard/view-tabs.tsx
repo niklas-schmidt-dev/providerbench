@@ -1,7 +1,7 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,18 @@ export function ViewTabs({
   planSummary: string;
 }) {
   const [active, setActive] = useState(views[0]?.id);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Keep the active tab inside the horizontally scrolling strip on narrow screens.
+  useEffect(() => {
+    const nav = navRef.current;
+    const tab = nav?.querySelector<HTMLElement>('[aria-current="location"]');
+    if (!nav || !tab) return;
+    const left = tab.offsetLeft; // the nav is the tab's offsetParent (relative)
+    if (left < nav.scrollLeft || left + tab.offsetWidth > nav.scrollLeft + nav.clientWidth) {
+      nav.scrollTo({ left: left - (nav.clientWidth - tab.offsetWidth) / 2, behavior: "smooth" });
+    }
+  }, [active]);
 
   // Scroll spy: the active view is the last section whose top has passed
   // the sticky header and tab bar.
@@ -55,7 +67,7 @@ export function ViewTabs({
 
   return (
     <div className="sticky top-(--header-height) z-30 flex items-center border-b border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/80">
-      <nav aria-label="Chart views" className="no-scrollbar flex min-w-0 flex-1 gap-6 overflow-x-auto px-4 sm:px-7">
+      <nav ref={navRef} aria-label="Chart views" className="no-scrollbar relative flex min-w-0 flex-1 gap-6 overflow-x-auto px-4 sm:px-7">
         {views.map((view) => (
           <a
             key={view.id}
@@ -76,6 +88,8 @@ export function ViewTabs({
       <button
         type="button"
         onClick={onOpenPlans}
+        aria-controls="plan-sidebar"
+        aria-haspopup="dialog"
         className="flex h-11 shrink-0 items-center gap-2 border-l border-border px-4 text-[13px] text-muted-foreground transition-colors hover:text-foreground lg:hidden"
       >
         <SlidersHorizontal aria-hidden className="size-3.5" />

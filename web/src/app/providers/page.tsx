@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-import { formatEuro } from "@/components/charts/scales";
 import { CompanyLogo } from "@/components/company-logo";
 import { aggregateRuns, bestRegionPerPlan, currentScoredGroups } from "@/lib/aggregate";
 import { loadRuns } from "@/lib/data";
+import { priceLabel } from "@/lib/plans";
 import { PROVIDERS } from "@/lib/providers";
 
 export const metadata: Metadata = {
@@ -18,13 +18,15 @@ export default function ProvidersPage() {
   const plans = bestRegionPerPlan(currentScoredGroups(aggregateRuns(runs)));
   const rows = PROVIDERS.map((provider) => {
     const own = plans.filter((plan) => plan.provider.name === provider.slug);
-    const prices = own.flatMap((plan) => (plan.provider.price_eur_month ? [plan.provider.price_eur_month] : []));
+    const cheapest = own
+      .filter((plan) => plan.provider.price_eur_month)
+      .sort((a, b) => a.provider.price_eur_month! - b.provider.price_eur_month!)[0];
     return {
       provider,
       plans: own.length,
       runs: runs.filter((run) => run.provider.name === provider.slug).length,
       best: own.length ? Math.max(...own.map((plan) => plan.performanceScore)) : undefined,
-      from: prices.length ? Math.min(...prices) : undefined,
+      from: cheapest ? priceLabel({ priceMonth: cheapest.provider.price_eur_month, tier: cheapest.provider.tier }) : undefined,
     };
   }).sort((a, b) => (b.best ?? -1) - (a.best ?? -1));
 
@@ -66,7 +68,7 @@ export default function ProvidersPage() {
                   </div>
                   <div>
                     <dt className="text-[12px] text-subtle">From</dt>
-                    <dd className="num">{from !== undefined ? `${formatEuro(from)}/mo` : "—"}</dd>
+                    <dd className="num">{from ? `${from}/mo` : "—"}</dd>
                   </div>
                 </dl>
               ) : (

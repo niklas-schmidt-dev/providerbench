@@ -1,6 +1,7 @@
 // Server-side shaping: aggregated cohorts -> plain, serializable records the
 // client charts and tables consume. Charts never see Run objects or raw JSON.
 
+import { formatEuro } from "@/components/charts/scales";
 import type { ScoredGroup } from "@/lib/aggregate";
 import type { CompanySlug } from "@/lib/companies";
 import { getProvider } from "@/lib/providers";
@@ -41,7 +42,6 @@ export type PlanDatum = {
   profile: string;
   measuredFrom: string;
   measuredTo: string;
-  rawFiles: string[];
   /** Keyed `${test}.${metric}`. */
   metrics: Record<string, MetricStat>;
 };
@@ -95,9 +95,17 @@ export function toPlanDatum(group: ScoredGroup): PlanDatum {
     profile: group.profile,
     measuredFrom: group.measuredFrom,
     measuredTo: group.measuredTo,
-    rawFiles: group.runs.map((run) => `${run.slug}.json`),
     metrics,
   };
+}
+
+/**
+ * Monthly price for display. Usage-based plans have no list price: their
+ * figure is an estimate at 730 hours of full use, so it carries "≈".
+ */
+export function priceLabel(plan: Pick<PlanDatum, "priceMonth" | "tier">): string | undefined {
+  if (plan.priceMonth === undefined) return undefined;
+  return `${plan.tier === "usage-based" ? "≈" : ""}${formatEuro(plan.priceMonth)}`;
 }
 
 /** Stable order: provider registry order, then price, then plan name. */

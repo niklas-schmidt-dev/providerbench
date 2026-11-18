@@ -9,7 +9,7 @@ import { useWidth } from "@/components/charts/use-width";
 import { CompanyLogo } from "@/components/company-logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatMetricValue } from "@/lib/format";
-import type { PlanDatum } from "@/lib/plans";
+import { priceLabel, type PlanDatum } from "@/lib/plans";
 import { providerColor } from "@/lib/providers";
 
 export type YAxisOption = {
@@ -100,8 +100,10 @@ export function PricePerformanceChart({
     const overflow = labels.length ? labels[labels.length - 1].y - (margin.top + plotH) : 0;
     if (overflow > 0) for (const label of labels) label.y -= overflow;
 
+    // Only ranked cohorts can define the frontier; provisional points stay plotted.
     const frontier: Point[] = [];
-    for (const point of [...points].sort((a, b) => a.price - b.price || b.value - a.value)) {
+    const ranked = points.filter((p) => p.plan.rankEligible);
+    for (const point of ranked.sort((a, b) => a.price - b.price || b.value - a.value)) {
       if (frontier.length === 0 || point.value > frontier[frontier.length - 1].value) frontier.push(point);
     }
 
@@ -151,9 +153,11 @@ export function PricePerformanceChart({
       controls={controls}
       footer={
         <>
-          Each point is one plan: list price (net, excl. VAT) against the cross-host P50 of{" "}
+          Each point is one plan: monthly price (net, excl. VAT) against the cross-host P50 of{" "}
           {option?.label.toLowerCase() ?? "the composite score"}. Lines join a provider&rsquo;s plans from cheapest to
-          most expensive. Hollow points are provisional cohorts that do not rank yet.
+          most expensive. Hollow points are provisional cohorts that do not rank yet. Usage-based plans have no list
+          price; their monthly figure is an estimate at 730 hours of full use (≈), as recorded in each report&rsquo;s
+          pricing basis.
         </>
       }
     >
@@ -267,7 +271,7 @@ export function PricePerformanceChart({
                       <a
                         key={point.plan.id}
                         href={`/providers/${provider}`}
-                        aria-label={`${point.plan.providerName} ${point.plan.plan}${point.plan.region ? `, ${point.plan.region}` : ""}: ${formatEuro(point.price)} per month, ${option?.label ?? "score"} ${formatMetricValue(point.value)}${point.plan.rankEligible ? "" : ", provisional"}`}
+                        aria-label={`${point.plan.providerName} ${point.plan.plan}${point.plan.region ? `, ${point.plan.region}` : ""}: ${priceLabel(point.plan)} per month, ${option?.label ?? "score"} ${formatMetricValue(point.value)}${point.plan.rankEligible ? "" : ", provisional"}`}
                         onMouseEnter={() => setHovered(point.plan.id)}
                         onMouseLeave={() => setHovered(null)}
                         onFocus={() => setHovered(point.plan.id)}
@@ -322,7 +326,7 @@ export function PricePerformanceChart({
               <ChartTooltip x={hoveredPoint.x} y={hoveredPoint.y} width={width}>
                 <TooltipHeader plan={hoveredPoint.plan} />
                 {hoveredPoint.plan.region && <TooltipRow label="Region" value={hoveredPoint.plan.region} />}
-                <TooltipRow label="Price / month" value={formatEuro(hoveredPoint.price)} />
+                <TooltipRow label="Price / month" value={priceLabel(hoveredPoint.plan)} />
                 <TooltipRow
                   label={option?.label ?? "Score"}
                   value={`${formatMetricValue(hoveredPoint.value)}${unit ? ` ${unit}` : ""}`}

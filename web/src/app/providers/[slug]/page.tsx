@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
-import { formatEuro } from "@/components/charts/scales";
 import { CompanyLogo } from "@/components/company-logo";
 import { ProviderCharts } from "@/components/provider/provider-charts";
 import { Badge } from "@/components/reui/badge";
@@ -13,13 +12,14 @@ import {
   bestRegionPerPlan,
   currentScoredGroups,
   metricSummary,
+  scoreGroups,
   type ScoredGroup,
 } from "@/lib/aggregate";
 import { allSample, loadRuns, runsForProvider } from "@/lib/data";
 import { formatMeasurementWindow } from "@/lib/dates";
 import { formatMetricValue } from "@/lib/format";
 import { getMetricDef } from "@/lib/metrics";
-import { rawReportUrl, sortPlans, sourceUrl, toPlanDatum } from "@/lib/plans";
+import { priceLabel, rawReportUrl, sortPlans, sourceUrl, toPlanDatum } from "@/lib/plans";
 import { getProvider, PROVIDERS } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +64,9 @@ function GroupDetail({ group, peers }: { group: ScoredGroup; peers: ScoredGroup[
     group.provider.region,
     `${group.system.cpu_cores} vCPU`,
     group.system.mem_total_mb ? `${Math.round(group.system.mem_total_mb / 1024)} GB RAM` : undefined,
-    group.provider.price_eur_month ? `${formatEuro(group.provider.price_eur_month)} / mo` : undefined,
+    group.provider.price_eur_month
+      ? `${priceLabel({ priceMonth: group.provider.price_eur_month, tier: group.provider.tier })} / mo`
+      : undefined,
   ].filter(Boolean);
 
   return (
@@ -171,7 +173,12 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
   const rawRuns = runsForProvider(slug);
   if (rawRuns.length === 0) notFound();
 
-  const allGroups = currentScoredGroups(aggregateRuns(loadRuns()));
+  const aggregated = aggregateRuns(loadRuns());
+  const allGroups = currentScoredGroups(aggregated);
+  // History uses its own all-campaign normalization; headlines stay current-only.
+  const history = scoreGroups(aggregated)
+    .filter((group) => group.provider.name === slug)
+    .sort((a, b) => b.measuredTo.localeCompare(a.measuredTo) || (a.provider.plan ?? "").localeCompare(b.provider.plan ?? ""));
   const groups = allGroups
     .filter((group) => group.provider.name === slug)
     .sort(
@@ -179,6 +186,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
         (a.provider.price_eur_month ?? Infinity) - (b.provider.price_eur_month ?? Infinity) ||
         (a.provider.region ?? "").localeCompare(b.provider.region ?? ""),
     );
+  const currentIds = new Set(groups.map((group) => group.id));
   const planLeaders = bestRegionPerPlan(groups);
   const globalPlanLeaders = bestRegionPerPlan(allGroups);
   const order = PROVIDERS.map((p) => p.slug);
@@ -190,7 +198,9 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
     .sort((a, b) => b.performanceScore - a.performanceScore);
   const rank = providerLeaders.findIndex((g) => g.provider.name === slug) + 1;
   const best = [...groups].sort((a, b) => b.performanceScore - a.performanceScore)[0];
-  const prices = groups.flatMap((g) => (g.provider.price_eur_month ? [g.provider.price_eur_month] : []));
+  const cheapest = groups
+    .filter((g) => g.provider.price_eur_month)
+    .sort((a, b) => a.provider.price_eur_month! - b.provider.price_eur_month!)[0];
   const hosts = groups.reduce((sum, group) => sum + group.hostCount, 0);
   const auditRuns = rawRuns.filter(
     (run) => !run.manifest.rank_eligible || run.results.some((result) => Boolean(result.error)),
@@ -239,7 +249,11 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
           <Stat label="Plans" value={String(planLeaders.length)} note={`${groups.length} region cohorts`} />
           <Stat label="Fresh hosts" value={String(hosts)} />
           <Stat label="Raw runs" value={String(rawRuns.length)} />
-          <Stat label="From" value={prices.length ? `${formatEuro(Math.min(...prices))}/mo` : "—"} note="net, excl. VAT" />
+          <Stat
+            label="From"
+            value={cheapest ? `${priceLabel({ priceMonth: cheapest.provider.price_eur_month, tier: cheapest.provider.tier })}/mo` : "—"}
+            note={cheapest?.provider.tier === "usage-based" ? "est. at 730 h full use" : "net, excl. VAT"}
+          />
         </dl>
         {allSample(rawRuns) && (
           <p className="mt-5 text-[13px] text-muted-foreground">Sample data: illustrative, not measurements.</p>
@@ -290,44 +304,71 @@ export default async function ProviderPage({ params }: { params: Promise<{ slug:
         />
       ))}
 
-      <section aria-labelledby="evidence-title" className="px-4 py-7 sm:px-7">
-        <h2 id="evidence-title" className="text-base font-medium tracking-tight">
-          Evidence
+      <section aria-labelledby="history-title" className="px-4 py-7 sm:px-7">
+        <h2 id="history-title" className="text-base font-medium tracking-tight">
+          Campaign history
         </h2>
-        <p className="mt-0.5 text-[13px] text-muted-foreground">
-          Every number above comes from these dated raw reports. Rerun the same plan and open a pull request to dispute
-          one.
+        <p className="mt-0.5 max-w-[68ch] text-[13px] text-pretty text-muted-foreground">
+          Every aggregated cohort, newest first, with each dated raw report. Campaigns are never pooled: the latest
+          complete cohort drives the comparison above, older ones stay here; runs excluded from aggregation are listed
+          under Audit reports. Scores in this table are normalized across all
+          campaigns, so they can differ slightly from the current comparison. Rerun a plan and open a pull request to
+          dispute a number.
         </p>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-[13px]">
+          <table className="w-full min-w-[760px] border-collapse text-[13px]">
             <thead>
               <tr className="text-[12px] text-subtle">
-                {["Plan", "Region", "Campaign", "Protocol", "Hosts", "Runs", "First report"].map((heading, i) => (
-                  <th key={heading} scope="col" className={cn("h-8 border-b border-border font-normal", i >= 4 && i <= 5 ? "text-right" : "text-left")}>
+                {["Campaign", "Plan", "Measured", "Protocol", "Hosts", "Score", "Status", "Raw reports"].map((heading, i) => (
+                  <th
+                    key={heading}
+                    scope="col"
+                    className={cn("h-8 border-b border-border pr-4 font-normal", i === 4 || i === 5 ? "text-right" : "text-left")}
+                  >
                     {heading}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {groups.map((group) => (
-                <tr key={group.id} className="border-b border-border last:border-b-0">
-                  <td className="py-2 pr-4">{group.provider.plan}</td>
-                  <td className="py-2 pr-4 text-muted-foreground">{group.provider.region ?? "—"}</td>
-                  <td className="py-2 pr-4 font-mono text-[12px] text-muted-foreground">{group.cohortId}</td>
-                  <td className="py-2 pr-4 font-mono text-[12px] text-muted-foreground">{group.protocolVersion}</td>
-                  <td className="num py-2 pr-4 text-right">{group.hostCount}</td>
-                  <td className="num py-2 pr-4 text-right">{group.runCount}</td>
-                  <td className="py-2">
-                    <a
-                      href={rawReportUrl(`${group.runs[0].slug}.json`)}
-                      className="font-mono text-[12px] underline decoration-border-strong underline-offset-3 hover:decoration-foreground"
-                    >
-                      {group.runs[0].slug}.json
-                    </a>
-                  </td>
-                </tr>
-              ))}
+              {history.map((cohort) => {
+                const status = !cohort.rankEligible ? "Not ranked" : currentIds.has(cohort.id) ? "Current" : "Superseded";
+                return (
+                  <tr key={cohort.id} className="border-b border-border align-top last:border-b-0">
+                    <td className="py-2 pr-4 font-mono text-[12px] text-muted-foreground">{cohort.cohortId || "—"}</td>
+                    <td className="py-2 pr-4">
+                      {cohort.provider.plan}
+                      {cohort.provider.region && <span className="ml-1.5 text-subtle">{cohort.provider.region}</span>}
+                    </td>
+                    <td className="py-2 pr-4 text-muted-foreground">
+                      {formatMeasurementWindow(cohort.measuredFrom, cohort.measuredTo)}
+                    </td>
+                    <td className="py-2 pr-4 font-mono text-[12px] text-muted-foreground">{cohort.protocolVersion}</td>
+                    <td className="num py-2 pr-4 text-right">{cohort.hostCount}</td>
+                    <td className="num py-2 pr-4 text-right">{cohort.performanceScore.toFixed(1)}</td>
+                    <td className={cn("py-2 pr-4", status === "Current" ? "text-foreground" : "text-subtle")}>{status}</td>
+                    <td className="py-2">
+                      <details>
+                        <summary className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground">
+                          {cohort.runs.length} {cohort.runs.length === 1 ? "file" : "files"}
+                        </summary>
+                        <ul className="mt-1.5 flex flex-col gap-1">
+                          {cohort.runs.map((run) => (
+                            <li key={run.slug}>
+                              <a
+                                href={rawReportUrl(`${run.slug}.json`)}
+                                className="font-mono text-[12px] underline decoration-border-strong underline-offset-3 hover:decoration-foreground"
+                              >
+                                {run.slug}.json
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

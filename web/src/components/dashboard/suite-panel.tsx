@@ -1,11 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ChartPanel, Segmented } from "@/components/charts/chart-panel";
 import { GroupedBars, type BarAccessor } from "@/components/charts/grouped-bars";
 import type { MetricDef } from "@/lib/metrics";
 import { metricKey, sourceUrl, type PlanDatum } from "@/lib/plans";
+
+export function metricAnchor(def: Pick<MetricDef, "test" | "metric">): string {
+  return `${def.test}-${def.metric}`;
+}
 
 function shortLabel(def: MetricDef): string {
   const tail = def.title.split(" · ")[1] ?? def.title;
@@ -31,6 +35,18 @@ export function SuitePanel({
   const [selected, setSelected] = useState(defaultMetric ?? metrics[0]?.metric ?? "");
   const def = metrics.find((m) => m.metric === selected) ?? metrics[0];
 
+  // Deep links (#cpu-single_core_hash, e.g. from ⌘K) select their metric.
+  useEffect(() => {
+    const sync = () => {
+      const hash = window.location.hash.slice(1);
+      const match = metrics.find((m) => metricAnchor(m) === hash);
+      if (match) setSelected(match.metric);
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [metrics]);
+
   const accessor = useMemo<BarAccessor>(() => {
     const key = metricKey(def.test, def.metric);
     return {
@@ -49,6 +65,7 @@ export function SuitePanel({
   return (
     <ChartPanel
       id={id}
+      anchors={metrics.map(metricAnchor)}
       title={title}
       description={summary}
       controls={

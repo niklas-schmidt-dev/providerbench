@@ -3,11 +3,11 @@
 import { useMemo, useState } from "react";
 
 import { ChartTooltip, TooltipHeader, TooltipRow } from "@/components/charts/chart-tooltip";
-import { formatEuro, formatTick, linearScale } from "@/components/charts/scales";
+import { formatTick, linearScale } from "@/components/charts/scales";
 import { useWidth } from "@/components/charts/use-width";
 import { CompanyLogo } from "@/components/company-logo";
 import { formatMetricValue } from "@/lib/format";
-import type { PlanDatum } from "@/lib/plans";
+import { priceLabel, type PlanDatum } from "@/lib/plans";
 import { providerColor } from "@/lib/providers";
 
 export type BarAccessor = {
@@ -125,11 +125,14 @@ export function GroupedBars({
 
   const hoveredBar = layout?.placed.flatMap((g) => g.bars).find((b) => b.plan.id === hovered);
 
+  // Keep the measured wrapper mounted so width tracking survives an empty selection.
   if (!layout) {
     return (
-      <p className="py-16 text-center text-[13px] text-muted-foreground">
-        No plan in the current selection reports this metric.
-      </p>
+      <div ref={ref}>
+        <p className="py-16 text-center text-[13px] text-muted-foreground">
+          No plan in the current selection reports this metric.
+        </p>
+      </div>
     );
   }
 
@@ -255,7 +258,7 @@ export function GroupedBars({
             <TooltipRow label="P10 – P90" value={`${format(hoveredBar.range[0])} – ${format(hoveredBar.range[1])}`} />
           )}
           {hoveredBar.plan.priceMonth !== undefined && (
-            <TooltipRow label="Price / month" value={formatEuro(hoveredBar.plan.priceMonth)} />
+            <TooltipRow label="Price / month" value={priceLabel(hoveredBar.plan)} />
           )}
           <TooltipRow label="Fresh hosts" value={hoveredBar.plan.hostCount} />
           {!hoveredBar.plan.rankEligible && <p className="mt-1 text-subtle">Provisional · not ranked yet</p>}

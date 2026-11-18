@@ -4,7 +4,6 @@ import { useTable, type ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { formatEuro } from "@/components/charts/scales";
 import { CompanyLogo } from "@/components/company-logo";
 import { Badge } from "@/components/reui/badge";
 import {
@@ -16,7 +15,7 @@ import {
 import { DataGridColumnHeader } from "@/components/reui/data-grid/data-grid-column-header";
 import { DataGridScrollArea } from "@/components/reui/data-grid/data-grid-scroll-area";
 import { DataGridTable } from "@/components/reui/data-grid/data-grid-table";
-import { metricKey, type PlanDatum } from "@/lib/plans";
+import { metricKey, priceLabel, type PlanDatum } from "@/lib/plans";
 import { providerColor } from "@/lib/providers";
 import { resolveTableColumns, type MetricRef } from "@/lib/report";
 import { cn } from "@/lib/utils";
@@ -91,7 +90,7 @@ export function BoardTable({ plans, metricRefs }: { plans: PlanDatum[]; metricRe
         accessorFn: (row) => row.priceMonth ?? Number.POSITIVE_INFINITY,
         header: ({ column }) => <DataGridColumnHeader column={column} title="€ / mo" />,
         cell: ({ row }) => (
-          <span className="num">{row.original.priceMonth !== undefined ? formatEuro(row.original.priceMonth) : "—"}</span>
+          <span className="num">{priceLabel(row.original) ?? "—"}</span>
         ),
         size: 92,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },

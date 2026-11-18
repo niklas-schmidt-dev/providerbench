@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { GroupedBars, type BarAccessor } from "@/components/charts/grouped-bars";
@@ -57,6 +57,16 @@ export function Dashboard({
 }) {
   const [filters, setFilters] = useState<PlanFilters>(EMPTY_FILTERS);
   const [plansOpen, setPlansOpen] = useState(false);
+  const closePlans = useCallback(() => setPlansOpen(false), []);
+
+  // The drawer only exists below lg; leaving that width closes it so the
+  // page behind never stays inert.
+  useEffect(() => {
+    const desktop = matchMedia("(min-width: 64rem)");
+    const onChange = () => desktop.matches && setPlansOpen(false);
+    desktop.addEventListener("change", onChange);
+    return () => desktop.removeEventListener("change", onChange);
+  }, []);
   const visible = useMemo(() => plans.filter((plan) => isVisible(plan, filters)), [plans, filters]);
 
   const suites = useMemo(
@@ -107,7 +117,7 @@ export function Dashboard({
 
   return (
     <div className="grid lg:grid-cols-[minmax(0,1fr)_var(--sidebar-width)]">
-      <main id="main" className="min-w-0">
+      <main id="main" className="min-w-0" inert={plansOpen || undefined}>
         <header className="border-b border-border px-4 pt-8 pb-7 sm:px-7">
           <p className="text-[12px] text-subtle">{eyebrow}</p>
           <h1 className="mt-1.5 text-[28px] leading-[34px] font-medium tracking-[-0.03em] text-balance sm:text-[32px] sm:leading-[38px]">
@@ -150,13 +160,13 @@ export function Dashboard({
           id="price-performance"
           plans={visible}
           yOptions={yOptions}
-          description="What each euro of list price buys. Up and to the left is better; plans on the Pareto line are beaten by nothing on both axes."
+          description="What each euro of monthly price buys. Up and to the left is better; plans on the Pareto line are beaten by nothing on both axes."
         />
 
         <ChartPanel
           id="value"
           title="Work per euro"
-          description="Composite performance per euro of list price, normalized so the best-value plan is 100."
+          description="Composite performance per euro of monthly price, normalized so the best-value plan is 100."
           footer="Neither the price column nor the score column answers the question alone. This index is the combination: measured composite work divided by monthly price."
         >
           <GroupedBars plans={visible} accessor={valueAccessor} label="Value index per plan" />
@@ -198,7 +208,7 @@ export function Dashboard({
         onChange={setFilters}
         onReset={() => setFilters(EMPTY_FILTERS)}
         open={plansOpen}
-        onClose={() => setPlansOpen(false)}
+        onClose={closePlans}
         footer={
           <>
             {stats.runs} raw runs from {stats.hosts} fresh hosts.{" "}

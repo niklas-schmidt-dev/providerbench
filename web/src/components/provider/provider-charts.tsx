@@ -49,7 +49,7 @@ export function ProviderCharts({ plans, regions }: { plans: PlanDatum[]; regions
         id="price-performance"
         plans={plans}
         yOptions={[{ id: "score", label: "Composite score" }]}
-        description="Each plan's composite score in its best-measured region, against its monthly list price."
+        description="Each plan's composite score in its best-measured region, against its monthly price."
       />
       {multiRegion && (
         <ChartPanel

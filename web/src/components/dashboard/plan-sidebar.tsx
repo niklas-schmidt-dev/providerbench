@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
 
 import { CompanyLogo } from "@/components/company-logo";
-import { formatEuro } from "@/components/charts/scales";
-import type { PlanDatum } from "@/lib/plans";
+import { priceLabel, type PlanDatum } from "@/lib/plans";
 import { providerColor } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 
@@ -51,27 +50,60 @@ export function PlanSidebar({
   footer: React.ReactNode;
 }) {
   const searchRef = useRef<HTMLInputElement>(null);
+  const asideRef = useRef<HTMLElement>(null);
 
-  // "/" focuses the plan search, like the reference's model finder.
+  // "/" focuses the plan search, like the reference's model finder. It stays
+  // out of the way while the search field is not on screen (closed drawer).
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (event.key !== "/" || event.metaKey || event.ctrlKey) return;
       if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      if (!searchRef.current?.getClientRects().length) return;
       event.preventDefault();
-      searchRef.current?.focus();
+      searchRef.current.focus();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  // The mobile drawer behaves like a dialog: search takes focus, Tab stays
+  // inside, Escape closes, and focus returns to whatever opened it.
+  useEffect(() => {
+    if (!open) return;
+    // WebKit does not focus a clicked button, so fall back to the drawer's trigger.
+    const active = document.activeElement;
+    const opener =
+      active instanceof HTMLElement && active !== document.body
+        ? active
+        : document.querySelector<HTMLElement>('[aria-controls="plan-sidebar"]');
+    searchRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") return onClose();
+      if (event.key !== "Tab" || !asideRef.current) return;
+      const focusable = [
+        ...asideRef.current.querySelectorAll<HTMLElement>("button:not([disabled]), input, a[href]"),
+      ].filter((el) => el.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      // Move focus explicitly (WebKit skips buttons in its native Tab order).
+      event.preventDefault();
+      const i = focusable.indexOf(document.activeElement as HTMLElement);
+      const next = event.shiftKey ? (i <= 0 ? focusable.length - 1 : i - 1) : (i + 1) % focusable.length;
+      focusable[next].focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
+  }, [open, onClose]);
+
   const tiers = useMemo(() => [...new Set(plans.map(tierOf))], [plans]);
-  const query = filters.query.trim().toLowerCase();
+  const query = filters.query;
   const groups = useMemo(() => {
     const byProvider = new Map<string, PlanDatum[]>();
     for (const plan of plans) {
-      const haystack = `${plan.providerName} ${plan.plan} ${plan.region ?? ""} ${plan.tier ?? ""}`.toLowerCase();
-      if (query && !haystack.includes(query)) continue;
+      if (!matchesQuery(plan, query)) continue;
       const list = byProvider.get(plan.provider) ?? [];
       list.push(plan);
       byProvider.set(plan.provider, list);
@@ -94,15 +126,14 @@ export function PlanSidebar({
   return (
     <>
       {open && (
-        <button
-          type="button"
-          aria-label="Close plan filters"
-          onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/50 animate-in fade-in-0 lg:hidden"
-        />
+        <div aria-hidden onClick={onClose} className="fixed inset-0 z-40 bg-black/50 animate-in fade-in-0 lg:hidden" />
       )}
       <aside
+        id="plan-sidebar"
+        ref={asideRef}
         aria-label="Plans"
+        aria-modal={open || undefined}
+        role={open ? "dialog" : undefined}
         className={cn(
           "flex-col border-l border-border bg-background",
           "lg:sticky lg:top-(--header-height) lg:flex lg:h-[calc(100dvh-var(--header-height))]",
@@ -121,7 +152,11 @@ export function PlanSidebar({
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={onReset}
+              onClick={() => {
+                // Reset disables this button; keep focus in the panel.
+                onReset();
+                searchRef.current?.focus();
+              }}
               disabled={!dirty}
               aria-label="Reset plan filters"
               className="grid size-8 place-items-center rounded-md text-subtle transition-colors hover:bg-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
@@ -216,7 +251,7 @@ export function PlanSidebar({
                         {plan.region && <span className="ml-1.5 text-[12px] text-subtle">{plan.region}</span>}
                       </span>
                       {plan.priceMonth !== undefined && (
-                        <span className="num text-[12px] text-subtle">{formatEuro(plan.priceMonth)}</span>
+                        <span className="num text-[12px] text-subtle">{priceLabel(plan)}</span>
                       )}
                       <span
                         aria-hidden
@@ -266,8 +301,16 @@ export function PlanSidebar({
   );
 }
 
+function matchesQuery(plan: PlanDatum, query: string): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  return `${plan.providerName} ${plan.plan} ${plan.region ?? ""} ${plan.tier ?? ""}`.toLowerCase().includes(needle);
+}
+
+/** One rule for the list and every chart: search, toggles, tiers, provisional. */
 export function isVisible(plan: PlanDatum, filters: PlanFilters): boolean {
   return (
+    matchesQuery(plan, filters.query) &&
     !filters.hidden.has(plan.id) &&
     !filters.excludedTiers.has(tierOf(plan)) &&
     (filters.showProvisional || plan.rankEligible)

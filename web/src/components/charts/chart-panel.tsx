@@ -15,7 +15,10 @@ export function ChartPanel({
   footer,
   children,
   className,
+  anchors,
 }: {
+  /** Extra in-page link targets at the top of the panel (e.g. one per metric). */
+  anchors?: string[];
   id?: string;
   title: ReactNode;
   description?: ReactNode;
@@ -28,8 +31,11 @@ export function ChartPanel({
     <section
       id={id}
       aria-labelledby={id ? `${id}-title` : undefined}
-      className={cn("border-b border-border px-4 py-6 sm:px-7 sm:py-7", className)}
+      className={cn("relative border-b border-border px-4 py-6 sm:px-7 sm:py-7", className)}
     >
+      {anchors?.map((anchor) => (
+        <span key={anchor} id={anchor} aria-hidden className="absolute top-0" />
+      ))}
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           <h2 id={id ? `${id}-title` : undefined} className="text-base font-medium tracking-tight">

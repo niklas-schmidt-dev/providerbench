@@ -178,7 +178,8 @@ enter ranked aggregates: quick workloads are smaller and not comparable.
 Every report and every workload carries its own UTC timestamp. Use a new
 `--campaign` ID whenever a provider, plan, and region are re-measured: the site
 keeps historical campaigns separate, uses the latest complete cohort for
-headline comparisons, and plots older cohorts as a performance timeline.
+headline comparisons, and lists every older cohort, with its score and raw
+reports, in each provider's campaign history.
 
 The site ranks the cross-host **P50**, not the luckiest VM. It also publishes
 the mean, P10, P90, and P99. A plan remains visibly provisional until the
