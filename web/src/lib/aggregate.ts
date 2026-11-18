@@ -1,8 +1,5 @@
 import type { Metric, Run } from "@/lib/data";
 
-export const MIN_RANKED_HOSTS = 10;
-export const P99_RECOMMENDED_HOSTS = 100;
-
 export type Distribution = {
   count: number;
   mean: number;
@@ -33,6 +30,7 @@ export type TestSummary = {
 
 export type BenchmarkGroup = {
   id: string;
+  baseSeriesId: string;
   seriesId: string;
   cohortId: string;
   measuredFrom: string;
@@ -49,7 +47,10 @@ export type BenchmarkGroup = {
   freshHostCount: number;
   sample: boolean;
   quick: boolean;
+  protocolVersion: string;
+  profile: string;
   rankEligible: boolean;
+  eligibilityReasons: string[];
 };
 
 export type ScoredGroup = BenchmarkGroup & {
@@ -118,13 +119,23 @@ export function summarize(values: number[]): Distribution {
   };
 }
 
-function seriesId(run: Run): string {
+function baseSeriesId(run: Run): string {
   return [
     run.category ?? "compute",
     run.provider.name ?? "unknown",
     run.provider.product ?? "unknown",
     run.provider.plan ?? "unknown",
     run.provider.region ?? "global",
+  ]
+    .map((part) => part.toLowerCase().replace(/[^a-z0-9]+/g, "-"))
+    .join("--");
+}
+
+function seriesId(run: Run): string {
+  return [
+    baseSeriesId(run),
+    run.manifest.protocol_version,
+    run.manifest.profile,
   ]
     .map((part) => part.toLowerCase().replace(/[^a-z0-9]+/g, "-"))
     .join("--");
@@ -290,21 +301,20 @@ export function aggregateRuns(runs: Run[]): BenchmarkGroup[] {
           })
           .sort((a, b) => a.test.localeCompare(b.test));
 
-        // A partial suite (e.g. `--tests cpu`) must not produce a ranked
-        // composite: the geometric mean would silently renormalize onto the
-        // metrics the cohort happens to have.
-        const fullScoreCoverage = SCORE_METRICS.every((definition) => {
-          const summary = results
-            .find((result) => result.test === definition.test)
-            ?.metrics.find((item) => item.name === definition.metric);
-          return (
-            summary !== undefined &&
-            summary.distribution.count >= MIN_RANKED_HOSTS
-          );
-        });
+        const eligibilityReasons = [
+          ...new Set(
+            analysisRuns.flatMap(
+              (run) => run.manifest.eligibility_reasons ?? [],
+            ),
+          ),
+        ].sort();
+        const manifestEligible =
+          analysisRuns.length > 0 &&
+          analysisRuns.every((run) => run.manifest.rank_eligible);
 
         return {
           id,
+          baseSeriesId: baseSeriesId(representative),
           seriesId: series,
           cohortId: cohort,
           measuredFrom,
@@ -321,13 +331,10 @@ export function aggregateRuns(runs: Run[]): BenchmarkGroup[] {
           freshHostCount,
           sample,
           quick,
-          rankEligible:
-            !sample &&
-            !quick &&
-            !excludedOnly &&
-            hostCount >= MIN_RANKED_HOSTS &&
-            freshHostCount >= MIN_RANKED_HOSTS &&
-            fullScoreCoverage,
+          protocolVersion: representative.manifest.protocol_version,
+          profile: representative.manifest.profile,
+          rankEligible: !excludedOnly && manifestEligible,
+          eligibilityReasons,
         } satisfies BenchmarkGroup;
       });
     })
@@ -358,7 +365,10 @@ export function latestMeasurementGroups<T extends BenchmarkGroup>(
 ): T[] {
   const bySeries = new Map<string, T[]>();
   for (const group of groups) {
-    bySeries.set(group.seriesId, [...(bySeries.get(group.seriesId) ?? []), group]);
+    bySeries.set(group.baseSeriesId, [
+      ...(bySeries.get(group.baseSeriesId) ?? []),
+      group,
+    ]);
   }
   return [...bySeries.values()].map((seriesGroups) => {
     const ranked = seriesGroups.filter((group) => group.rankEligible);
@@ -403,21 +413,24 @@ export function scoreGroups(groups: BenchmarkGroup[]): ScoredGroup[] {
 
   const rawScores = groups.map((group) => {
     let logSum = 0;
-    let usedWeight = 0;
+    let complete = true;
     for (const definition of SCORE_METRICS) {
       const summary = metricSummary(group, definition.test, definition.metric);
       const best = bestByMetric.get(metricKey(definition.test, definition.metric));
       const value = summary?.distribution.p50;
       if (!summary || best === undefined || value === undefined || value <= 0 || best <= 0) {
-        continue;
+        complete = false;
+        break;
       }
       const ratio = summary.higherIsBetter ? value / best : best / value;
       logSum += definition.weight * Math.log(Math.max(0.000001, Math.min(1, ratio)));
-      usedWeight += definition.weight;
     }
     return {
       group,
-      raw: usedWeight > 0 ? Math.exp(logSum / usedWeight) : 0,
+      // Missing metrics invalidate the composite. We deliberately do not
+      // renormalize the remaining weights because that would reward partial
+      // or failed suites.
+      raw: complete ? Math.exp(logSum) : 0,
     };
   });
   const referenceSet = new Set<BenchmarkGroup>(reference);

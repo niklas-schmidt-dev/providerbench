@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/niklas-schmidt-dev/providerbench/internal/bench"
 )
 
 type fakeClient struct {
@@ -61,24 +63,47 @@ func (f *fakeClient) CopyFrom(_ context.Context, name, _, local string) error {
 	sample, _ := strconv.Atoi(f.lastArgs["--sample-index"])
 	repeat, _ := strconv.Atoi(f.lastArgs["--repeat-index"])
 	report := map[string]any{
-		"created_at": time.Date(2026, 7, 24, 12, 0, 0, 0, time.UTC),
+		"schema_version":   bench.SchemaVersion,
+		"protocol_version": bench.ComputeProtocol,
+		"profile":          bench.StandardProfile,
+		"cli_version":      "test",
+		"category":         "compute",
+		"created_at":       time.Date(2026, 7, 24, 12, 0, 0, 0, time.UTC),
 		"provider": map[string]any{
-			"name":    "vercel",
-			"product": "Sandbox",
-			"plan":    f.lastArgs["--plan"],
-			"region":  Region,
+			"name":            "vercel",
+			"product":         "Sandbox",
+			"plan":            f.lastArgs["--plan"],
+			"tier":            f.lastArgs["--tier"],
+			"region":          Region,
+			"price_eur_hour":  0.30,
+			"price_eur_month": 219,
 		},
 		"measurement": map[string]any{
-			"campaign_id":  f.lastArgs["--campaign"],
-			"sample_index": sample,
-			"repeat_index": repeat,
+			"campaign_id":    f.lastArgs["--campaign"],
+			"sample_index":   sample,
+			"repeat_index":   repeat,
+			"fresh_instance": true,
 		},
 		"environment": map[string]any{
 			"pricing_as_of": f.pricingDate,
+			"pricing_basis": "continuous full-utilization equivalent",
+		},
+		"system": map[string]any{
+			"os":           "linux",
+			"arch":         "amd64",
+			"cpu_cores":    2,
+			"mem_total_mb": 4096,
 		},
 		"results": []any{map[string]any{
-			"test":       "cpu",
-			"started_at": time.Date(2026, 7, 24, 12, 0, 1, 0, time.UTC),
+			"test":             "cpu",
+			"started_at":       time.Date(2026, 7, 24, 12, 0, 1, 0, time.UTC),
+			"duration_seconds": 1,
+			"metrics": []any{map[string]any{
+				"name":             "single_core_hash",
+				"value":            1,
+				"unit":             "MB/s",
+				"higher_is_better": true,
+			}},
 		}},
 	}
 	data, err := json.Marshal(report)

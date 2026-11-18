@@ -1,0 +1,3019 @@
+{
+  "manifest_version": 1,
+  "reports": [
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-1-1.json",
+      "sha256": "6852dc2753cfb7b1d29e27f65e3d5999e46589e172f2752dbf03dedb0f0be3ff",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-1-2.json",
+      "sha256": "13d996dbced9085cc1c78db1b1270f2ec8dc675653b1b200aa747295d3bc4203",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-1-3.json",
+      "sha256": "d2786ce02a4f13d4c1167f756892176798bf041096818d02cc3f3b925e3e819b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-10-1.json",
+      "sha256": "79dfcf52e0ae8d8204e4990c46b3f4d2b8c08daa4ed9ec577f4ba8e962dc11f2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-10-2.json",
+      "sha256": "0b652bfe95b2eea924a02f276cd20dd244d500bd452b6aad12e5ebcf829ca52f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-10-3.json",
+      "sha256": "b2b575653d0362d1eec158cb65c5cd533d2a88cb41aa19787daddde6177014cf",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-2-1.json",
+      "sha256": "a419ff15c7570ea999d0cb3813389d74638442ca84522f901d350c8b96bc0e22",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-2-2.json",
+      "sha256": "4c911a432740f3a13420a8909ef1347ad960d8b3df13b86fd11154e18d031fac",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-2-3.json",
+      "sha256": "39f082d174333f0b992187894e00e95c17c2bac81cfdd9a5d2b53e18a19bf3b2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-3-1.json",
+      "sha256": "41fd7e162f12be2ef723ab5bc763bf20a78bffe7599d324c86c2c9cc8bfa7c9e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-3-2.json",
+      "sha256": "d0c5e904f35763b609cabf1a1533d1eef0054144c8e17f4c4f4341d8d47b7842",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-3-3.json",
+      "sha256": "aeb9b4906edaab5abc44032567a84918f5e12c91f938cc81d9e31e2ec9b36458",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-4-1.json",
+      "sha256": "150f22690954e31b5bbd6ee0a471451ce37a0cec0c7f888d6d8b3b02d8848766",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-4-2.json",
+      "sha256": "ab1f6d4ac49c099c2b1ac55ae850481e211c6c814b9af0208ebb49a524852cb9",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-4-3.json",
+      "sha256": "e33d436ecfcdfbabb0b3ee184d0752d6b7fdb9d91808b713d5777c7ccda25319",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-5-1.json",
+      "sha256": "c226561b9d943d8189dbc1a8eeb4c70091c9c48e0be38b4b0458f35ed6a1e188",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-5-2.json",
+      "sha256": "7f6285f474fdf33aa717c9ce3954bfe34d0c99a71f34d373f638c0a66748f110",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-5-3.json",
+      "sha256": "b0e6ba6e5472f3e4f5d99331dfb7136e7fe88f69c7d87975c7f5da7cdcd882a1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-6-1.json",
+      "sha256": "24557c27a556d0bb6143c4f99e332f6b602924be09d9c9332715a177f581d20f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-6-2.json",
+      "sha256": "04a9b4e270976943ba8de4edbb16e5188f8d2761fdd57f6e7668a053fdf0c8ca",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-6-3.json",
+      "sha256": "f7bf6d010ab4ba785d3701efb72fdf2b120695eaa155b810fa9c92f713863c57",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-7-1.json",
+      "sha256": "9627ac296e6ba39e7291762f61e365e2d152f6b532e64ece6538438fe5c161db",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-7-2.json",
+      "sha256": "096121627ce2592af8006f80574c14ec79f9c3d43c129359f9b2cb564bcbb9c4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-7-3.json",
+      "sha256": "b3b9b0c3ec2dee93e7b0d8e8bab264eee72ee4e460a342e1269b1697c25e7761",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-8-1.json",
+      "sha256": "3f71449e29344ea94bc6c3f15023c0dd44dd7d1b0f92f4d5290e37b30470a550",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-8-2.json",
+      "sha256": "d76738677e055d22d56fb092c3bd9c48451d31e288c05ce93de54021ec56afd1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-8-3.json",
+      "sha256": "572a463aa471dd846273f7ef3442dc99e190d1d872a3feb92ac0169079736239",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-9-1.json",
+      "sha256": "3580d88e9f441d3813538a806b90e0979d8a130e7e986510fd9bd05395d4cb3b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-9-2.json",
+      "sha256": "64f399051b57ba4b0fad245e4af3766b02a713783ddec75a5f7d633fdf37a8db",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026-07-24-v2-9-3.json",
+      "sha256": "ca255da3fde5b98b7768aecf06896c71f496bf66bb6d46372b7c81c51afd93b6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-1-1.json",
+      "sha256": "5298fd2cb28388453602349f4b46bbcc1f94c291d958f22a12a54054bc69bb52",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-10-1.json",
+      "sha256": "a68438bd4671a9c9a6d48138d6e2a53d4f3a9d1f6477bd7b2755db046bd73393",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-2-1.json",
+      "sha256": "5b6cb9a5b6a425ab31e4dc48fc42a8693a5efeec815f7b6ca31632624e95f286",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-3-1.json",
+      "sha256": "b2756cad0a189cfc9683f54a9ed333c5681634a28612823b690f5a83915bd026",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-4-1.json",
+      "sha256": "cc4c9d0ac0fd4e0de5d13272daaeedae375506b15f488434dbf784561e28d9c2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-5-1.json",
+      "sha256": "38838249d6c2123326f6fd76807838579f44a5576761849f144a042efde84652",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-6-1.json",
+      "sha256": "c390253589642c34e1d6e0f1c3f1f144998b2622e91e4ce082ee44821ca265f6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-7-1.json",
+      "sha256": "650b0404ba3161db8a0966bf5a7616eeb28ae13f7d9bb993ab03dbab916a27ad",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-8-1.json",
+      "sha256": "3e742617d3c2d8588e8a582a1b2fd879a5aebae087e091529e91e452da80d06a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-ccx13-nbg1-hetzner-2026q3-9-1.json",
+      "sha256": "db3e9830c276e80dfc32329c0397918b1d4c4cacd1ed28f4335f27f8a0b75c34",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-1-1.json",
+      "sha256": "05800f516f11de4f03e50e911dd201d0cea446b0173b4e065d8c2c1ec7b01728",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-1-2.json",
+      "sha256": "413d4d4bdbc0aad2f5e0d69070d3d9da3bbe6e0eed7a5fbf536c1f9701b79181",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-1-3.json",
+      "sha256": "2bd8b54cd6e7219095fc835d51fcb874f079936ff7424e49dd523b5991c10054",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-10-1.json",
+      "sha256": "7df45262d037bc1f34138ff05ab8f27c53088bcd36d7f89c25e4f86e651a1b99",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-10-2.json",
+      "sha256": "b8a2d3c7c588ca158e75cf48e460f128c1658c111eb8f8624637d391987dbe9c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-10-3.json",
+      "sha256": "68d2bcc9424c110d2b0c1459f4c79370810242f203e7a938fe7c5c3a5160adb0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-2-1.json",
+      "sha256": "6344eb30b04a2dcf6e767308489290b6546a586cb51ada7a46022aa44446b8fc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-2-2.json",
+      "sha256": "5cb766d2eba30194a936cf1fbd09e85c13ba7026a2103da3e46aa1f36723da57",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-2-3.json",
+      "sha256": "75f5c3c0e3abeff776ce59f12ca5bca0a45894641f8f4e138b18e1d1e92db705",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-3-1.json",
+      "sha256": "9acd6b672f2271981d1e7d247ce1e49fe711e1d0d6982e4ff7f4ce8c12352e43",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-3-2.json",
+      "sha256": "7d436f0b2ae496d38bc8b3f449cf20bcc3ac43cd7ce1a09b2e95f9f4076f1333",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-3-3.json",
+      "sha256": "373d3c8516029da90e6864cf84e079d0c09afaa6824dd4c052af329056c5bd86",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-4-1.json",
+      "sha256": "f50f86e5f661f236e360d9b51d6b1a8455af0ee62e72e749e118e71dc9d53c7e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-4-2.json",
+      "sha256": "3f00b6900d7c87c93049ba491a60ca09a971f9e8cedf3150bae4430851657d2d",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-4-3.json",
+      "sha256": "5aa3d512ef12fe53352aff25f4ed098b8cee94748123ebbdee37e91c7f5786d4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-5-1.json",
+      "sha256": "0acab4213fd8043f2a8af809fa299a5fc23d7541f3f3e1b57c44118f7a74b9c3",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-5-2.json",
+      "sha256": "748a054889297481802956477d6f5c089456eedd7975c65d7bb847bbb091b891",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-5-3.json",
+      "sha256": "5ce21dea389fb13a4b8ebc08c7b98c7db187eb7f0ccbe5d19fa4c7cec38e461a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-6-1.json",
+      "sha256": "44a6338245bf5752f7dda48156985bc57ecf5072f28d02565e98725165df8f69",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-6-2.json",
+      "sha256": "d89b2d7a4aa5a3fa5e4c7cfde46f23f6efba36d4e9f01dc31ef2c7eebf735c35",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-6-3.json",
+      "sha256": "ad94b3c64c49495964f480a7fc04c9dc38bae2f9f12f85b3609751a0a83bf465",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-7-1.json",
+      "sha256": "312ffc31e2f4f6405fc9a331c1e3a5756d4a4c03c92036e04f1be2a4d20a5d9a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-7-2.json",
+      "sha256": "80493b87dcd32ecfa98407150c43fac1d0bb72bf060073681ffafef1436fb05e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-7-3.json",
+      "sha256": "a2f56a12519e08f2e9496ebf01e187349745d3101bb32b7ffe6350b9bc5ec82b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-8-1.json",
+      "sha256": "95a5df98e2e6ab945d9bde4121aeb12ae323679201171d1dcada48bbf49796ae",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-8-2.json",
+      "sha256": "2582a022271bff40d5eebbe5cbfe8fa4179084f1c248581748a4d32773ac1017",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-8-3.json",
+      "sha256": "7347d7ccbcbba46fa29402767dc41117c755fe6e9ea8cb4fe6373af5532eb1c7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-9-1.json",
+      "sha256": "aec7074c9900286f89dcb6f7dea1d9801fe14bf6c4b989fd9f3cbc415cc56588",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-9-2.json",
+      "sha256": "3e94478bda8d62d5d566065ce953f9e0966c2b8a193282bb98ad264d407ff71a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026-07-24-v2-9-3.json",
+      "sha256": "ac9fbb2ecfce5d4d698ccfa3e15f7ccaf9ec284e716272d4ea66f12937184b5a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-1-1.json",
+      "sha256": "e9b8805a7b1582dc1b434e40143eaa5b47b8ba33ad17b683ab522f4a0bc10cb4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-10-1.json",
+      "sha256": "e7e8a2658c577217ab4459146ea0c6a6835d15dee74e8ec85c5b95938bab7add",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-2-1.json",
+      "sha256": "b712414c075a26b9c2e03e1bf39ca402081c92c4546b8cf75d1db27239e58670",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-3-1.json",
+      "sha256": "782e293ff0468bc0ddba98bdfdca298d7fd6b11eeecac6a678c8ab2b2982dc18",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-4-1.json",
+      "sha256": "b3bc2334a6db2e6db5cbb5144cbde3f57a695a74c9dd5ef3bfc2b976fcd2e7cb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-5-1.json",
+      "sha256": "1472ea624563c276e4f227e6651ed01164c86448a93d1638b10504f85fbdceda",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-6-1.json",
+      "sha256": "e4ce3eabd811559ebf8df9a4f772473b2ff665ed9c75c556eb38160f41453bf2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-7-1.json",
+      "sha256": "7a850d3aebcb20f4f22e085a91b459698c999c16e697c7af27431774dac459bd",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-8-1.json",
+      "sha256": "e3bb3d87ed884450db571355abb389cf8a6c859d30834c45f0ef9376dfc0bf8b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-fsn1-hetzner-2026q3-9-1.json",
+      "sha256": "9d9b4622d7f15784c59340d903f29bd4c90fb0235ebd055374b5ac85bdf336bb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-1-1.json",
+      "sha256": "ffe178c0a952a63f554b8ed05c9e417b173b15f488a87860d8ff8e300cc429e6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-1-2.json",
+      "sha256": "3a0d3a3a6930a006cde2709f343d70eb3cf35746a7bf48db43d982bf4ffbce39",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-1-3.json",
+      "sha256": "0d1651d22adeac0daf3d1cef66d75b3c146708e877f619bef62cbe59b7f950c6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-10-1.json",
+      "sha256": "cc7996161c1d3f500b44bb3e2cdedc818e1e6f9f090537243aed5601c73b7f7a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-10-2.json",
+      "sha256": "300569093e9bca26fe4a38df55880a9f20988249f38941d3e82748781bb80b71",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-10-3.json",
+      "sha256": "c497290f880beb4235e3cb834b19fb03f345d1e2b2ed6cbb0c454de18cc57a89",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-2-1.json",
+      "sha256": "54403899382d12e80257f84fb0a5893cdde2e329331f10e828f7d301c6842334",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-2-2.json",
+      "sha256": "a3b9eaf22760665893fd2daba0d6fb781348ff3f49bd3a80ce82438133c2712a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-2-3.json",
+      "sha256": "65b8eea405320b9dd3e78409205188703d0d72b03e8b40cd8cad41bba05442c3",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-3-1.json",
+      "sha256": "c1317077c8cd8d506dade38e643c2660968c68bbeb99f95080e017ffd97517aa",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-3-2.json",
+      "sha256": "31e45d132d552f812e898197ed223a5f80401e20cc240a35dc2fbf7626103bfe",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-3-3.json",
+      "sha256": "df967e7f289747f53be25203a5d89cfd21e8e351cff15264236542d8cc96b7fd",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-4-1.json",
+      "sha256": "2b138f98ee33673554d608466c642606b3a69a8f886fa54d2bd2cf10487fc5db",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-4-2.json",
+      "sha256": "0237127193e3e5c6a230ab77480464667ffd456fdcc759cd852de1538ac4ac4e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-4-3.json",
+      "sha256": "a3dd40a039c2b19a889cb5d2b06dd6bbe30b9fefc32d8fe5f5169f4a48345f9a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-5-1.json",
+      "sha256": "5df8a80c9b1e5972665430d2af71213aa4ae764448723d8d2e6bd6645d97865f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-5-2.json",
+      "sha256": "1d9fe4c767c37592f2eca6dec2544a0c849c064dc3c18b431c67ff726e4b9124",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-5-3.json",
+      "sha256": "03962d675020efe470e0e769989dcd596ed75de4c51e05e3ad30fa0792a2b840",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-6-1.json",
+      "sha256": "06084258a39a2210a441f1b8f264bf1f0b5859205554bd38a646a1bc3ab8ed32",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-6-2.json",
+      "sha256": "77c66c1ff0c6dcc7283096d9d1b31ba891dabf8a24faa19fc56b77225372d8b8",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-6-3.json",
+      "sha256": "307b2fbf128fa324da214a0aab59efdf2458c1db9a009629c7d546e6f00da6cc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-7-1.json",
+      "sha256": "ddf226a58d7c6b8329f774c7d8a75030f158aa24a3627e2714c26a0902e323a2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-7-2.json",
+      "sha256": "9bd2d3cfa41d563119f4c114f34453fe5d6c9671c60686aa7bc81440fa840e48",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-7-3.json",
+      "sha256": "f0bd91f9def27d02158624a5280611bbe989b88403da34bc36c37bc519be5f80",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-8-1.json",
+      "sha256": "fa0b7f3cf4b454a887547f1b02ac3e22ef94d73ea80ae3632687ea97dfbd8932",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-8-2.json",
+      "sha256": "cd21b02c0a259f0bd922efa35a4a493713635c287df895112510447ad502b14c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-8-3.json",
+      "sha256": "519298d387e457116ae1411df8ec6c6467ef7127692dd2f47ebdae6c5761ace1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-9-1.json",
+      "sha256": "69ab8c64013bffc988fb1e21bb2819fee1b2793b2f9ac027e4984167bfd41869",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-9-2.json",
+      "sha256": "17cd618008c98bf9bb35a50687842f11380233a144976c1e5712632852677364",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026-07-24-v2-9-3.json",
+      "sha256": "8a584639b4a63914b8fe5285b994e2e274f17946ff0299ecc091c47d2e78a864",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-1-1.json",
+      "sha256": "3f17f15c7505c6a6f2d1d6eb1796c9e7e72739fd64bd2ac07b72eb08bc8f20df",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-10-1.json",
+      "sha256": "db48215c217413a1a30e6179173aefa0f3eddb22e8e7df31f4722a1faa17afff",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-2-1.json",
+      "sha256": "516e6f90b91ebd6b760996e448f79fc7d2a7327b13a614547545d834a819ff38",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-3-1.json",
+      "sha256": "00ec4f31aff5c1e7f07feea3ed5134ab5fc88439b6512c50110c9cd2e651ae52",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-4-1.json",
+      "sha256": "d86e223e0ac0cf7f0bcd30e6b1790a760b2274ee96c56bd05a3aa071f2ccb840",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-5-1.json",
+      "sha256": "b09bb19e4241d541d1f4c2b03a9a92f3178f69326c39d387f3e8b1eb100d52d5",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-6-1.json",
+      "sha256": "289777d37231265079f323ade607ea281f2f6dc189a56872eb434bb5d83e0b7c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-7-1.json",
+      "sha256": "7ae858a6bbc06ecd4b1bf23e9401ee6277f7442ecceec732b1b4707fb523245c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-8-1.json",
+      "sha256": "8c66712efb5b95114691ff527b42882e644c9d2991e74863138eb18dd4a471ef",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-2026q3-9-1.json",
+      "sha256": "a29dc0697d0fe8884cbbbc06cf9c3ec9e31125d2c78d15fc2e911ee5970c291e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-hel1-hetzner-pilot-20260724-1-1.json",
+      "sha256": "77fff62b30396b18b8f00f88bc922a2773c799333fa4b43a2bd66db7ccfa9774",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-pilot-20260724",
+      "rank_eligible": false,
+      "eligibility_reasons": [
+        "cohort is explicitly excluded from aggregation",
+        "legacy ranking requires at least 10 independent samples"
+      ]
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-1-1.json",
+      "sha256": "93afef70ddb83d01c18127d3be2eb55b7798cd1a7a9641e186c1585e0d2397ec",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-1-2.json",
+      "sha256": "dda74e3f4aa85d58546afde04895099bafac62181b4afa0667cad9ff0d960201",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-1-3.json",
+      "sha256": "548054c0d1b23c1efb8e82039043dea371c54d19f33679d39039b520386bbdae",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-10-1.json",
+      "sha256": "58c6fa88c0f45a86ba791179bcbd673cdcb264250e7f5c41e617bc0392eba7bf",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-10-2.json",
+      "sha256": "6b175eb9110946e38a2efec4e136545a9a15e0efdcd4b88bf4d301daa9a1c2b9",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-10-3.json",
+      "sha256": "1de30d930fbddca5058793586ee7a1d41edf23cd214c626805932e4fec4b5e36",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-2-1.json",
+      "sha256": "50f1efe02327576b7b97d047ffe6f35cb653750cd289c9d3243b73127812b377",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-2-2.json",
+      "sha256": "1e6589ef52f68c11a871a5fd42d02af88ede96887a18995f0f7adb09b05deec2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-2-3.json",
+      "sha256": "d7a7f462345d030dff6652b04fdd8c1ba45446f0e8903c5b181869f1c1956941",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-3-1.json",
+      "sha256": "80138c81d7ce67a9056b216c90be8c1aeac0093e6a67eb9bbb8ff177e8888d44",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-3-2.json",
+      "sha256": "d5105d79304cc7ba46366e4cb5eb0595bbf641fcfa9ffde5fc19bfaaea4096cf",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-3-3.json",
+      "sha256": "bae4f8d1da48e7786d70c108654e1092b941d7a1d4a24b3368246288b529a781",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-4-1.json",
+      "sha256": "7e549e4e77c3562929d928980755f250621100e1116f54472a66de53820a30ec",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-4-2.json",
+      "sha256": "cc335a5a886bee2b6463d09347fdb9d0f7012910faeb55f8e15897a34832dfc7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-4-3.json",
+      "sha256": "7b45d30235b041c432aef1056eca795d1a7d7c77530a31d8ec1711a41fef85d8",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-5-1.json",
+      "sha256": "fb6449e0922d8e8a93074b332223494760e67a0133fd40eeeaf26d576464287e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-5-2.json",
+      "sha256": "e4d7d575acca94e9e11bee8db1fd16fc5430e096683e2e327286173305fba0ba",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-5-3.json",
+      "sha256": "cc65bf74d798c3a291898b5a1068b7d71831a3d6ffcd2a360ee036a11a249ef2",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-6-1.json",
+      "sha256": "77e37127e9c387016930d2dac0aea0e3dc1a3fe21f245e70d7f65b861fb0645a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-6-2.json",
+      "sha256": "be00f6f26d4e5c1c14b942c3e415e0260664f4178207499485c67e6fc88e1451",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-6-3.json",
+      "sha256": "9a6a392a47bb0ea0b2077de5506ac1efd5535f9135f557a5e8e117b4f8b31a71",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-7-1.json",
+      "sha256": "7cec0ba8609a90682af615bfb3cc3624e163ae7028f9a808cc19636b9171a7b1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-7-2.json",
+      "sha256": "322cdd0d91cc44bdef44cfbb725e86482dae586d589b53be11c41d39076f8a0c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-7-3.json",
+      "sha256": "6102f0f85a8d600df427c861d4310f94d36ed6b433e8e0c65133c2b310c582d1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-8-1.json",
+      "sha256": "8b03333835c562013af364fc8cdd0785fe6936e5b987206cbdd6ed9cbdbe38ec",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-8-2.json",
+      "sha256": "b4b34863df73068a3038e123679a03ae7c2fb41d3f774586c36538d8adf04478",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-8-3.json",
+      "sha256": "5d4d01c02ffebc24518577891d63b4a1678f81f70470d6c7bfb5eef8992ed9c1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-9-1.json",
+      "sha256": "b820f800e68a690188b1894459e453fc67eb3c2972cd518d3d04109517cc29a0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-9-2.json",
+      "sha256": "48b19b26b33d88389eee62fd2c0a6048b22a92594178771d6b99d644b0845517",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026-07-24-v2-9-3.json",
+      "sha256": "bdc816e49593eaea770163b23a3d36c5e3ecfc1289693829c333ce71c86bc2e1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-1-1.json",
+      "sha256": "25096759fb58c8df84483b01da838c1f99a4e6fe7af45966a665bbaf6d0b12af",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-10-1.json",
+      "sha256": "83d828155d7a5d338a54dd289b251a3cb5ebeaa2deda826e189c5186ac34c2fb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-2-1.json",
+      "sha256": "de104ce0c3409cc89729593875dbb0b8cf2271ed4a8ed512f671712e13c72019",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-3-1.json",
+      "sha256": "75bcda695761b34aeea3291118a85f203df1d645e9b49820944771f8df7558da",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-4-1.json",
+      "sha256": "b1252f408f7d385487517900954403062370c21b3fb582f4c1e3cc1f121e3212",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-5-1.json",
+      "sha256": "e05f7c9cad7cc3c11445081f16bc5e822d141390d0378125c59a3a3bd7e3189a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-6-1.json",
+      "sha256": "1aef45eefdc9f4de07c9447d27032350dabf8f43a36ed0a642a9763dcc160dd1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-7-1.json",
+      "sha256": "7707818dced44fd9669827ab161470c9d895bf2634b26d0122a93e737ec5df39",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-8-1.json",
+      "sha256": "20d5c80fbd4d010a380182b4e701945d0187d8c942f6935373e3f550ad7ce507",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-nbg1-hetzner-2026q3-9-1.json",
+      "sha256": "6e401163aaab95c3f88d571be34e8a9a66b209e3704a195bde692bd322e55000",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-1-1.json",
+      "sha256": "1bd84f4c840271361a39a8353758315a5d262342f8184571ff5d3f59ede711fe",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-1-2.json",
+      "sha256": "a1d7e492c5ef68808146d77427158a136d2faae066ae979fe01dc6e69150a8a7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-1-3.json",
+      "sha256": "88fb1034a0b5158bea9d7588b15b6b931a49e2c05f4d62b467eb5f7c109a3c9c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-10-1.json",
+      "sha256": "ebca2c9e5b77d2685e42915ee74aba36f9c77d48b8c82bf5c4b411a1701595fc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-10-2.json",
+      "sha256": "830718fa72ce8401dd3e3825502c715d01d741f176e4824c09943c6fc621731b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-10-3.json",
+      "sha256": "06f4b520ac4eae20b40e415379dfe9b577f85af22982d9e114f3b88f15205558",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-2-1.json",
+      "sha256": "89703f76e4d697b0da797422cd60842b97c1f2ac7a1d580da0a4eae9664bdb6f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-2-2.json",
+      "sha256": "39cc25cff9fdb2556d455c90c0dbcda96bbfa99879958c9b43bca7a2749e1fb0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-2-3.json",
+      "sha256": "12b66446c5cba6f5f7b0efbf16448dca695e0d3a02a74dfb40e9020f7640bb26",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-3-1.json",
+      "sha256": "c7cc17e46239140e497214463b6e9eddcd52a64d621dd098a2ec70fad3118e61",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-3-2.json",
+      "sha256": "5434bc0fe9aad4517e972abeb2fa9469fc06a4a6e619ac981e19d1cc78d2694a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-3-3.json",
+      "sha256": "dd1d1d1ebf18ed9bf0701d40d42b0cab7a791a80b751f2247eb1ed8424955f73",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-4-1.json",
+      "sha256": "4c685ee913f19dd7900a417e71de80b258318fb249243f5a2ae74ee36a5583da",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-4-2.json",
+      "sha256": "debf1c05d26cf1256df92ae30688b432733715b133c772ca95bbc1ae56e0d99d",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-4-3.json",
+      "sha256": "181951ea4533a1439d48294fe97034eac4393a14652a54cdc42424899fe42faa",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-5-1.json",
+      "sha256": "dcc173fb4296f1156e14cd19e24893428be954b91fa3e115968be1f223fa7f33",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-5-2.json",
+      "sha256": "24f260420c0f6614f52e1bf9187fc9bba4c7dd1103a2a73f604d2a9e4c974924",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-5-3.json",
+      "sha256": "85e1a7e2571c2588b5bce746e9de36e9dcde075ea52075d24750fb28d887bbfc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-6-1.json",
+      "sha256": "afce04350fc9010cab42d8c4dad5b86ce425c94fff5ababdb49e55df81a10073",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-6-2.json",
+      "sha256": "b80089de087f1534e0be2af989167e903e6d4e769bb3af21d3d0c420c86d77ea",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-6-3.json",
+      "sha256": "ada97232922461ebff0a32a79b36f92a5a1e4a40a9072e09772a4ff8a277a6c8",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-7-1.json",
+      "sha256": "a5cde0b404f2f4db6af4737547a61849ea364bb808194f567a04a78947086585",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-7-2.json",
+      "sha256": "fedbda0a3b9e77f9589711ba094b6f32ef4e53f29d5c85dccf277b4fba42d907",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-7-3.json",
+      "sha256": "e5b1e6c06cec8e029e05a3f51939f39bd7c917a6bc107caa1f09f23d71b884db",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-8-1.json",
+      "sha256": "0552a63ea9cefd7ef65bafe17ed7d2b1a3c25b99cf765087c6cbdabe613c3eae",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-8-2.json",
+      "sha256": "1550d679f613bc89b4bbcb3d37db6f47412aabd72406a2c5b610f8437c5666bd",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-8-3.json",
+      "sha256": "7b0529b118bff050aba5af073804ffd3c23cfb20edb5ceaddcf968dab91167fb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-9-1.json",
+      "sha256": "d7567c00bb4d5426c35ee3ab8be373b12661fa74d47351d3cca5dce6499fbedd",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-9-2.json",
+      "sha256": "eda71743405afc3961ca03c940066609bfacc064a621adf564ba1b9eb5d255fc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026-07-24-v2-9-3.json",
+      "sha256": "81d8571e4155c541fa4eb339490a539ac4f47b6e6eedf86e835ae1a001e7abe6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-1-1.json",
+      "sha256": "85d99ab2762c4e07998f2cd2b1ec650f1eb1814129ef83f706c8277f018d0e80",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-10-1.json",
+      "sha256": "c669859610de3baab7bdb813660c9689d5c96b4e550569826eaf861ab38e1027",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-2-1.json",
+      "sha256": "27c2ba81f78cdee4ac48d90a98ec9daeece0974dcf51b6897da606d7dafd3d4f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-3-1.json",
+      "sha256": "d15c849a3486cc30e092243e8e95bf6a6b6db8d569eb8c5cfb405345d898b21a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-4-1.json",
+      "sha256": "5b377a2ebd09df0838cf9ecc34893908ed4aca57fa18583201a7a9d53f816361",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-5-1.json",
+      "sha256": "1efc144d0615d4db92185da7859329b445aeae9bfc8517c952d67ebc1c7e6aa7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-6-1.json",
+      "sha256": "54ad70a62d6def2cdd4fc92a9fdc65d5ba083e27dda18cf86c1f170e7f588a0b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-7-1.json",
+      "sha256": "4f59e7873fa08bd2f962ca8d2cb43185e52e1e88252d340252c5333d7b70d8b5",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-8-1.json",
+      "sha256": "f87def0c1f4e66b5f8b637a343c30b9312c2db9aaf1b30b463f845a825f3242f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cpx22-sin-hetzner-2026q3-9-1.json",
+      "sha256": "fcd032ad12f8f5b0318398d36d4d463e1697a1b02039c99385ebfc2f23f652d5",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-1-1.json",
+      "sha256": "518d1f5c70362794f4eba4f5511e18e5af5a122977ed9dfab63b7d278cb77bd7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-1-2.json",
+      "sha256": "09cd936efd680c0cde15c05013a58ca0ba75627e8625f97af14f884d014ccf0f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-1-3.json",
+      "sha256": "696b37eb7ed8ba1d249245b505b7f1b00587bfe08ea6450c644e309b73e7181c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-10-1.json",
+      "sha256": "6f7331a4f356454a3a2095a12e224639eec79d4383ff252a266140769e9507e1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-10-2.json",
+      "sha256": "5477b9dfd2fbfa508a4fefccc094bae12957f181db0b6867fdb14c6a7eb58039",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-10-3.json",
+      "sha256": "dd0bde9f93e530d21f69f3cb13c2d6767c5299585d751a99b959bb884719b85c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-2-1.json",
+      "sha256": "c7a412be647104f7d9df3fe350240ed2c2ed336c26ff333d19baa0820c552e98",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-2-2.json",
+      "sha256": "362e9550286f66388954da95c6059a33161dfb7e21beed5a8e03db9605d921b1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-2-3.json",
+      "sha256": "eb2912ae787e018ea283120e02ccf093bc239d9b986d4efb064dbe546f7390e7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-3-1.json",
+      "sha256": "fee6d758c9b7f90462fff6445bec85521e3975186059107bb532eebac0daa46c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-3-2.json",
+      "sha256": "58b7de4a3d44e54e9e2359d51b1990cd71ef1c67ec52250c3ae80e88858c9222",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-3-3.json",
+      "sha256": "19b3311b8e36eb8602e59943f02f7004fbc80977724867d6a4d86d4dd5ff7f82",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-4-1.json",
+      "sha256": "8870eff1a657b42e2241555607dab179f2c837cd275d4e2872ccad37ed3b2593",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-4-2.json",
+      "sha256": "c62777ec848081a56bdd031b15a8379d03a7f339fa75a10bbeaf033d603742c5",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-4-3.json",
+      "sha256": "666b3bcf61f23bc7389a582697a571f24a2cb7d86cb1d9d7b6139b3871bedac4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-5-1.json",
+      "sha256": "1d7f762e1b029f22476e18e990a37598200b0f5ade6bcaae2d55312b5e9fa2d8",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-5-2.json",
+      "sha256": "08848903d57270ec7c682905ddef9609505a903540030778228f7ba1d43f80d7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-5-3.json",
+      "sha256": "fe8da0f2c7036a902d7f03df42affc13cbe6ae694ab185fa37292cb0bf168b7a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-6-1.json",
+      "sha256": "668645428b3200c6667df42ac563380394217f8459389722059341374b1c6109",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-6-2.json",
+      "sha256": "004ac897b0a4a2161842192eda9927f6ceb6f2e4ae198f7065b92577baf9fb34",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-6-3.json",
+      "sha256": "4cdcd45350d262eb7dce072673229180640114b8354b153fad90b4bd97131988",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-7-1.json",
+      "sha256": "5ebdbeab2d3d845f9fe7fa05195f5fc2684672b37c36d7b8e294d51433298d5a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-7-2.json",
+      "sha256": "3b2275921c0a2b0f7b6b6df82b8880978a579e5b936f9e805dd28313bec7dae6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-7-3.json",
+      "sha256": "79483b750a095bac78eac66e1d226c1cebad1bae0dbf2a9d3d84fa00f0e4e1c7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-8-1.json",
+      "sha256": "a325661317f3748cb371ac792d5f9aefa51c2bf40106026491374671a1bee9b1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-8-2.json",
+      "sha256": "8b3d920fe78accb2567ac6d697d891a89a91de004e3e063291414e7faa3952d0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-8-3.json",
+      "sha256": "aa0bb2c0a72c87a38da66ced630ae3bdeadb1ade599cb61e26596a6d2d6092c4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-9-1.json",
+      "sha256": "ab7c9b96d5644159905b4b551c0f1386ea54b10f2cfa0022e0c8d18b94e6e2a7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-9-2.json",
+      "sha256": "57504ad61d768ed67fde539b1185481fc3dd5e8c75f883aa7a0caa6d1949f2a4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026-07-24-v2-9-3.json",
+      "sha256": "82a1c4e25e81e7af379383b481c1064ede79ea13e13da3c096972c1252ed6172",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-1-1.json",
+      "sha256": "6da3e72de59160eccda2a0aacf1c1fb87b1b4ad3a501db734541dbd8e21d3a3e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-10-1.json",
+      "sha256": "f62b3bc1494d4625f1cfa5eda8443ceb6c0083f09fed6f18b527ee7ee76cfd87",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-2-1.json",
+      "sha256": "bf144ffe9c696d6aeda9b6ec61bd138ebc891138cf0f205848b9b62e62a7121b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-3-1.json",
+      "sha256": "62407dd8cad9cf9bf8db8295da426c5a4bcfaf718cb67b979920b37b62204efc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-4-1.json",
+      "sha256": "8fe693214bb04e4ac74f359c2c2e81b1f7acfd190313b2a6b657d889e86272db",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-5-1.json",
+      "sha256": "de546d4eb55e7c7fb757766d0006499ed5986e73af35335c64ae33240a6ec173",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-6-1.json",
+      "sha256": "d632e98bd06f11bf6ae0119d3a8693f8af66012eaa1240bca163f4ef646e9bdc",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-7-1.json",
+      "sha256": "57482b890eeba3023ac592bb26c97379136c3079dc180fc99862a1260b3cd9fb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-8-1.json",
+      "sha256": "4259e3c27a7b0259f6fc064bdb422c15a866acf6c15f8411f255517ea28bc40a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "hetzner-cloud-vps-cx23-nbg1-hetzner-2026q3-9-1.json",
+      "sha256": "0b90409aad035a9f570f859f06fa869c5e2c5398fddda9eda34b57863421cfcf",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "hetzner-2026q3",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-1-1.json",
+      "sha256": "c217d908d0dd2f5313cdc8e665b4304a411cbc26311c7cd5e8a7697e605e88ee",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-1-2.json",
+      "sha256": "deaa7d33e22b48872c148dd15efcb1dd124ab8aa6e41571fcb0eb13eb4749554",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-1-3.json",
+      "sha256": "8bcfc1b5784b714612bc03b539b2a969f63ff948f6e5de703a491d382e1d2880",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-10-1.json",
+      "sha256": "4ffc981522b0a1482310a1c25a8dee44d68c895dff719e8bc931980917d8d62b",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-10-2.json",
+      "sha256": "e0743f611ede3873c3da6738b1acb883f4308630513386be65a3b80ac4e34169",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-10-3.json",
+      "sha256": "fcb5599508db68c441632efe1223fcb38d28a3b25580e79ab6c8cb7f2b893717",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-2-1.json",
+      "sha256": "3e58f5b987f9c7f9b8dc5689f5839630b1989414419d26a9741780c690b6136e",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-2-2.json",
+      "sha256": "d7fc69196e15e0e18d32e70670ca2135de52bd825a7c111c6ceb4014cc9947af",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-2-3.json",
+      "sha256": "a8127a1a0aad3cb8c967b68ea412c5899077936bd0e752325485865cbd6d90f8",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-3-1.json",
+      "sha256": "7f340e7b248b334f71528087d53b6107a1e76c76e05023489e91b8d6b2da2eb0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-3-2.json",
+      "sha256": "2469b5ef6f36ab7d12cdc6a9ddb283eb3a448160583d48f2be366b6f2306fe3a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-3-3.json",
+      "sha256": "e6b445f2db7518bc8367781824848a5a68b7afcdd4b7a4fb4dea3b39bd0d5286",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-4-1.json",
+      "sha256": "32f69c4345506e77f95add684d7820e98765aff9c432605f3dc96a334294d282",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-4-2.json",
+      "sha256": "d334ee6d903655ebd5649f1f32871b5578c656ec88f5bd750669bb691ff80417",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-4-3.json",
+      "sha256": "3304e0f5e6bb0e3ddff560a39071984e99d94238118ce619cdfc51ea9a6b5f18",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-5-1.json",
+      "sha256": "327a1588d77d7174e30e6426c2d59c7a1b29241a4efc4141b1667f05a65d5c09",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-5-2.json",
+      "sha256": "b19d8e0d24418356e816eab2f532938d73efcc675ae7a3da8db584d512d73e23",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-5-3.json",
+      "sha256": "4242971836e66d5bfe07b0ceb0094f3ce186f08b7dea2d18280287ecba03aafb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-6-1.json",
+      "sha256": "0d89cae50d62b6400e36ed3a2f49450b7dd973d60b3551a571e2ce57c9562a48",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-6-2.json",
+      "sha256": "e8790a5050545f42375969fafcad6fd2b63e110f6fcf0b096757e4654d55c2ce",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-6-3.json",
+      "sha256": "9b2bae14696d7b20b90a537c951ccd942e3ddb489a97851123578878fe24c3ca",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-7-1.json",
+      "sha256": "7d26bb40ef79a69ef95bca5e7894e72293ac7ada6312f1fea5701660837e0850",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-7-2.json",
+      "sha256": "df7ee39e7a944b350925ad4c23703df3d6c6c0764e54bb9549c42d2c483764cb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-7-3.json",
+      "sha256": "03f2a097eb74b3520a8bc435ea45f4712d2fd49b8c4fdf390988147d23d87ea6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-8-1.json",
+      "sha256": "6f287e4a9df29da17d52d4ae38f92b9a9696d09f24e956cf8e98768b046224fd",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-8-2.json",
+      "sha256": "393a7bb8dbac715d5896fb10e046b57bd6ec9fa2fa615a6b8c86be5ca72e19c0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-8-3.json",
+      "sha256": "ed1a04c8ebe53f3369b469201417163d2853902268e789821ddcc025cc1883a7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-9-1.json",
+      "sha256": "2017c5e2bbed8e83b38e098423c225c99006eb2f8c8bb2b5aec796711991e565",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-9-2.json",
+      "sha256": "9417da1f66625d9aedbde2b2d46bbe8e9d4491c09eecd1ab17e23fc059f98988",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-9-3.json",
+      "sha256": "b4946075e46ca83bb3a8063f89e0dbcd35820b3a13e67ca70b01f74fb9bd1d13",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.1.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-1-1.json",
+      "sha256": "f04bc23344018778895d56ef8d5b044d9100681c739a8d5a03fafce933c92a73",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-1-2.json",
+      "sha256": "e735eae6c0c28e5d62a9421bb1d7a6f50cc83b6d56be9629e30bee4fe0296808",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-1-3.json",
+      "sha256": "71c9e0eca115e3c1c5201e6a70fefdc8f3434904f4c14a0a8a9506c659481a0c",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-10-1.json",
+      "sha256": "ab35808e8c14f67bf0039e86a29abcfd6a92abc1dbef14c4740e9dbe81f72442",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-10-2.json",
+      "sha256": "33e2c12f5d4a9e85a39587f351a40f8a27c063fd2aa2e69435af9ac55b38f5aa",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-10-3.json",
+      "sha256": "a02dc97613ee1cb39bdfc7ddecba50d600f7d17443b72f3427ec7fa57f00a9b4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-2-1.json",
+      "sha256": "7d9096281071b9f9e15d43712636de11581e91c8df883102bc456463bcd36a2a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-2-2.json",
+      "sha256": "478cb55bae4050d06bfe8685da994d755ca4afc65ca1dbc1f46d1aaa5016c7a6",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-2-3.json",
+      "sha256": "aa412a4a2c7ab35afec8368a94f975a7201038a0d81227445375d3d329662b2a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-3-1.json",
+      "sha256": "ed9c6fe871a4a1870335664e1949824df53e7baf48b33a42c14f674847e578fb",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-3-2.json",
+      "sha256": "3fcc10fce4d7ec43ce72751dd59e050cf76404884a58187b19fb5423b5496cb0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-3-3.json",
+      "sha256": "572bd6d82eac379bb3116742adcabb95df53d2a1057fb5289eb81f038564a760",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-4-1.json",
+      "sha256": "48d9af806a696137d36462eb6adb3173fc129744fa19f4b502bc83313e48544a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-4-2.json",
+      "sha256": "376a73cedd70198a2d3c6883353acd05682d81957bf50f16207903d5e64e80b9",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-4-3.json",
+      "sha256": "b1a0ebb73b0031e02034162056e966c515b2a23984ee7b6221bf2b5a72e93210",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-5-1.json",
+      "sha256": "7c4bd8cc2b2d3c252fbd259d20ac3d000c0324db4128ddc2a38782ee47a7559f",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-5-2.json",
+      "sha256": "193bb2ce2a20f013a0e8cd129bebe758f97104569e9792104d9533cf05623f88",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-5-3.json",
+      "sha256": "49dd2ce00902c8f00bdbdc691693331db8459192bf6d89f220c3a21818b83674",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-6-1.json",
+      "sha256": "775b472c46a98b10c9665c74bac476c48ba7c00ffa867149dc42593bf8bc2ed7",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-6-2.json",
+      "sha256": "4d5e7ddc436a632a6eda4c508020f17272810011238fd40c9bccad21e7718094",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-6-3.json",
+      "sha256": "8554a1357e46640f9953296f5078d0e8c460da9f6b73246b3df805bba760ebb9",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-7-1.json",
+      "sha256": "149b34dfb68c690cb6e1508d2f569c49e586eedf94e063832df0150878656038",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-7-2.json",
+      "sha256": "685f81f6d8e31e2b015664ec4072204f8fa49e9fc97fb04386e8d14e8a0c1533",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-7-3.json",
+      "sha256": "a3352451efe5e66a37ae0fd994afd39952220bebee695ec5d72abac145a7cf51",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-8-1.json",
+      "sha256": "ad9cf3dd4665b680471d8fb0773f1c80703a7520871aab9d13a16005eaac3801",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-8-2.json",
+      "sha256": "429069f6b6e80f5e71b95c8d9acfb13bfed3f6b7dd188d0fd8b75ccf73dce6b1",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-8-3.json",
+      "sha256": "5bfc0365e2d9fcf042b8ea949f1b8bcc9cdca19d21c5a0bb9571d952dc7ba0b4",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-9-1.json",
+      "sha256": "270abdaaaf42dcbd952bc832192fcc753986526d3dee77ae422d7ff98c2560e0",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-9-2.json",
+      "sha256": "e351f498bbaae1dfe395521a8cd49e54ff9a20c6f72ddf3f943da16e61cbbf8a",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    },
+    {
+      "file": "vercel-sandbox-2vcpu-iad1-vercel-sandbox-2026-07-24-v2-9-3.json",
+      "sha256": "dc0c12327535a1f4fa8ff7d34ad4c6c16433eb577472bea6f29f31622c76b5dd",
+      "schema_version": 1,
+      "protocol_version": "compute-cli-0.2.0-dev",
+      "profile": "standard",
+      "category": "compute",
+      "cohort_id": "vercel-sandbox-2026-07-24-v2",
+      "rank_eligible": true
+    }
+  ]
+}

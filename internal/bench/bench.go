@@ -66,6 +66,21 @@ type Benchmark interface {
 	Run(ctx context.Context, opts Options) (*Result, error)
 }
 
+// Categorized lets a benchmark declare the report category it belongs to.
+// Benchmarks without it are compute — the CLI's original suite. A report
+// always holds exactly one category, so a run never mixes suites.
+type Categorized interface {
+	Category() string
+}
+
+// CategoryOf returns the category a benchmark reports under.
+func CategoryOf(b Benchmark) string {
+	if c, ok := b.(Categorized); ok {
+		return c.Category()
+	}
+	return "compute"
+}
+
 var registry []Benchmark
 
 // Register adds a benchmark to the global registry. Call it from an init
@@ -82,6 +97,18 @@ func Register(b Benchmark) {
 // All returns registered benchmarks in registration order.
 func All() []Benchmark {
 	return registry
+}
+
+// ByCategory returns the registered benchmarks of one category in
+// registration order.
+func ByCategory(category string) []Benchmark {
+	var out []Benchmark
+	for _, b := range registry {
+		if CategoryOf(b) == category {
+			out = append(out, b)
+		}
+	}
+	return out
 }
 
 // Select resolves test names to benchmarks, erroring on unknown names.

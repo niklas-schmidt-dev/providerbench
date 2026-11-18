@@ -44,17 +44,19 @@ export function CommandMenu({ providersWithRuns }: { providersWithRuns: string[]
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden h-8 items-center gap-2 rounded-lg border bg-card px-2.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:flex"
+        className="hidden h-[30px] w-56 items-center gap-2 rounded-(--radius-sm) border border-(--border-strong) bg-card px-2.5 text-[13px] tracking-[-0.005em] whitespace-nowrap text-muted-foreground shadow-(--shadow-xs) transition-colors hover:border-gray-400 sm:flex"
       >
-        <Search className="size-3.5" />
-        Search
-        <kbd className="ml-3 rounded-sm border bg-muted px-1 font-mono text-[10px]">⌘K</kbd>
+        <Search className="size-3.5 shrink-0 text-(--text-faint)" />
+        Search the bench…
+        <kbd className="ml-auto rounded-(--radius-xs) border border-(--border-hairline) bg-muted px-1 font-mono text-[10px] text-muted-foreground">
+          ⌘K
+        </kbd>
       </button>
       <button
         type="button"
         aria-label="Search"
         onClick={() => setOpen(true)}
-        className="flex size-8 items-center justify-center rounded-lg border bg-card text-muted-foreground sm:hidden"
+        className="flex size-[30px] items-center justify-center rounded-(--radius-sm) border border-(--border-strong) bg-card text-muted-foreground shadow-(--shadow-xs) sm:hidden"
       >
         <Search className="size-3.5" />
       </button>

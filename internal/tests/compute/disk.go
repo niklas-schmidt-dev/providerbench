@@ -3,11 +3,13 @@ package compute
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -64,7 +66,15 @@ func (diskTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 			f.Close()
 			return nil, fmt.Errorf("disk: write: %w", err)
 		}
+		if n != len(block) {
+			f.Close()
+			return nil, fmt.Errorf("disk: write: %w", io.ErrShortWrite)
+		}
 		written += int64(n)
+	}
+	if err := ctx.Err(); err != nil {
+		f.Close()
+		return nil, fmt.Errorf("disk: sequential write: %w", err)
 	}
 	if err := f.Sync(); err != nil {
 		f.Close()
@@ -79,19 +89,10 @@ func (diskTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 		iters = 20
 	}
 	page := alignedBuf(diskAlign, diskAlign)
-	var syncMs []float64
-	for range iters {
-		if ctx.Err() != nil {
-			break
-		}
-		t := time.Now()
-		if _, err := f.WriteAt(page, 0); err != nil {
-			break
-		}
-		if err := f.Sync(); err != nil {
-			break
-		}
-		syncMs = append(syncMs, float64(time.Since(t).Microseconds())/1000)
+	syncMs, err := measureFsyncLatency(ctx, f, page, iters)
+	if err != nil {
+		f.Close()
+		return nil, fmt.Errorf("disk: fsync latency: %w", err)
 	}
 	f.Close()
 
@@ -115,35 +116,22 @@ func (diskTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 			return nil, fmt.Errorf("disk: read: %w", err)
 		}
 	}
+	if err := ctx.Err(); err != nil {
+		rf.Close()
+		return nil, fmt.Errorf("disk: sequential read: %w", err)
+	}
 	readMBps := float64(read) / time.Since(start).Seconds() / 1e6
 
 	// --- Random 4K reads at queue depth 4 ---
 	opts.Logf("disk: random 4K reads (QD4)...")
 	blocks := fileSize / diskAlign
 	dur := opts.Pick(2*time.Second, 1*time.Second)
-	var ops atomic.Int64
-	done := make(chan struct{})
 	const workers = 4
-	start = time.Now()
-	for w := range workers {
-		go func() {
-			defer func() { done <- struct{}{} }()
-			buf := alignedBuf(diskAlign, diskAlign)
-			rng := rand.New(rand.NewSource(int64(w)))
-			deadline := time.Now().Add(dur)
-			for time.Now().Before(deadline) && ctx.Err() == nil {
-				off := rng.Int63n(blocks) * diskAlign
-				if _, err := rf.ReadAt(buf, off); err != nil {
-					return
-				}
-				ops.Add(1)
-			}
-		}()
+	iops, err := measureRandomReadIOPS(ctx, rf, blocks, dur, workers)
+	if err != nil {
+		rf.Close()
+		return nil, fmt.Errorf("disk: random 4K read: %w", err)
 	}
-	for range workers {
-		<-done
-	}
-	iops := float64(ops.Load()) / time.Since(start).Seconds()
 	rf.Close()
 
 	res.Add("seq_write", writeMBps, "MB/s", true)
@@ -158,4 +146,99 @@ func (diskTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 	res.Note("test file: %d MiB, random reads at queue depth %d", fileSize>>20, workers)
 	finish(res)
 	return res, ctx.Err()
+}
+
+type fsyncFile interface {
+	WriteAt([]byte, int64) (int, error)
+	Sync() error
+}
+
+func measureFsyncLatency(ctx context.Context, file fsyncFile, page []byte, iterations int) ([]float64, error) {
+	if iterations < 1 {
+		return nil, errors.New("no fsync iterations configured")
+	}
+	samples := make([]float64, 0, iterations)
+	for range iterations {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		started := time.Now()
+		n, err := file.WriteAt(page, 0)
+		if err != nil {
+			return nil, fmt.Errorf("write 4K page: %w", err)
+		}
+		if n != len(page) {
+			return nil, fmt.Errorf("write 4K page: %w", io.ErrShortWrite)
+		}
+		if err := file.Sync(); err != nil {
+			return nil, fmt.Errorf("sync 4K page: %w", err)
+		}
+		samples = append(samples, float64(time.Since(started).Microseconds())/1000)
+	}
+	if len(samples) == 0 {
+		return nil, errors.New("fsync workload produced no samples")
+	}
+	return samples, nil
+}
+
+func measureRandomReadIOPS(
+	ctx context.Context,
+	reader io.ReaderAt,
+	blocks int64,
+	duration time.Duration,
+	workers int,
+) (float64, error) {
+	if blocks < 1 || duration <= 0 || workers < 1 {
+		return 0, errors.New("random-read workload has invalid configuration")
+	}
+	workerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	var ops atomic.Int64
+	errs := make(chan error, 1)
+	var wait sync.WaitGroup
+	started := time.Now()
+	deadline := started.Add(duration)
+	for worker := range workers {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			buf := alignedBuf(diskAlign, diskAlign)
+			rng := rand.New(rand.NewSource(int64(worker)))
+			for time.Now().Before(deadline) {
+				if err := workerCtx.Err(); err != nil {
+					return
+				}
+				offset := rng.Int63n(blocks) * diskAlign
+				n, err := reader.ReadAt(buf, offset)
+				if err == nil && n != len(buf) {
+					err = io.ErrUnexpectedEOF
+				}
+				if err != nil {
+					select {
+					case errs <- err:
+						cancel()
+					default:
+					}
+					return
+				}
+				ops.Add(1)
+			}
+		}()
+	}
+	wait.Wait()
+
+	select {
+	case err := <-errs:
+		return 0, err
+	default:
+	}
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+	elapsed := time.Since(started).Seconds()
+	if ops.Load() == 0 || elapsed <= 0 {
+		return 0, errors.New("random-read workload produced no samples")
+	}
+	return float64(ops.Load()) / elapsed, nil
 }

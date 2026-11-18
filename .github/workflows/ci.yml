@@ -4,16 +4,92 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
-  go:
+  go-data:
+    name: go-data
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
-      - run: go vet ./...
-      - run: go test ./...
+          cache: true
+      - name: Vet
+        run: go vet ./...
+      - name: Race tests
+        run: go test -race ./...
       - name: Validate public dataset
         run: go run ./cmd/providerbench validate data/results
+      - name: Check report manifest drift
+        run: |
+          manifest="$(mktemp)"
+          go run ./cmd/providerbench validate --manifest "$manifest" data/results
+          cmp data/report-manifest.json "$manifest"
+
+  web:
+    name: web
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Unit tests with coverage
+        run: bun test src --coverage
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Production build (local fonts and static data only)
+        run: bun run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  e2e:
+    name: e2e
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+      - name: Browser smoke tests
+        run: bun run test:e2e
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  security:
+    name: security
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.10.0
+      - name: Audit Go call graph
+        run: govulncheck ./...
+      - name: Install web dependencies
+        working-directory: web
+        run: bun install --frozen-lockfile
+      - name: Block high and critical production advisories
+        working-directory: web
+        run: bun audit --production --audit-level=high

@@ -4,7 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
+	"sync"
+
+	reportschema "github.com/niklas-schmidt-dev/providerbench/schema"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // ValidTier reports whether tier is empty or one of the schema's price tiers.
@@ -16,26 +21,146 @@ func ValidTier(tier string) bool {
 	return false
 }
 
-// ValidateReport parses data strictly and returns every structural problem it
-// finds. It is the Go mirror of schema/result.schema.json plus the cross-field
-// rules a schema cannot express (campaign coordinates travel together).
-// Reports from any runner — this CLI or a future category's — must pass.
+var (
+	schemasOnce sync.Once
+	schemas     map[int]*jsonschema.Schema
+	schemasErr  error
+)
+
+// ValidateReport validates a report with the public schema selected by its
+// schema_version, then decodes it into the shared Go type. Version 1 keeps its
+// historical strict-decoder checks; version 2 delegates structure entirely to
+// the embedded Draft 2020-12 contract and keeps only semantic checks here.
 func ValidateReport(data []byte) (*Report, []error) {
+	version, err := schemaVersion(data)
+	if err != nil {
+		return nil, []error{fmt.Errorf("parse: %w", err)}
+	}
+	if version != LegacySchemaVersion && version != SchemaVersion {
+		return nil, []error{fmt.Errorf("schema_version is %d, supported versions are %d and %d", version, LegacySchemaVersion, SchemaVersion)}
+	}
+	if err := validateSchema(version, data); err != nil {
+		return nil, []error{fmt.Errorf("schema v%d: %w", version, err)}
+	}
+
 	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.DisallowUnknownFields()
+	if version == LegacySchemaVersion {
+		dec.DisallowUnknownFields()
+	}
 	var r Report
 	if err := dec.Decode(&r); err != nil {
 		return nil, []error{fmt.Errorf("parse: %w", err)}
 	}
-	if dec.More() {
+	if err := expectEOF(dec); err != nil {
 		return nil, []error{fmt.Errorf("parse: trailing data after the report object")}
 	}
 
+	if version == SchemaVersion {
+		return &r, semanticV2Errors(&r)
+	}
+	return &r, legacyReportErrors(&r)
+}
+
+func schemaVersion(data []byte) (int, error) {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	var header struct {
+		SchemaVersion int `json:"schema_version"`
+	}
+	if err := dec.Decode(&header); err != nil {
+		return 0, err
+	}
+	if err := expectEOF(dec); err != nil {
+		return 0, err
+	}
+	return header.SchemaVersion, nil
+}
+
+func expectEOF(dec *json.Decoder) error {
+	var extra any
+	err := dec.Decode(&extra)
+	if err == io.EOF {
+		return nil
+	}
+	if err == nil {
+		return errorsNewTrailingData
+	}
+	return err
+}
+
+var errorsNewTrailingData = fmt.Errorf("trailing data after the report object")
+
+func validateSchema(version int, data []byte) error {
+	schemasOnce.Do(compileSchemas)
+	if schemasErr != nil {
+		return fmt.Errorf("load embedded schemas: %w", schemasErr)
+	}
+	instance, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	return schemas[version].Validate(instance)
+}
+
+func compileSchemas() {
+	schemas = make(map[int]*jsonschema.Schema, 2)
+	for version, name := range map[int]string{
+		LegacySchemaVersion: "result.schema.json",
+		SchemaVersion:       "result-v2.schema.json",
+	} {
+		data, err := reportschema.Files.ReadFile(name)
+		if err != nil {
+			schemasErr = err
+			return
+		}
+		doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+		if err != nil {
+			schemasErr = fmt.Errorf("%s: %w", name, err)
+			return
+		}
+		compiler := jsonschema.NewCompiler()
+		compiler.DefaultDraft(jsonschema.Draft2020)
+		compiler.AssertFormat()
+		url := "https://providerbench.dev/schema/" + name
+		if err := compiler.AddResource(url, doc); err != nil {
+			schemasErr = fmt.Errorf("%s: %w", name, err)
+			return
+		}
+		compiled, err := compiler.Compile(url)
+		if err != nil {
+			schemasErr = fmt.Errorf("%s: %w", name, err)
+			return
+		}
+		schemas[version] = compiled
+	}
+}
+
+func semanticV2Errors(r *Report) []error {
 	var errs []error
 	fail := func(format string, a ...any) { errs = append(errs, fmt.Errorf(format, a...)) }
 
-	if r.SchemaVersion != SchemaVersion {
-		fail("schema_version is %d, want %d", r.SchemaVersion, SchemaVersion)
+	if want, ok := ProtocolFor(r.Category); ok && r.ProtocolVersion != want {
+		fail("%s reports need protocol_version %q", r.Category, want)
+	}
+	if r.Profile == SustainedProfile && r.Quick {
+		fail("sustained reports cannot also be quick")
+	}
+	if r.CreatedAt.IsZero() {
+		fail("created_at must not be the zero timestamp")
+	}
+	for i, result := range r.Results {
+		if result.StartedAt.IsZero() {
+			fail("results[%d] (%s): started_at must not be the zero timestamp", i, result.Test)
+		}
+	}
+	return errs
+}
+
+func legacyReportErrors(r *Report) []error {
+	var errs []error
+	fail := func(format string, a ...any) { errs = append(errs, fmt.Errorf(format, a...)) }
+
+	if r.SchemaVersion != LegacySchemaVersion {
+		fail("schema_version is %d, want %d", r.SchemaVersion, LegacySchemaVersion)
 	}
 	if r.CLIVersion == "" {
 		fail("cli_version is missing")
@@ -91,7 +216,30 @@ func ValidateReport(data []byte) (*Report, []error) {
 			}
 		}
 	}
-	return &r, errs
+	return errs
+}
+
+// EffectiveProtocol returns the immutable method identity used for grouping.
+// Legacy reports predate the field, so their CLI version forms an explicit
+// non-comparable protocol boundary.
+func EffectiveProtocol(r *Report) string {
+	if r.ProtocolVersion != "" {
+		return r.ProtocolVersion
+	}
+	category := r.Category
+	if category == "" {
+		category = "compute"
+	}
+	return slugify(category + "-cli-" + r.CLIVersion)
+}
+
+// EffectiveProfile returns the report profile, defaulting legacy data to the
+// standard short-running suite.
+func EffectiveProfile(r *Report) string {
+	if r.Profile != "" {
+		return r.Profile
+	}
+	return StandardProfile
 }
 
 // DatasetErrors checks the extra conventions for reports submitted to

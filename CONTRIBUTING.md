@@ -20,9 +20,9 @@ providerbench run \
 - `--env` (repeatable) carries the reproducibility detail: OS image, service
   versions, non-default config. Everything needed to reproduce the run lives
   in the public report — the site only shows a summary.
-- A ranked campaign needs at least **10 independently provisioned hosts** per
-  provider/product/plan/region. Do not repeatedly benchmark one lucky VM and
-  present those runs as independent samples.
+- A `compute-v2` standard cohort needs exactly **10 independently provisioned
+  hosts with 3 successful repeats each** per provider/product/plan/region.
+  Do not repeatedly benchmark one lucky VM or silently replace a failed sample.
 - Use one `--campaign` ID. Increment `--sample-index` for every fresh host and
   `--repeat-index` for technical repeats on the same host. The CLI refuses a
   campaign run without explicit coordinates, and the site collapses any
@@ -35,28 +35,33 @@ providerbench run \
 - Name files
   `data/results/<provider>-<product>-<plan>-<region>-<campaign>-<sample>-<repeat>.json`
   and submit every raw observation, not a hand-picked representative.
-- Ten hosts are enough to enter the ranking and estimate P90. Treat P99 as an
-  observed-tail estimate until the campaign reaches 100 independent hosts.
+- Ten hosts are enough to enter the standard ranking. Treat P99 as a
+  descriptive observed-tail estimate for this fixed 10-host design.
 - Reports include full system info (never your hostname) so others can verify.
 - Every report and individual benchmark must retain its UTC timestamp. Re-runs
   at a later date use a new campaign ID; historical cohorts are never pooled.
-- Don't hand-edit the JSON. Run `providerbench validate data/results` before
-  opening the PR — CI runs the same check and rejects reports that fail the
-  schema in `schema/result.schema.json` or the naming convention.
+- Don't hand-edit the JSON. Run
+  `providerbench validate --manifest data/report-manifest.json data/results`
+  before opening the PR. CI verifies the schema selected by `schema_version`,
+  all cohort invariants, the naming convention, and byte-for-byte manifest
+  drift. Schema v1 remains the immutable legacy contract; new runs use strict
+  schema v2 and `protocol_version: "compute-v2"`.
 
 For supported provider lifecycles, use the managed Go commands instead of an
 ad-hoc shell script:
 
 ```sh
 providerbench campaign hetzner --help
+providerbench campaign digitalocean --help
 providerbench campaign vercel --help
 ```
 
-The Vercel command defaults to 10 fresh Sandboxes with 3 repeats per Sandbox.
-It creates and removes Sandboxes sequentially. The Hetzner command creates its
-10-host cohort together so a spread placement group can distribute hosts, then
-benchmarks and removes them sequentially. Both commands refuse to overwrite an
-existing campaign report and require `--confirm-cost` for live provisioning.
+The Vercel command defaults to 10 fresh Sandboxes with 3 repeats per Sandbox
+and creates them sequentially. Hetzner creates its 10-host cohort in a spread
+placement group. DigitalOcean selects the cheapest matching Basic 2-vCPU/4-GiB
+size in `fra1` and requests all 10 tagged Droplets together. Every runner
+benchmarks sequentially, refuses to overwrite campaign reports, and requires
+`--confirm-cost` for live provisioning.
 
 ## 2. Add a benchmark test
 
@@ -84,13 +89,15 @@ Ground rules for tests (the benchmark source is the methodology):
 
 ## 3. Propose a category
 
-Categories group benchmarks on the site (`compute` is live; `ai` and
-`storage` are planned). The architectural rule is **category = runner,
-schema = contract**: a category is not required to extend this CLI. `compute`
-runs as one zero-dependency static binary because the host itself is being
-measured; a category whose workload doesn't fit that shape gets its own
-runner (`ai` hits provider APIs from a client, `storage` drives object stores
-from a fixed vantage point).
+Categories group benchmarks on the site (`compute` is live; `storage` ships
+in this CLI as `providerbench run -t s3` under `protocol_version:
+"storage-v1"` and awaits its first ranked campaigns). The architectural rule
+is **category = runner, schema = contract**: a category is not required to
+extend this CLI. `compute` and `storage` run as one zero-dependency static
+binary — `storage` drives object stores from whatever vantage host the CLI
+runs on, which is why its protocol records the vantage. A category whose
+workload doesn't fit that shape gets its own runner (an AI suite would hit
+provider APIs from a client).
 
 Every runner must satisfy the same contract: emit reports that pass
 `providerbench validate`, carry campaign/sample/repeat coordinates, and land
@@ -105,9 +112,11 @@ proposed metrics first — methodology gets debated before code.
 cd web && bun install && bun dev
 ```
 
-Next.js + Tailwind v4 + shadcn/ui (Base UI) + Motion. Provider chart colors
-live in `web/src/lib/providers.ts` — the slot order is a validated
-colorblind-safe sequence; add new providers to the end, never re-shuffle.
+Next.js + Tailwind v4 + locally generated Base UI components + Motion. IBM
+Plex is bundled locally, so production builds do not fetch fonts. Provider
+chart colors live in `web/src/lib/providers.ts` — the slot order is a
+validated colorblind-safe sequence; add new providers to the end, never
+re-shuffle.
 
 ## Ground rules
 

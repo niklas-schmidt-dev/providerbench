@@ -4,6 +4,7 @@ import {
   aggregateRuns,
   currentScoredGroups,
   latestMeasurementGroups,
+  scoreGroups,
 } from "@/lib/aggregate";
 
 // The full scoring suite. `factor` scales quality in one direction: for
@@ -35,6 +36,9 @@ function observation({
   omitSampleIndex = false,
   onlyTests,
   notes,
+  rankEligible = false,
+  eligibilityReasons = [],
+  protocol = "compute-cli-test",
 }) {
   const byTest = new Map();
   for (const metric of SUITE) {
@@ -62,6 +66,17 @@ function observation({
     cli_version: "test",
     category: "compute",
     created_at: createdAt,
+    manifest: {
+      file: `${campaign}-${index}-${repeat}.json`,
+      sha256: "test",
+      schema_version: 1,
+      protocol_version: protocol,
+      profile: "standard",
+      category: "compute",
+      cohort_id: campaign,
+      rank_eligible: rankEligible,
+      eligibility_reasons: eligibilityReasons,
+    },
     quick: quick || undefined,
     provider: {
       name: "provider",
@@ -86,6 +101,9 @@ function observation({
 }
 
 function campaign(id, day, hostCount, value, extra = {}) {
+  const rankEligible =
+    extra.rankEligible ??
+    (hostCount >= 10 && !extra.quick && !extra.onlyTests && !extra.omitSampleIndex);
   return Array.from({ length: hostCount }, (_, index) =>
     observation({
       campaign: id,
@@ -94,6 +112,8 @@ function campaign(id, day, hostCount, value, extra = {}) {
         index,
       ).padStart(2, "0")}:00.000Z`,
       value,
+      rankEligible,
+      eligibilityReasons: rankEligible ? [] : ["fixture is provisional"],
       ...extra,
     }),
   );
@@ -200,6 +220,35 @@ describe("dated benchmark cohorts", () => {
 
     expect(groups[0].hostCount).toBe(10);
     expect(groups[0].rankEligible).toBe(false);
+    expect(scoreGroups(groups)[0].performanceScore).toBe(0);
+  });
+
+  test("retains valid failure reports for audit without ranking or scoring them", () => {
+    const failed = observation({
+      campaign: "provider-failed",
+      index: 1,
+      createdAt: "2026-07-24T08:00:00.000Z",
+      value: 100,
+      rankEligible: false,
+      eligibilityReasons: ["cohort contains benchmark errors"],
+      protocol: "compute-v2",
+    });
+    failed.schema_version = 2;
+    failed.results = [
+      {
+        test: "disk",
+        started_at: failed.created_at,
+        duration_seconds: 1,
+        metrics: [],
+        error: "fsync failed",
+      },
+    ];
+
+    const groups = aggregateRuns([failed]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].runs[0].results[0].error).toBe("fsync failed");
+    expect(groups[0].rankEligible).toBe(false);
+    expect(scoreGroups(groups)[0].performanceScore).toBe(0);
   });
 
   test("provisional cohorts do not define the ranked scale", () => {
@@ -227,5 +276,20 @@ describe("dated benchmark cohorts", () => {
     expect(disk?.notes).toEqual([
       "page cache could not be bypassed on this platform",
     ]);
+  });
+
+  test("keeps protocol versions in separate history series", () => {
+    const groups = aggregateRuns([
+      ...campaign("provider-legacy", 1, 10, 100, {
+        protocol: "compute-cli-0.1.0-dev",
+      }),
+      ...campaign("provider-v2", 24, 10, 140, {
+        protocol: "compute-v2",
+      }),
+    ]);
+
+    expect(new Set(groups.map((group) => group.seriesId)).size).toBe(2);
+    expect(latestMeasurementGroups(groups)).toHaveLength(1);
+    expect(latestMeasurementGroups(groups)[0].protocolVersion).toBe("compute-v2");
   });
 });

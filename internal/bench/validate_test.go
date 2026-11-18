@@ -2,6 +2,8 @@ package bench
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -12,10 +14,12 @@ import (
 func validReport() *Report {
 	started := time.Date(2026, 7, 24, 12, 0, 0, 0, time.UTC)
 	return &Report{
-		SchemaVersion: SchemaVersion,
-		CLIVersion:    "test",
-		Category:      "compute",
-		CreatedAt:     started,
+		SchemaVersion:   SchemaVersion,
+		ProtocolVersion: ComputeProtocol,
+		Profile:         StandardProfile,
+		CLIVersion:      "test",
+		Category:        "compute",
+		CreatedAt:       started,
 		Provider: Provider{
 			Name: "hetzner", Product: "cloud-vps", Plan: "cpx22", Tier: "medium",
 			Region: "fsn1", PriceEURHour: 0.032, PriceEURMonth: 19.99,
@@ -54,6 +58,17 @@ func TestValidateReportOK(t *testing.T) {
 	}
 }
 
+func TestValidateLegacyReportOK(t *testing.T) {
+	r := validReport()
+	r.SchemaVersion = LegacySchemaVersion
+	r.ProtocolVersion = ""
+	r.Profile = ""
+	report, errs := ValidateReport(mustJSON(t, r))
+	if report == nil || len(errs) != 0 {
+		t.Fatalf("valid legacy report rejected: %v", errs)
+	}
+}
+
 func TestValidateReportRejectsUnknownFields(t *testing.T) {
 	var m map[string]any
 	if err := json.Unmarshal(mustJSON(t, validReport()), &m); err != nil {
@@ -64,7 +79,7 @@ func TestValidateReportRejectsUnknownFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, errs := ValidateReport(data); !hasError(errs, "parse") {
+	if _, errs := ValidateReport(data); !hasError(errs, "hostname") {
 		t.Fatalf("unknown field accepted: %v", errs)
 	}
 }
@@ -75,19 +90,21 @@ func TestValidateReportProblems(t *testing.T) {
 		mutate func(*Report)
 		want   string
 	}{
-		{"wrong schema version", func(r *Report) { r.SchemaVersion = 2 }, "schema_version"},
+		{"wrong schema version", func(r *Report) { r.SchemaVersion = 3 }, "schema_version"},
 		{"missing cli version", func(r *Report) { r.CLIVersion = "" }, "cli_version"},
 		{"missing category", func(r *Report) { r.Category = "" }, "category"},
 		{"missing created_at", func(r *Report) { r.CreatedAt = time.Time{} }, "created_at"},
 		{"invalid tier", func(r *Report) { r.Provider.Tier = "premium" }, "tier"},
-		{"negative price", func(r *Report) { r.Provider.PriceEURMonth = -1 }, "negative"},
-		{"missing system", func(r *Report) { r.System.OS = "" }, "system.os"},
+		{"negative price", func(r *Report) { r.Provider.PriceEURMonth = -1 }, "price_eur_month"},
+		{"missing system", func(r *Report) { r.System.OS = "" }, "/system/os"},
 		{"zero cores", func(r *Report) { r.System.CPUCores = 0 }, "cpu_cores"},
-		{"incomplete coordinates", func(r *Report) { r.Measurement.SampleIndex = 0 }, "travel together"},
-		{"missing results", func(r *Report) { r.Results = nil }, "results is missing"},
-		{"unnamed test", func(r *Report) { r.Results[0].Test = "" }, "test name"},
+		{"incomplete coordinates", func(r *Report) { r.Measurement.SampleIndex = 0 }, "sample_index"},
+		{"missing results", func(r *Report) { r.Results = nil }, "/results"},
+		{"unnamed test", func(r *Report) { r.Results[0].Test = "" }, "/results/0/test"},
 		{"missing started_at", func(r *Report) { r.Results[0].StartedAt = time.Time{} }, "started_at"},
-		{"unitless metric", func(r *Report) { r.Results[0].Metrics[0].Unit = "" }, "name and a unit"},
+		{"unitless metric", func(r *Report) { r.Results[0].Metrics[0].Unit = "" }, "/unit"},
+		{"wrong compute protocol", func(r *Report) { r.ProtocolVersion = "compute-v3" }, "compute-v2"},
+		{"quick sustained profile", func(r *Report) { r.Profile = SustainedProfile; r.Quick = true }, "/quick"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -95,6 +112,184 @@ func TestValidateReportProblems(t *testing.T) {
 			tc.mutate(r)
 			if _, errs := ValidateReport(mustJSON(t, r)); !hasError(errs, tc.want) {
 				t.Fatalf("expected error containing %q, got: %v", tc.want, errs)
+			}
+		})
+	}
+}
+
+func TestV2ResultOutcomeContract(t *testing.T) {
+	t.Run("successful result needs metrics", func(t *testing.T) {
+		r := validReport()
+		r.Results[0].Metrics = []Metric{}
+		if _, errs := ValidateReport(mustJSON(t, r)); len(errs) == 0 {
+			t.Fatal("successful result without metrics was accepted")
+		}
+	})
+	t.Run("failed result needs an explicit empty metrics array", func(t *testing.T) {
+		r := validReport()
+		r.Results[0].Error = "workload failed"
+		r.Results[0].Metrics = nil
+		if _, errs := ValidateReport(mustJSON(t, r)); len(errs) == 0 {
+			t.Fatal("failed result with null metrics was accepted")
+		}
+	})
+	t.Run("failed result with empty metrics is valid", func(t *testing.T) {
+		r := validReport()
+		r.Results[0].Error = "workload failed"
+		r.Results[0].Metrics = []Metric{}
+		if _, errs := ValidateReport(mustJSON(t, r)); len(errs) != 0 {
+			t.Fatalf("valid failed result rejected: %v", errs)
+		}
+	})
+}
+
+func TestV2SchemaAndValidateReportAgree(t *testing.T) {
+	asMap := func(t *testing.T, report *Report) map[string]any {
+		t.Helper()
+		var value map[string]any
+		if err := json.Unmarshal(mustJSON(t, report), &value); err != nil {
+			t.Fatal(err)
+		}
+		return value
+	}
+	marshal := func(t *testing.T, value map[string]any) []byte {
+		t.Helper()
+		data, err := json.Marshal(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return data
+	}
+	cases := []struct {
+		name  string
+		valid bool
+		data  func(*testing.T) []byte
+	}{
+		{"valid", true, func(t *testing.T) []byte { return mustJSON(t, validReport()) }},
+		{"valid failure", true, func(t *testing.T) []byte {
+			r := validReport()
+			r.Results[0].Error = "workload failed"
+			r.Results[0].Metrics = []Metric{}
+			return mustJSON(t, r)
+		}},
+		{"unknown field", false, func(t *testing.T) []byte {
+			m := asMap(t, validReport())
+			m["unexpected"] = true
+			return marshal(t, m)
+		}},
+		{"missing required provider", false, func(t *testing.T) []byte {
+			m := asMap(t, validReport())
+			delete(m, "provider")
+			return marshal(t, m)
+		}},
+		{"missing metrics", false, func(t *testing.T) []byte {
+			m := asMap(t, validReport())
+			results := m["results"].([]any)
+			delete(results[0].(map[string]any), "metrics")
+			return marshal(t, m)
+		}},
+		{"null metrics", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.Results[0].Error = "failed"
+			r.Results[0].Metrics = nil
+			return mustJSON(t, r)
+		}},
+		{"empty successful metrics", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.Results[0].Metrics = []Metric{}
+			return mustJSON(t, r)
+		}},
+		{"failure with metrics", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.Results[0].Error = "workload failed"
+			return mustJSON(t, r)
+		}},
+		{"wrong compute protocol", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.ProtocolVersion = "compute-v3"
+			return mustJSON(t, r)
+		}},
+		{"quick sustained profile", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.Profile = SustainedProfile
+			r.Quick = true
+			return mustJSON(t, r)
+		}},
+		{"zero report timestamp", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.CreatedAt = time.Time{}
+			return mustJSON(t, r)
+		}},
+		{"zero result timestamp", false, func(t *testing.T) []byte {
+			r := validReport()
+			r.Results[0].StartedAt = time.Time{}
+			return mustJSON(t, r)
+		}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			data := tc.data(t)
+			schemaErr := validateSchema(SchemaVersion, data)
+			_, reportErrs := ValidateReport(data)
+			if tc.valid && (schemaErr != nil || len(reportErrs) != 0) {
+				t.Fatalf("valid fixture rejected: schema=%v report=%v", schemaErr, reportErrs)
+			}
+			if !tc.valid && (schemaErr == nil || len(reportErrs) == 0) {
+				t.Fatalf("invalid fixture accepted: schema=%v report=%v", schemaErr, reportErrs)
+			}
+		})
+	}
+}
+
+func TestLegacyFixtureSchemaAndValidateReportAgree(t *testing.T) {
+	r := validReport()
+	r.SchemaVersion = LegacySchemaVersion
+	r.ProtocolVersion = ""
+	r.Profile = ""
+	data := mustJSON(t, r)
+	if schemaErr := validateSchema(LegacySchemaVersion, data); schemaErr != nil {
+		t.Fatalf("legacy schema rejected fixture: %v", schemaErr)
+	}
+	if _, reportErrs := ValidateReport(data); len(reportErrs) != 0 {
+		t.Fatalf("legacy validator rejected fixture: %v", reportErrs)
+	}
+}
+
+func TestContractFixturesAgreeAcrossValidators(t *testing.T) {
+	fixtures, err := filepath.Glob(filepath.Join("testdata", "contracts", "*.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(fixtures) == 0 {
+		t.Fatal("no contract fixtures found")
+	}
+
+	for _, fixture := range fixtures {
+		fixture := fixture
+		t.Run(filepath.Base(fixture), func(t *testing.T) {
+			data, err := os.ReadFile(fixture)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var header struct {
+				SchemaVersion int `json:"schema_version"`
+			}
+			if err := json.Unmarshal(data, &header); err != nil {
+				t.Fatalf("fixture is not valid JSON: %v", err)
+			}
+
+			schemaErr := validateSchema(header.SchemaVersion, data)
+			_, reportErrs := ValidateReport(data)
+			schemaValid := schemaErr == nil
+			reportValid := len(reportErrs) == 0
+			if schemaValid != reportValid {
+				t.Fatalf("validators disagree: schema=%v report=%v", schemaErr, reportErrs)
+			}
+
+			wantValid := strings.HasPrefix(filepath.Base(fixture), "valid-")
+			if schemaValid != wantValid {
+				t.Fatalf("fixture validity mismatch: want valid=%t, schema=%v report=%v", wantValid, schemaErr, reportErrs)
 			}
 		})
 	}

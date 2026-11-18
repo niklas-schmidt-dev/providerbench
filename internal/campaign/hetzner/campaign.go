@@ -17,6 +17,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/niklas-schmidt-dev/providerbench/internal/bench"
 )
 
 const (
@@ -495,6 +497,13 @@ func verifyReport(path string, cfg Config, sample, repeat int) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read copied report %s: %w", path, err)
+	}
+	validated, validationErrs := bench.ValidateReport(data)
+	if len(validationErrs) > 0 {
+		return fmt.Errorf("copied report %s fails the report contract: %v", path, errors.Join(validationErrs...))
+	}
+	if validated.ProtocolVersion != bench.ComputeProtocol || validated.Profile != bench.StandardProfile {
+		return fmt.Errorf("copied report %s has unexpected protocol/profile", path)
 	}
 	var report reportIdentity
 	if err := json.Unmarshal(data, &report); err != nil {
