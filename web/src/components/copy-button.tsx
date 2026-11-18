@@ -27,7 +27,7 @@ export function CopyButton({
         setTimeout(() => setCopied(false), 1500);
       }}
     >
-      {copied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
+      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
     </Button>
   );
 }

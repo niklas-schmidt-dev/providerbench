@@ -1,6 +1,3 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+// One class-merging helper for the whole app: the `cn` package the ReUI
+// registry components import directly (clsx + tailwind-merge semantics).
+export { cn } from "cn";

@@ -18,64 +18,9 @@
   }
 }
 
-/* ——— ProviderBench design system motifs ————————————————— */
-
-/* Dark instrument panel: graphite with faint vertical rules every 64px.
-   Used by hero sections and the footer. */
-@utility hero-dark {
-  background-color: var(--surface-inverse);
-  background-image: repeating-linear-gradient(
-    to right,
-    rgb(255 255 255 / 0.045) 0 1px,
-    transparent 1px 64px
-  );
-}
-
-/* The live-status dot. One slow pulse, never a strobe. */
-@utility led {
-  animation: led-pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes led-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .led {
-    animation: none;
-  }
-}
-
-/* Label / eyebrow — uppercase, wide, small. Plain classes (not utilities) so
-   text-* utilities can override size and color. `.stamp` stays as an alias for
-   components that predate the rework. */
-@layer components {
-  .pb-label,
-  .stamp {
-    font-family: var(--font-sans);
-    font-size: var(--label-size);
-    line-height: var(--label-line);
-    letter-spacing: var(--label-track);
-    font-weight: var(--label-weight);
-    text-transform: uppercase;
-  }
-  .pb-num {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: var(--mono-track);
-  }
-}
-
 @theme inline {
-  --font-sans: "Geist Sans", "Helvetica Neue", system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --font-display: var(--font-sans);
+  --font-sans: "DM Sans Variable", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
   --font-heading: var(--font-sans);
 
   --color-background: var(--background);
@@ -93,240 +38,145 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--series-1);
-  --color-chart-2: var(--series-2);
-  --color-chart-3: var(--series-3);
-  --color-chart-4: var(--series-4);
-  --color-chart-5: var(--series-5);
 
-  --color-signal: var(--signal-400);
-  --color-brand: var(--brand);
-  --color-warning: var(--warn-500);
-  --color-success: var(--pass-500);
-  --color-fail: var(--fail-500);
-  --color-console: var(--console);
-  --color-console-foreground: var(--console-foreground);
+  /* ReUI state tokens. ProviderBench is monochrome, so states map to ink
+     steps; only destructive keeps a hue, and it is reserved for errors. */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-invert: var(--invert);
+  --color-invert-foreground: var(--invert-foreground);
 
-  --color-gray-0: var(--gray-0);
-  --color-gray-25: var(--gray-25);
-  --color-gray-50: var(--gray-50);
-  --color-gray-100: var(--gray-100);
-  --color-gray-200: var(--gray-200);
-  --color-gray-300: var(--gray-300);
-  --color-gray-400: var(--gray-400);
-  --color-gray-500: var(--gray-500);
-  --color-gray-600: var(--gray-600);
-  --color-gray-700: var(--gray-700);
-  --color-gray-800: var(--gray-800);
-  --color-gray-900: var(--gray-900);
-  --color-gray-950: var(--gray-950);
+  /* Text steps beyond foreground / muted-foreground. */
+  --color-subtle: var(--subtle);
+  --color-faint: var(--faint);
+  --color-surface: var(--surface);
+  --color-hover: var(--hover);
+  --color-border-strong: var(--border-strong);
+  --color-grid: var(--grid);
 
-  /* Radii — small and consistent. Nothing is a pill except tags/switches. */
-  --radius-xs: 3px;
-  --radius-sm: 5px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
-  --radius-3xl: 24px;
-  --radius-4xl: 28px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 20px;
 }
 
-/* ProviderBench: cool graphite neutrals, one instrument-lime signal channel.
-   Numbers are mono; data surfaces sit flat; only overlays lift. */
-:root,
+/* ——— Light: white paper, grey ink. Achromatic on purpose: no tinted
+   neutrals, no accent hue. The only color on the page is data. ——— */
+:root {
+  --background: #ffffff;
+  --surface: #fafafa;
+  --hover: #f4f4f4;
+  --foreground: #0a0a0a;
+  --muted-foreground: #5e5e5e;
+  --subtle: #737373;
+  --faint: #a3a3a3;
+  --border: #ebebeb;
+  --border-strong: #d4d4d4;
+  --grid: #e5e5e5;
+
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f4;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f4f4f4;
+  --accent: #f0f0f0;
+  --accent-foreground: #0a0a0a;
+  --destructive: #c4262e;
+  --destructive-foreground: #a11d24;
+  --input: #d4d4d4;
+  --ring: #0a0a0a;
+
+  --success: #0a0a0a;
+  --success-foreground: #0a0a0a;
+  --info: #5e5e5e;
+  --info-foreground: #0a0a0a;
+  --warning: #737373;
+  --warning-foreground: #0a0a0a;
+  --invert: #0a0a0a;
+  --invert-foreground: #fafafa;
+
+  /* Provider series. One validated categorical palette per theme
+     (dataviz validator: lightness band, chroma floor, CVD separation).
+     Vercel's brand is black and white, so it plots as ink — always direct
+     labelled. Color follows the provider, never its rank. */
+  --provider-hetzner: #d4202f;
+  --provider-vercel: #171717;
+  --provider-digitalocean: #0a64e8;
+  --provider-aws: #b45309;
+  --provider-ovh: #6d4ee6;
+  --provider-netcup: #008573;
+  --provider-other: #8a8a8a;
+
+  /* Header height drives every sticky offset; on narrow screens the
+     primary nav wraps to a second 40px row. */
+  --header-height: 96px;
+  --sidebar-width: 272px;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --header-height: 56px;
+  }
+}
+
+/* ——— Dark: true black canvas, grey steps above it. ——— */
 .dark {
-  /* ── Base neutrals: cool graphite, never pure black ── */
-  --gray-0: #ffffff;
-  --gray-25: #fbfcfc;
-  --gray-50: #f5f7f7;
-  --gray-100: #eceff0;
-  --gray-200: #dfe3e5;
-  --gray-300: #c6cccf;
-  --gray-400: #9aa3a8;
-  --gray-500: #6f797f;
-  --gray-600: #4d5459;
-  --gray-700: #343a3e;
-  --gray-800: #22272a;
-  --gray-900: #14181a;
-  --gray-950: #0c0f10;
+  --background: #000000;
+  --surface: #0a0a0a;
+  --hover: #121212;
+  --foreground: #fafafa;
+  --muted-foreground: #a1a1a1;
+  --subtle: #8a8a8a;
+  --faint: #5c5c5c;
+  --border: #1c1c1c;
+  --border-strong: #2e2e2e;
+  --grid: #262626;
 
-  /* ── Signal: the one brand accent. Instrument lime on graphite. ── */
-  --signal-100: #f0fbcf;
-  --signal-200: #e2f8a4;
-  --signal-300: #d3f56d;
-  --signal-400: #c8f135;
-  --signal-500: #b0d92a;
-  --signal-600: #8aae1c;
-  --signal-700: #5f7a11;
+  --card: #0a0a0a;
+  --popover: #0d0d0d;
+  --primary: #fafafa;
+  --primary-foreground: #000000;
+  --secondary: #141414;
+  --secondary-foreground: #fafafa;
+  --muted: #141414;
+  --accent: #1a1a1a;
+  --accent-foreground: #fafafa;
+  --destructive: #e5484d;
+  --destructive-foreground: #ff6b70;
+  --input: #2e2e2e;
+  --ring: #fafafa;
 
-  /* ── Semantic status ── */
-  --pass-500: #12876a;
-  --pass-100: #dcf2ec;
-  --warn-500: #b6741a;
-  --warn-100: #fbeed6;
-  --fail-500: #c0392f;
-  --fail-100: #fbe4e1;
-  --info-500: #2b6cb0;
-  --info-100: #e2edf8;
+  --success: #fafafa;
+  --success-foreground: #fafafa;
+  --info: #a1a1a1;
+  --info-foreground: #fafafa;
+  --warning: #8a8a8a;
+  --warning-foreground: #fafafa;
+  --invert: #fafafa;
+  --invert-foreground: #0a0a0a;
 
-  /* ── Semantic aliases: surfaces ── */
-  --surface-page: var(--gray-50);
-  --surface-card: var(--gray-0);
-  --surface-sunken: var(--gray-100);
-  --surface-inset: var(--gray-25);
-  --surface-inverse: var(--gray-950);
-  --surface-inverse-raised: var(--gray-900);
-  --surface-hover: var(--gray-50);
-  --surface-active: var(--gray-100);
-  --surface-selected: var(--signal-100);
-
-  /* ── Semantic aliases: text ── */
-  --text-primary: var(--gray-950);
-  --text-body: var(--gray-700);
-  --text-muted: var(--gray-500);
-  --text-faint: var(--gray-400);
-  --text-inverse: var(--gray-0);
-  --text-inverse-muted: var(--gray-400);
-  --text-link: var(--gray-950);
-  --text-pass: var(--pass-500);
-  --text-warn: var(--warn-500);
-  --text-fail: var(--fail-500);
-
-  /* ── Semantic aliases: lines ── */
-  --border-hairline: var(--gray-200);
-  --border-strong: var(--gray-300);
-  --border-inverse: #2b3134;
-  --border-focus: var(--gray-950);
-  --grid-line: var(--gray-100);
-
-  /* ── Interactive ── */
-  --action-solid-bg: var(--gray-950);
-  --action-solid-bg-hover: var(--gray-800);
-  --action-solid-fg: var(--gray-0);
-  --action-signal-bg: var(--signal-400);
-  --action-signal-bg-hover: var(--signal-300);
-  --action-signal-fg: var(--gray-950);
-  --focus-ring: var(--gray-950);
-  --focus-ring-offset: var(--gray-0);
-
-  /* ── Charts: categorical series (assigned per provider, never by rank) ── */
-  --series-1: #0f6e63;
-  --series-2: #2b6cb0;
-  --series-3: #b6741a;
-  --series-4: #8e4585;
-  --series-5: #c0392f;
-  --series-6: #4d5459;
-  --series-7: #5f7a11;
-  --series-8: #9aa3a8;
-  --series-1-soft: #dcefec;
-  --series-2-soft: #e2edf8;
-  --series-3-soft: #fbeed6;
-  --series-4-soft: #f3e7f1;
-  --series-5-soft: #fbe4e1;
-  --series-6-soft: #e7eaeb;
-  --series-7-soft: #eef4dc;
-  --series-8-soft: #eceff0;
-
-  /* ── Performance ramp — worse → better (heatmaps + score cells) ── */
-  --ramp-0: #c0392f;
-  --ramp-1: #d97b45;
-  --ramp-2: #e0b04c;
-  --ramp-3: #9dbb4a;
-  --ramp-4: #4f9a5f;
-  --ramp-5: #12876a;
-
-  /* ── Chart furniture ── */
-  --axis-line: var(--gray-300);
-  --axis-text: var(--gray-500);
-  --gridline: var(--gray-100);
-  --gridline-strong: var(--gray-200);
-  --bar-track: var(--gray-100);
-  --annotation: var(--gray-950);
-  --chart-bar-height: 10px;
-  --chart-bar-gap: 6px;
-
-  /* ── Typography rhythm ── */
-  --label-size: 11px;
-  --label-line: 14px;
-  --label-track: 0.08em;
-  --label-weight: 600;
-  --mono-lg-size: 28px;
-  --mono-lg-line: 32px;
-  --mono-lg-track: -0.02em;
-  --mono-size: 14px;
-  --mono-line: 20px;
-  --mono-track: -0.01em;
-  --mono-sm-size: 12px;
-  --mono-sm-line: 16px;
-  --body-sm-size: 13px;
-  --body-sm-line: 19px;
-  --heading-1-size: 22px;
-  --heading-1-line: 28px;
-  --heading-1-track: -0.015em;
-  --heading-2-size: 17px;
-  --heading-2-line: 24px;
-  --heading-2-track: -0.01em;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-
-  /* ── Component rhythm ── */
-  --pad-cell-y: 10px;
-  --pad-cell-x: 14px;
-  --pad-card: 20px;
-  --gutter-site: 32px;
-  --content-max: 1320px;
-  --row-height: 44px;
-  --row-height-compact: 36px;
-
-  /* ── Shadows — restrained. Data surfaces sit flat; only overlays lift. ── */
-  --shadow-xs: 0 1px 1px rgb(12 15 16 / 0.04);
-  --shadow-sm: 0 1px 2px rgb(12 15 16 / 0.06), 0 1px 1px rgb(12 15 16 / 0.04);
-  --shadow-md: 0 4px 12px rgb(12 15 16 / 0.08), 0 1px 2px rgb(12 15 16 / 0.06);
-  --shadow-lg: 0 16px 40px rgb(12 15 16 / 0.14), 0 2px 6px rgb(12 15 16 / 0.08);
-  --ring-focus: 0 0 0 2px var(--focus-ring-offset), 0 0 0 4px var(--focus-ring);
-
-  /* ── Motion ── */
-  --dur-instant: 80ms;
-  --dur-fast: 140ms;
-  --dur-base: 220ms;
-  --dur-chart: 700ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-control: background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out);
-  --transition-bar: width var(--dur-chart) var(--ease-out);
-
-  /* ── shadcn semantic mapping ── */
-  --background: var(--gray-50);
-  --foreground: var(--gray-950);
-  --card: var(--gray-0);
-  --card-foreground: var(--gray-950);
-  --popover: var(--gray-0);
-  --popover-foreground: var(--gray-950);
-  --primary: var(--gray-950);
-  --primary-foreground: var(--gray-0);
-  --secondary: var(--gray-100);
-  --secondary-foreground: var(--gray-800);
-  --muted: var(--gray-100);
-  --muted-foreground: var(--gray-500);
-  --accent: var(--gray-100);
-  --accent-foreground: var(--gray-950);
-  --destructive: var(--fail-500);
-  --border: var(--gray-200);
-  --input: var(--gray-300);
-  --ring: var(--gray-950);
-
-  --brand: var(--signal-600);
-  --console: var(--gray-950);
-  --console-foreground: var(--gray-100);
-
-  /* Provider colors live in lib/providers.ts (assigned series slots — the
-     single source of truth). */
+  --provider-hetzner: #e5484d;
+  --provider-vercel: #ededed;
+  --provider-digitalocean: #3e8bff;
+  --provider-aws: #c97d0f;
+  --provider-ovh: #8f7cf0;
+  --provider-netcup: #1f9e89;
+  --provider-other: #6b6b6b;
 }
 
 @layer base {
@@ -337,15 +187,32 @@
     @apply font-sans;
     color-scheme: light;
     -webkit-text-size-adjust: 100%;
+    /* Room for the sticky header plus the dashboard tab bar. */
+    scroll-padding-top: calc(var(--header-height) + 52px);
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground antialiased;
-    text-rendering: optimizeLegibility;
-    font-size: 15px;
-    line-height: 23px;
+    font-size: 14px;
+    line-height: 20px;
+    font-optical-sizing: auto;
   }
   ::selection {
-    background: var(--signal-400);
-    color: var(--gray-950);
+    background: var(--foreground);
+    color: var(--background);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Numbers that align in columns and on axes. Standalone figures keep
+     proportional digits. */
+  .num {
+    font-variant-numeric: tabular-nums;
   }
 }

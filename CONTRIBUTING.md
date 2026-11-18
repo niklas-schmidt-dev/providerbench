@@ -112,11 +112,24 @@ proposed metrics first — methodology gets debated before code.
 cd web && bun install && bun dev
 ```
 
-Next.js + Tailwind v4 + locally generated Base UI components + Motion. IBM
-Plex is bundled locally, so production builds do not fetch fonts. Provider
-chart colors live in `web/src/lib/providers.ts` — the slot order is a
-validated colorblind-safe sequence; add new providers to the end, never
-re-shuffle.
+Next.js 16 (Turbopack) + React 19 + Tailwind v4 + TypeScript 7. Components
+come from the shadcn registries in `web/components.json`: Base UI primitives,
+the ReUI data grid, and beUI Pro blocks (command palette, 404). Installing a
+beUI Pro block needs `BEUI_PRO_TOKEN`; ReUI blocks need `REUI_LICENSE_KEY`.
+Free components and everything already in `src/` build without either.
+
+The interface is deliberately monochrome: black, white and greys only. The
+one exception is data. Each provider owns a `--provider-<slug>` token per
+theme in `web/src/app/globals.css`, and the set is validated as one
+colorblind-safe categorical palette. A new provider adds an entry in
+`web/src/lib/providers.ts` and a token pair in `globals.css`; never re-color
+an existing provider. Charts are hand-drawn SVG in
+`web/src/components/charts/`. DM Sans and Geist Mono are bundled via
+Fontsource, so production builds never fetch fonts.
+
+`bun run test:e2e` builds the site and runs the Playwright smoke tests. It
+honors `PORT`, so `portless run --name e2e bun run test:e2e` runs beside a
+dev server.
 
 ## Ground rules
 

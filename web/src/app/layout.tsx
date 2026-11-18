@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import "@fontsource/geist-sans/latin-400.css";
-import "@fontsource/geist-sans/latin-500.css";
-import "@fontsource/geist-sans/latin-600.css";
-import "@fontsource/geist-mono/latin-400.css";
-import "@fontsource/geist-mono/latin-500.css";
+import "@fontsource-variable/dm-sans/index.css";
+import "@fontsource-variable/geist-mono/index.css";
 
-import { CommandMenu } from "@/components/command-menu";
-import { buttonVariants } from "@/components/ui/button";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { SiteNav, type NavItem } from "@/components/site/site-nav";
+import { SiteSearch } from "@/components/site/site-search";
+import { THEME_SCRIPT, ThemeToggle } from "@/components/site/theme-toggle";
 import { CATEGORIES } from "@/lib/categories";
 import { loadRuns } from "@/lib/data";
-import { PROVIDERS } from "@/lib/providers";
-import { cn } from "@/lib/utils";
+import { RAW_DATA_URL } from "@/lib/plans";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,25 +21,40 @@ export const metadata: Metadata = {
     "Independent, reproducible benchmarks for cloud providers: compute today, object storage next. Open data, open method, no affiliate links.",
 };
 
-const nav = [
-  { href: "/compute", label: "Compute" },
-  { href: "/storage", label: "Storage" },
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+};
+
+const REPO = "https://github.com/niklas-schmidt-dev/providerbench";
+
+const NAV: NavItem[] = [
+  { href: "/", label: "Compute" },
+  ...CATEGORIES.filter((c) => c.status !== "live").map((c) => ({
+    href: `/${c.slug}`,
+    label: c.slug === "storage" ? "Storage" : c.name,
+    muted: true,
+  })),
   { href: "/providers", label: "Providers" },
   { href: "/cli", label: "CLI" },
 ];
 
-// The mark: a mono "P" tile — graphite plate, instrument-lime glyph.
-function BenchMark({ className }: { className?: string }) {
+function Wordmark() {
   return (
-    <span
-      aria-hidden
-      className={cn(
-        "inline-flex size-[22px] items-center justify-center rounded-[4px] bg-gray-950 font-mono text-[13px] font-semibold text-signal",
-        className,
-      )}
-    >
-      P
-    </span>
+    <Link href="/" aria-label="ProviderBench home" className="shrink-0 text-[20px] leading-none font-[450] tracking-[-0.05em]">
+      <span className="text-subtle">provider</span>
+      <span>bench</span>
+    </Link>
+  );
+}
+
+function GitHubIcon() {
+  return (
+    <svg aria-hidden viewBox="0 0 16 16" className="size-4 fill-current">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+    </svg>
   );
 }
 
@@ -52,161 +63,60 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     ...new Set(loadRuns().flatMap((r) => (r.provider.name ? [r.provider.name] : []))),
   ];
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col">
-        <TooltipProvider>
-          <header className="sticky top-0 z-40 border-b border-(--border-hairline) bg-card">
-            <div className="mx-auto flex h-[58px] max-w-(--content-max) items-center gap-6 px-4 sm:px-8">
-              <Link href="/" className="flex shrink-0 items-center gap-[9px]">
-                <BenchMark />
-                <span className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
-                  ProviderBench
-                </span>
-              </Link>
-              <nav className="hidden items-center gap-5 md:flex">
-                {nav.map((n) => (
-                  <Link
-                    key={n.href}
-                    href={n.href}
-                    className="text-[14px] tracking-[-0.005em] text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {n.label}
-                  </Link>
-                ))}
-              </nav>
-              <div className="min-w-2 flex-1" />
-              <div className="flex items-center gap-2.5">
-                <CommandMenu providersWithRuns={providersWithRuns} />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="flex min-h-dvh flex-col">
+        <a
+          href="#main"
+          className="sr-only z-50 rounded-md bg-foreground px-3 py-2 text-background focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        >
+          Skip to content
+        </a>
+          <header className="sticky top-0 z-40 border-b border-border bg-background">
+            <div className="flex h-14 items-center gap-8 px-4 sm:px-7">
+              <Wordmark />
+              <SiteNav items={NAV} className="hidden md:flex" />
+              <div className="flex-1" />
+              <div className="flex items-center gap-1.5">
+                <SiteSearch providersWithRuns={providersWithRuns} />
+                <ThemeToggle />
                 <a
-                  href="https://github.com/niklas-schmidt-dev/providerbench"
-                  className={cn(
-                    buttonVariants({ variant: "ghost", size: "sm" }),
-                    "hidden text-[13px] sm:inline-flex",
-                  )}
+                  href={REPO}
+                  aria-label="ProviderBench on GitHub"
+                  className="grid size-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-hover hover:text-foreground"
                 >
-                  GitHub
+                  <GitHubIcon />
                 </a>
-                <Link
-                  href="/cli"
-                  className={cn(
-                    buttonVariants({ variant: "default", size: "sm" }),
-                    "text-[13px]",
-                  )}
-                >
-                  Run the benchmark
-                </Link>
               </div>
             </div>
+            <SiteNav items={NAV} className="no-scrollbar h-10 overflow-x-auto border-t border-border px-4 md:hidden" />
           </header>
 
           <div className="flex-1">{children}</div>
 
-          <footer className="hero-dark mt-24">
-            <div className="mx-auto grid max-w-(--content-max) grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-9 px-4 py-11 sm:px-8">
-              <div>
-                <span className="flex items-center gap-[9px]">
-                  <BenchMark className="size-[18px] bg-gray-900 text-[11px]" />
-                  <span className="text-[15px] font-semibold tracking-[-0.02em] text-gray-0">
-                    ProviderBench
-                  </span>
-                </span>
-                <p className="mt-2 max-w-[250px] text-[12.5px] leading-[19px] text-gray-500">
-                  Independent, reproducible cloud benchmarks. No vendor
-                  sponsorships, no affiliate links —{" "}
-                  <a
-                    href="https://github.com/niklas-schmidt-dev/providerbench"
-                    className="border-b border-gray-700 text-gray-400 hover:text-gray-0"
-                  >
-                    MIT licensed
-                  </a>
-                  .
-                </p>
-              </div>
-              <div>
-                <div className="pb-label mb-2.5 text-[10.5px] text-gray-600">
-                  Benchmarks
-                </div>
-                <div className="grid justify-items-start gap-[7px]">
-                  {CATEGORIES.map((c) => (
-                    <Link
-                      key={c.slug}
-                      href={`/${c.slug}`}
-                      className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                    >
-                      {c.name}
-                      {c.status === "planned" && (
-                        <span className="ml-1.5 text-[11px] text-gray-600">planned</span>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div className="pb-label mb-2.5 text-[10.5px] text-gray-600">
-                  Providers
-                </div>
-                <div className="grid justify-items-start gap-[7px]">
-                  {PROVIDERS.slice(0, 4).map((p) => (
-                    <Link
-                      key={p.slug}
-                      href={`/providers/${p.slug}`}
-                      className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                    >
-                      {p.name}
-                    </Link>
-                  ))}
-                  <Link
-                    href="/providers"
-                    className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                  >
-                    All providers
-                  </Link>
-                </div>
-              </div>
-              <div>
-                <div className="pb-label mb-2.5 text-[10.5px] text-gray-600">
-                  Project
-                </div>
-                <div className="grid justify-items-start gap-[7px]">
-                  <Link
-                    href="/cli"
-                    className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                  >
-                    CLI &amp; methodology
-                  </Link>
-                  <a
-                    href="https://github.com/niklas-schmidt-dev/providerbench/tree/main/internal/tests"
-                    className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                  >
-                    Benchmark source
-                  </a>
-                  <a
-                    href="https://github.com/niklas-schmidt-dev/providerbench/tree/main/data/results"
-                    className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                  >
-                    Raw data downloads
-                  </a>
-                  <a
-                    href="https://github.com/niklas-schmidt-dev/providerbench/issues"
-                    className="text-[13px] text-gray-400 transition-colors hover:text-gray-0"
-                  >
-                    Open a discussion
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div className="border-t border-(--border-inverse)">
-              <div className="mx-auto flex max-w-(--content-max) flex-wrap items-center justify-between gap-2 px-4 py-4 sm:px-8">
-                <span className="pb-label text-[10px] text-gray-600">
-                  Open data · Open method
-                </span>
-                <span className="pb-label text-[10px] text-gray-600">
-                  No affiliate links · No sponsored rankings
-                </span>
-              </div>
+          <footer className="border-t border-border">
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4 text-[12px] text-subtle sm:px-7">
+              <p>
+                Open data · open method · no affiliate links ·{" "}
+                <a href={`${REPO}/blob/main/LICENSE`} className="text-muted-foreground transition-colors hover:text-foreground">
+                  MIT
+                </a>
+              </p>
+              <nav aria-label="Project" className="flex flex-wrap gap-x-5 gap-y-1">
+                <a href={RAW_DATA_URL} className="transition-colors hover:text-foreground">
+                  Raw data
+                </a>
+                <a href={`${REPO}/tree/main/internal/tests`} className="transition-colors hover:text-foreground">
+                  Benchmark source
+                </a>
+                <a href={`${REPO}/issues`} className="transition-colors hover:text-foreground">
+                  Discuss
+                </a>
+              </nav>
             </div>
           </footer>
-        </TooltipProvider>
       </body>
     </html>
   );
