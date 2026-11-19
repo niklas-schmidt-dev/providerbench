@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -89,10 +90,15 @@ func TestStallReportsItsContract(t *testing.T) {
 	if metrics["lost_time"].Value > 100 {
 		t.Errorf("lost_time = %v%%, cannot exceed 100", metrics["lost_time"].Value)
 	}
-	_, steal := metrics["reported_steal"]
+	linux := runtime.GOOS == "linux"
+	if _, steal := metrics["reported_steal"]; steal != linux {
+		t.Errorf("reported_steal present = %v, must exist exactly on Linux", steal)
+	}
+	// A Linux kernel may keep no scheduler statistics; the note then says so.
 	_, wait := metrics["runqueue_wait"]
-	if linux := runtime.GOOS == "linux"; steal != linux || wait != linux {
-		t.Errorf("reported_steal (%v) and runqueue_wait (%v) must exist exactly on Linux", steal, wait)
+	explained := strings.Contains(strings.Join(res.Notes, "\n"), "runqueue_wait needs")
+	if wait == explained || (wait && !linux) {
+		t.Errorf("runqueue_wait present = %v, explained as missing = %v", wait, explained)
 	}
 }
 

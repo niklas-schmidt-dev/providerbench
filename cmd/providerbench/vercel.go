@@ -42,10 +42,11 @@ Measurement:
       --category NAME     suite to run: compute, workload, platform, reach
                           (default compute). One campaign measures one suite;
                           give each suite its own --campaign ID.
-      --profile NAME      standard or sustained (default standard). A
-                          sustained run takes 15 minutes per repeat: it needs
-                          --command-timeout 20m or more and a
-                          --sandbox-timeout of 20m per repeat.
+      --profile NAME      standard or sustained (default standard). The
+                          sustained suite takes 15 minutes per repeat: it
+                          needs --command-timeout 20m or more and a
+                          --sandbox-timeout of 20m per repeat. With --tests,
+                          size both to the tests you pick.
       --quick             run shorter benchmark workloads
       --output-dir DIR    downloaded reports (default data/results)
 

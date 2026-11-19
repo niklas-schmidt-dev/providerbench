@@ -99,6 +99,7 @@ const (
 	VerdictNoDifference = "no clear difference"
 	VerdictTooFewHosts  = "too few hosts"
 	VerdictZeroBaseline = "baseline is zero"
+	VerdictUnbounded    = "baseline reaches zero"
 )
 
 // minHostsForInterval is the smallest side a bootstrap interval is computed
@@ -259,10 +260,11 @@ func buildSide(reports []NamedReport) (*comparisonSide, error) {
 		}
 		side.summary.Reports++
 		// Without campaign coordinates nothing says which reports share a
-		// machine, so they count as one host: a ratio, never an interval.
-		key := cohortKey(r)
+		// machine, so together they count as one host: a ratio, never an
+		// interval.
+		key := ""
 		if r.Measurement.CampaignID != "" {
-			key += "\x1f" + strconv.Itoa(r.Measurement.SampleIndex)
+			key = cohortKey(r) + "\x1f" + strconv.Itoa(r.Measurement.SampleIndex)
 		}
 		h, ok := hosts[key]
 		if !ok {
@@ -356,7 +358,7 @@ func compareMetric(
 	}
 	low, high := quantile(ratios, 0.025), quantile(ratios, 0.975)
 	if math.IsInf(high, 1) {
-		out.Verdict = VerdictZeroBaseline
+		out.Verdict = VerdictUnbounded
 		return out
 	}
 	out.Low, out.High = &low, &high

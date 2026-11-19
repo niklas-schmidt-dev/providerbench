@@ -167,7 +167,7 @@ func TestCompareKeepsZeroBaselineDrawsInTheInterval(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m := onlyMetric(t, c); m.Verdict != VerdictZeroBaseline || m.Low != nil || m.High != nil {
+	if m := onlyMetric(t, c); m.Verdict != VerdictUnbounded || m.Low != nil || m.High != nil {
 		t.Errorf("an interval that reaches a zero baseline carries no verdict: %+v", m)
 	}
 }
@@ -175,8 +175,9 @@ func TestCompareKeepsZeroBaselineDrawsInTheInterval(t *testing.T) {
 func TestCompareCountsReportsWithoutCoordinatesAsOneHost(t *testing.T) {
 	adHoc := func(plan string, value float64) []NamedReport {
 		reports := cohort(plan, "", "", 6, 1, func(int, int) float64 { return value })
-		for _, nr := range reports {
+		for i, nr := range reports {
 			nr.Report.Measurement = Measurement{}
+			nr.Report.Provider.Region = fmt.Sprintf("region-%d", i)
 		}
 		return reports
 	}

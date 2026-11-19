@@ -83,7 +83,8 @@ type Runner struct {
 }
 
 // sustainedRepeatTimeout is the least a command may be given to finish one
-// sustained repeat: ten minutes of CPU, five of disk, and laying out the file.
+// repeat of the whole sustained suite: ten minutes of CPU, five of disk, and
+// laying out the file. A --tests subset is shorter and sized by the caller.
 const sustainedRepeatTimeout = 20 * time.Minute
 
 // Validate checks inputs before Vercel is contacted.
@@ -128,7 +129,7 @@ func Validate(cfg Config) error {
 	if cfg.CommandTimeout <= 0 || cfg.CommandTimeout > cfg.SandboxTimeout {
 		problems = append(problems, errors.New("--command-timeout must be positive and no longer than --sandbox-timeout"))
 	}
-	if session := time.Duration(cfg.Repeats) * sustainedRepeatTimeout; cfg.Profile == bench.SustainedProfile &&
+	if session := time.Duration(cfg.Repeats) * sustainedRepeatTimeout; cfg.Profile == bench.SustainedProfile && cfg.Tests == "" &&
 		(cfg.CommandTimeout < sustainedRepeatTimeout || cfg.SandboxTimeout < session) {
 		problems = append(problems, fmt.Errorf(
 			"a sustained repeat runs for 15 minutes: --command-timeout must be at least %s and --sandbox-timeout at least %s for %d repeats",

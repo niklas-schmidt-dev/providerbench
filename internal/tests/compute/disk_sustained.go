@@ -46,12 +46,16 @@ func (diskSustainedTest) Run(ctx context.Context, opts Options) (*bench.Result, 
 
 func runDiskSustained(ctx context.Context, opts Options, total, window time.Duration, fileSize int64) (*bench.Result, error) {
 	res := newResult("disk_sustained")
-	dir := opts.Dir
-	if dir == "" {
-		dir = "."
+	parent := opts.Dir
+	if parent == "" {
+		parent = "."
 	}
-	path := filepath.Join(dir, ".providerbench-disk-sustained.tmp")
-	defer os.Remove(path)
+	dir, err := os.MkdirTemp(parent, ".providerbench-disk-sustained-")
+	if err != nil {
+		return nil, fmt.Errorf("disk_sustained: create scratch directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+	path := filepath.Join(dir, "data")
 
 	// Lay the file out first. Overwriting allocated blocks is the steady
 	// state of a database; allocating them is a different, one-off cost.

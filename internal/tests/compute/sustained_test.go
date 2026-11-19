@@ -6,7 +6,6 @@ import (
 	"io"
 	"math"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -221,8 +220,8 @@ func TestDiskSustainedReportsItsContractAndCleansUp(t *testing.T) {
 			t.Errorf("%s metric is wrong: %+v", name, m)
 		}
 	}
-	if _, err := os.Stat(filepath.Join(dir, ".providerbench-disk-sustained.tmp")); !errors.Is(err, os.ErrNotExist) {
-		t.Errorf("scratch file was not removed: %v", err)
+	if left, err := os.ReadDir(dir); err != nil || len(left) != 0 {
+		t.Errorf("disk_sustained left %d entries in its scratch directory (%v)", len(left), err)
 	}
 }
 

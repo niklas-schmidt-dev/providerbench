@@ -394,4 +394,9 @@ func TestValidateRefusesSuitesTheSandboxCannotFinish(t *testing.T) {
 	if err := Validate(cfg); err != nil {
 		t.Fatalf("timeouts that fit every repeat were refused: %v", err)
 	}
+	cfg.Tests = "disk_sustained"
+	cfg.CommandTimeout, cfg.SandboxTimeout = 10*time.Minute, 35*time.Minute
+	if err := Validate(cfg); err != nil {
+		t.Fatalf("a subset shorter than the whole suite was held to its floor: %v", err)
+	}
 }
