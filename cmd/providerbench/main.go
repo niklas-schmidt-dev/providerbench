@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"runtime/debug"
 	"strings"
 	"syscall"
@@ -17,8 +18,11 @@ import (
 	"github.com/niklas-schmidt-dev/providerbench/internal/bench"
 	"github.com/niklas-schmidt-dev/providerbench/internal/output"
 	"github.com/niklas-schmidt-dev/providerbench/internal/sysinfo"
-	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/compute" // registers built-in tests
-	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/storage" // registers object-storage tests
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/compute"  // registers built-in tests
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/platform" // registers platform-overhead tests
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/reach"    // registers network-reach tests
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/storage"  // registers object-storage tests
+	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/workload" // registers application workloads
 )
 
 // version is overridden at release time via -ldflags "-X main.version=...".
@@ -37,6 +41,9 @@ Usage:
   providerbench campaign storage [flags]
                               measure an S3-compatible endpoint from fresh
                               Hetzner vantage hosts (storage-v1 cohorts)
+  providerbench compare [flags] FILE|DIR ...
+                              compare two selections of reports metric by
+                              metric, with a bootstrap confidence interval
   providerbench list          list available tests
   providerbench system        show detected system info
   providerbench validate [--dataset] [--manifest FILE] FILE|DIR ...
@@ -47,14 +54,20 @@ Usage:
 Run flags:
   -t, --tests cpu,disk    comma-separated tests to run (default: all tests of
                           the category)
-      --category NAME     benchmark category: compute, storage (default:
-                          inferred from --tests, else compute). A report
-                          holds exactly one category.
-	      --quick             faster, less precise runs
-	      --profile NAME      measurement profile (default: standard)
+      --category NAME     benchmark category: compute, workload, platform,
+                          reach, storage (default: inferred from --tests,
+                          else compute). A report holds exactly one category.
+      --quick             faster, less precise runs
+      --profile NAME      measurement profile: standard, sustained (default:
+                          inferred from --tests, else standard). A report
+                          holds exactly one profile.
+      --duration TIME     run each sustained test for TIME instead of its
+                          protocol duration, e.g. 2m. The report is marked
+                          as a pilot and never enters an aggregate.
       --json FILE         where to write the JSON report; "-" prints it to
                           stdout with no table (default: providerbench-<provider>-<time>.json)
-      --dir DIR           scratch directory for disk tests (default: current dir)
+      --dir DIR           scratch directory for the disk, files and spawn
+                          tests (default: current dir)
       --provider NAME     provider company, e.g. hetzner, vercel, aws
       --product NAME      the offering tested, e.g. cloud-vps, sandbox, ec2
       --plan NAME         plan/instance type, e.g. cax21
@@ -84,6 +97,10 @@ Examples:
   providerbench run --provider hetzner --product cloud-vps --plan cax21 \
       --region fsn1 --env os_image=ubuntu-24.04 --json report.json
   providerbench run --quick -t cpu,steal
+  providerbench run --category workload     # compression, JSON, TLS, HTTP ...
+  providerbench run --category platform     # syscalls, spawn, files, stalls
+  providerbench run --category reach        # round trips to nine cloud regions
+  providerbench run --profile sustained     # 15 minutes: what survives the burst
   providerbench run -t s3 --provider cloudflare --product r2 \
       --plan standard --region auto --json report.json
   providerbench campaign hetzner --dry-run \
@@ -113,9 +130,15 @@ func main() {
 		os.Exit(campaignCmd(os.Args[2:]))
 	case "validate":
 		os.Exit(validateCmd(os.Args[2:]))
+	case "compare":
+		os.Exit(compareCmd(os.Args[2:]))
 	case "list":
 		for _, b := range bench.All() {
-			fmt.Printf("  %-10s %-9s %s\n", b.Name(), bench.CategoryOf(b), b.Description())
+			suite := bench.CategoryOf(b)
+			if profile := bench.ProfileOf(b); profile != bench.StandardProfile {
+				suite += "/" + profile
+			}
+			fmt.Printf("  %-15s %-18s %s\n", b.Name(), suite, b.Description())
 		}
 	case "system":
 		info := sysinfo.Collect()
@@ -177,7 +200,8 @@ func runCmd(args []string) int {
 		testsFlag     = fs.String("tests", "", "comma-separated tests to run")
 		categoryFlag  = fs.String("category", "", "benchmark category (default: inferred)")
 		quick         = fs.Bool("quick", false, "faster, less precise runs")
-		profile       = fs.String("profile", bench.StandardProfile, "measurement profile")
+		profileFlag   = fs.String("profile", "", "measurement profile (default: inferred)")
+		duration      = fs.Duration("duration", 0, "pilot length of each sustained test")
 		jsonPath      = fs.String("json", "", "write JSON report to file (- for stdout)")
 		dir           = fs.String("dir", "", "scratch directory for disk tests")
 		provider      = fs.String("provider", "", "provider company, e.g. hetzner")
@@ -211,16 +235,6 @@ func runCmd(args []string) int {
 		fmt.Fprintln(os.Stderr, "--tier must be one of: cheap, medium, dedicated, usage-based")
 		return 2
 	}
-	switch *profile {
-	case bench.StandardProfile:
-	case bench.SustainedProfile:
-		fmt.Fprintln(os.Stderr, "--profile sustained is reserved for the documented long-running suite and is not implemented yet")
-		return 2
-	default:
-		fmt.Fprintln(os.Stderr, "--profile must be one of: standard, sustained")
-		return 2
-	}
-
 	identity := []*string{provider, product, plan, region}
 	emptyIdentity := 0
 	for _, value := range identity {
@@ -240,42 +254,20 @@ func runCmd(args []string) int {
 		return 2
 	}
 
-	// A report holds exactly one category, so a run never mixes suites.
-	// Explicit --tests pin the category; --category alone selects that
-	// category's full suite; neither means the original compute run.
-	category := *categoryFlag
-	var selected []bench.Benchmark
-	if *testsFlag != "" {
-		var err error
-		selected, err = bench.Select(strings.Split(*testsFlag, ","))
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 2
-		}
-		for _, b := range selected {
-			c := bench.CategoryOf(b)
-			if category == "" {
-				category = c
-			}
-			if c != category {
-				fmt.Fprintf(os.Stderr, "test %q belongs to category %q — a report holds one category, run it separately\n", b.Name(), c)
-				return 2
-			}
-		}
-	} else {
-		if category == "" {
-			category = "compute"
-		}
-		selected = bench.ByCategory(category)
-		if len(selected) == 0 {
-			fmt.Fprintf(os.Stderr, "unknown category %q (run `providerbench list`)\n", category)
-			return 2
-		}
-	}
-	protocol, ok := bench.ProtocolFor(category)
-	if !ok {
-		fmt.Fprintf(os.Stderr, "category %q has no pinned protocol — add it to bench.ProtocolFor\n", category)
+	suite, err := bench.ResolveSuite(*categoryFlag, *profileFlag, *testsFlag, *quick)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		return 2
+	}
+	if *duration != 0 {
+		if suite.Profile != bench.SustainedProfile {
+			fmt.Fprintln(os.Stderr, "--duration applies to the sustained profile only")
+			return 2
+		}
+		if *duration < bench.MinSustainedDuration {
+			fmt.Fprintf(os.Stderr, "--duration must be at least %s: the sustained metrics are defined over nine 10 s windows\n", bench.MinSustainedDuration)
+			return 2
+		}
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -285,7 +277,7 @@ func runCmd(args []string) int {
 	logf := func(format string, a ...any) {
 		fmt.Fprintf(os.Stderr, "  "+format+"\n", a...)
 	}
-	opts := bench.Options{Quick: *quick, Dir: *dir, Log: logf}
+	opts := bench.Options{Quick: *quick, Dir: *dir, Log: logf, Duration: *duration}
 
 	monthlyPrice := *priceMonth
 	if monthlyPrice == 0 {
@@ -293,10 +285,10 @@ func runCmd(args []string) int {
 	}
 	report := &bench.Report{
 		SchemaVersion:   bench.SchemaVersion,
-		ProtocolVersion: protocol,
-		Profile:         *profile,
+		ProtocolVersion: suite.Protocol,
+		Profile:         suite.Profile,
 		CLIVersion:      version,
-		Category:        category,
+		Category:        suite.Category,
 		CreatedAt:       time.Now().UTC(),
 		Quick:           *quick,
 		Provider: bench.Provider{
@@ -316,12 +308,20 @@ func runCmd(args []string) int {
 			FreshInstance: *freshInstance,
 		},
 	}
-	if len(env) > 0 {
-		report.Environment = env
+	if *duration != 0 {
+		// A shortened run measures different windows than the protocol
+		// defines, so it is an audit-trail pilot, never cohort evidence.
+		report.Measurement.ExcludeFromAggregate = true
+		env["sustained_duration"] = duration.String()
 	}
+	// The benchmarks are compiled Go, so the toolchain is part of the
+	// method: a cohort must come from one release. It is a fact about this
+	// binary, so it is not open to --env.
+	env[bench.GoVersionKey] = runtime.Version()
+	report.Environment = env
 
 	exitCode := 0
-	for _, b := range selected {
+	for _, b := range suite.Tests {
 		if ctx.Err() != nil {
 			break
 		}

@@ -45,10 +45,15 @@ type Config struct {
 	Binary        string
 	OutputDir     string
 	Tests         string
-	Quick         bool
-	PricingAsOf   string
-	PricingBasis  string
-	SSHTimeout    time.Duration
+	// Category and Profile are the resolved identity of the suite to run.
+	// The CLI fills them through bench.ResolveSuite before any resource
+	// exists; empty means the standard compute suite.
+	Category     string
+	Profile      string
+	Quick        bool
+	PricingAsOf  string
+	PricingBasis string
+	SSHTimeout   time.Duration
 }
 
 // Server is the subset of a Hetzner server needed by the campaign runner.
@@ -171,6 +176,8 @@ func Describe(w io.Writer, cfg Config) {
 	fmt.Fprintf(w, "  plan/region:    %s / %s (%s)\n", cfg.Plan, cfg.Region, cfg.Tier)
 	fmt.Fprintf(w, "  hosts:          %d fresh %s in spread group %s\n", cfg.Count, hostWord, placementGroupName(cfg))
 	fmt.Fprintf(w, "  measurements:   %d repeats per host, %d reports total\n", cfg.Repeats, total)
+	category, profile := suiteIdentity(cfg)
+	fmt.Fprintf(w, "  suite:          %s/%s\n", category, profile)
 	fmt.Fprintf(w, "  output:         %s\n", cfg.OutputDir)
 	fmt.Fprintf(w, "  price/server:   %.6f EUR/hour, %.4f EUR/month\n", cfg.PriceHour, cfg.PriceMonth)
 	fmt.Fprintf(w, "  max live rate:  %.6f EUR/hour while all %d hosts exist\n", cfg.PriceHour*float64(cfg.Count), cfg.Count)
@@ -467,10 +474,46 @@ func benchmarkArgs(cfg Config, sample, repeat int, report string) []string {
 	if cfg.Tests != "" {
 		args = append(args, "--tests", cfg.Tests)
 	}
+	if cfg.Category != "" {
+		args = append(args, "--category", cfg.Category)
+	}
+	if cfg.Profile != "" {
+		args = append(args, "--profile", cfg.Profile)
+	}
 	if cfg.Quick {
 		args = append(args, "--quick")
 	}
 	return args
+}
+
+// suiteIdentity returns the category and profile every report of the
+// campaign must carry.
+func suiteIdentity(cfg Config) (category, profile string) {
+	category, profile = cfg.Category, cfg.Profile
+	if category == "" {
+		category = "compute"
+	}
+	if profile == "" {
+		profile = bench.StandardProfile
+	}
+	return category, profile
+}
+
+// verifySuite rejects a copied report that was measured under a different
+// suite than the campaign asked for.
+func verifySuite(path string, cfg Config, validated *bench.Report) error {
+	category, profile := suiteIdentity(cfg)
+	protocol, ok := bench.ProtocolFor(category)
+	if !ok {
+		return fmt.Errorf("campaign category %q has no pinned protocol", category)
+	}
+	if validated.Category != category || validated.ProtocolVersion != protocol || validated.Profile != profile {
+		return fmt.Errorf(
+			"copied report %s is %s/%s under %s, want %s/%s under %s",
+			path, validated.Category, validated.Profile, validated.ProtocolVersion, category, profile, protocol,
+		)
+	}
+	return nil
 }
 
 type reportIdentity struct {
@@ -502,8 +545,8 @@ func verifyReport(path string, cfg Config, sample, repeat int) error {
 	if len(validationErrs) > 0 {
 		return fmt.Errorf("copied report %s fails the report contract: %v", path, errors.Join(validationErrs...))
 	}
-	if validated.ProtocolVersion != bench.ComputeProtocol || validated.Profile != bench.StandardProfile {
-		return fmt.Errorf("copied report %s has unexpected protocol/profile", path)
+	if err := verifySuite(path, cfg, validated); err != nil {
+		return err
 	}
 	var report reportIdentity
 	if err := json.Unmarshal(data, &report); err != nil {

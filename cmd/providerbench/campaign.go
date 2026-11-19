@@ -102,7 +102,13 @@ Safety:
 Measurement:
       --count N           independent fresh hosts (default 10; maximum 10)
       --repeats N         measurements per host (default 3)
-  -t, --tests LIST        comma-separated benchmark tests (default all)
+  -t, --tests LIST        comma-separated benchmark tests (default: the
+                          whole suite)
+      --category NAME     suite to run: compute, workload, platform, reach
+                          (default compute). One campaign measures one suite;
+                          give each suite its own --campaign ID.
+      --profile NAME      standard or sustained (default standard). A
+                          sustained run takes 15 minutes per repeat.
       --quick             run shorter benchmark workloads
       --output-dir DIR    downloaded reports (default data/results)
 
@@ -292,6 +298,8 @@ func hetznerCampaignCmd(args []string) int {
 	fs.StringVar(&cfg.OutputDir, "output-dir", filepath.Join("data", "results"), "downloaded report directory")
 	fs.StringVar(&cfg.Tests, "tests", "", "comma-separated benchmark tests")
 	fs.StringVar(&cfg.Tests, "t", "", "alias for --tests")
+	fs.StringVar(&cfg.Category, "category", "", "benchmark category (default: inferred from --tests, else compute)")
+	fs.StringVar(&cfg.Profile, "profile", "", "measurement profile (default: inferred from --tests, else standard)")
 	fs.BoolVar(&cfg.Quick, "quick", false, "run shorter benchmark workloads")
 	fs.StringVar(&cfg.PricingAsOf, "pricing-as-of", time.Now().UTC().Format(time.DateOnly), "price observation date")
 	fs.StringVar(&cfg.PricingBasis, "pricing-basis", "server+primary-ipv4-net-excl-vat", "pricing note stored in reports")
@@ -313,12 +321,12 @@ func hetznerCampaignCmd(args []string) int {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
-	if cfg.Tests != "" {
-		if _, err := bench.Select(strings.Split(cfg.Tests, ",")); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 2
-		}
+	suite, err := bench.ResolveSuite(cfg.Category, cfg.Profile, cfg.Tests, cfg.Quick)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
 	}
+	cfg.Category, cfg.Profile = suite.Category, suite.Profile
 	if dryRun {
 		hetznercampaign.Describe(os.Stdout, cfg)
 		return 0

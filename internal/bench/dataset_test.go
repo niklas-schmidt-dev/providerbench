@@ -143,6 +143,20 @@ func TestValidateDatasetRejectsMixedPricingBasis(t *testing.T) {
 	}
 }
 
+func TestValidateDatasetRejectsMixedGoToolchains(t *testing.T) {
+	files := completeV2Dataset(t)
+	r := fullComputeReport(1, 1)
+	if r.Environment == nil {
+		r.Environment = map[string]string{}
+	}
+	r.Environment[GoVersionKey] = "go1.99.0"
+	files[0] = datasetFile(t, r, "cpx22")
+	_, errs := ValidateDataset(files)
+	if !hasError(errs, "mixes Go toolchains") {
+		t.Fatalf("a cohort built by two toolchains was accepted: %v", errs)
+	}
+}
+
 func TestValidateDatasetRejectsProtocolAndProfileMixingInsideCampaign(t *testing.T) {
 	t.Run("protocol", func(t *testing.T) {
 		files := completeV2Dataset(t)

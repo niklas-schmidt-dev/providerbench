@@ -20,6 +20,18 @@ func openDirect(path string) (*os.File, bool, error) {
 	return f, false, err
 }
 
+// openDirectWrite opens an existing file for writing with O_DIRECT so writes
+// reach the device instead of resting in the page cache. Falls back to a
+// normal open where the filesystem refuses O_DIRECT.
+func openDirectWrite(path string) (*os.File, bool, error) {
+	f, err := os.OpenFile(path, os.O_WRONLY|syscall.O_DIRECT, 0)
+	if err == nil {
+		return f, true, nil
+	}
+	f, err = os.OpenFile(path, os.O_WRONLY, 0)
+	return f, false, err
+}
+
 // alignedBuf returns a size-byte slice whose base address is align-aligned,
 // as required for O_DIRECT reads.
 func alignedBuf(size, align int) []byte {

@@ -21,6 +21,17 @@ func openDirect(path string) (*os.File, bool, error) {
 	return f, errno == 0, nil
 }
 
+// openDirectWrite opens an existing file for writing with F_NOCACHE so
+// writes bypass the unified buffer cache.
+func openDirectWrite(path string) (*os.File, bool, error) {
+	f, err := os.OpenFile(path, os.O_WRONLY, 0)
+	if err != nil {
+		return nil, false, err
+	}
+	_, _, errno := syscall.Syscall(syscall.SYS_FCNTL, f.Fd(), fNOCACHE, 1)
+	return f, errno == 0, nil
+}
+
 // disableWriteCache marks a freshly written file uncachable so the read
 // phase measures the device, not the unified buffer cache.
 func disableWriteCache(f *os.File) {

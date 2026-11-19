@@ -9,6 +9,7 @@ package bench
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -43,6 +44,10 @@ type Options struct {
 	Quick bool                          // shorter, less precise runs
 	Dir   string                        // scratch directory for disk tests ("" = current directory)
 	Log   func(format string, a ...any) // progress output, may be nil
+	// Duration overrides how long a sustained-profile test runs. Zero keeps
+	// the protocol duration; any other value makes the report a pilot that
+	// never enters an aggregate.
+	Duration time.Duration
 }
 
 func (o Options) Logf(format string, a ...any) {
@@ -81,6 +86,22 @@ func CategoryOf(b Benchmark) string {
 	return "compute"
 }
 
+// Profiled lets a benchmark declare the measurement profile it belongs to.
+// Benchmarks without it are standard: the short suite a default run executes.
+// A report holds exactly one profile, so long-running tests never ride along
+// with — or silently extend — the standard suite.
+type Profiled interface {
+	Profile() string
+}
+
+// ProfileOf returns the profile a benchmark reports under.
+func ProfileOf(b Benchmark) string {
+	if p, ok := b.(Profiled); ok {
+		return p.Profile()
+	}
+	return StandardProfile
+}
+
 var registry []Benchmark
 
 // Register adds a benchmark to the global registry. Call it from an init
@@ -99,16 +120,34 @@ func All() []Benchmark {
 	return registry
 }
 
-// ByCategory returns the registered benchmarks of one category in
-// registration order.
-func ByCategory(category string) []Benchmark {
+// Suite returns the registered benchmarks of one category and profile in
+// registration order — the set a run executes when no tests are named.
+func Suite(category, profile string) []Benchmark {
 	var out []Benchmark
 	for _, b := range registry {
-		if CategoryOf(b) == category {
+		if CategoryOf(b) == category && ProfileOf(b) == profile {
 			out = append(out, b)
 		}
 	}
 	return out
+}
+
+// NewResult starts a result for one test, stamped with the current UTC time.
+func NewResult(test string) *Result {
+	return &Result{Test: test, StartedAt: time.Now().UTC()}
+}
+
+// Finish records the elapsed time and rounds every metric to two decimals,
+// the precision all published reports share.
+func (r *Result) Finish() {
+	r.DurationSeconds = round2(time.Since(r.StartedAt).Seconds())
+	for i, m := range r.Metrics {
+		r.Metrics[i].Value = round2(m.Value)
+	}
+}
+
+func round2(v float64) float64 {
+	return math.Round(v*100) / 100
 }
 
 // Select resolves test names to benchmarks, erroring on unknown names.
