@@ -317,16 +317,16 @@ func hetznerCampaignCmd(args []string) int {
 		fmt.Fprintf(os.Stderr, "unexpected positional arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
-	if err := hetznercampaign.Validate(cfg); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 2
-	}
 	suite, err := bench.ResolveSuite(cfg.Category, cfg.Profile, cfg.Tests, cfg.Quick)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
 	cfg.Category, cfg.Profile = suite.Category, suite.Profile
+	if err := hetznercampaign.Validate(cfg); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
+	}
 	if dryRun {
 		hetznercampaign.Describe(os.Stdout, cfg)
 		return 0

@@ -202,8 +202,10 @@ the two medians and a 95% bootstrap interval over hosts; a verdict is given
 only when the whole interval lies on one side of "no change". With ten hosts a
 side the interval is indicative, not exact. Filters take `provider`, `product`,
 `plan`, `region`, `campaign` and `cpu`, a substring of the reported CPU model:
-`--a plan=cx23,cpu=skylake --b plan=cx23,cpu=rome` compares the two hardware
-generations one plan is sold on.
+`--a plan=cx23,cpu=skylake --b plan=cx23,cpu=rome --across-protocols` compares
+the two hardware generations one plan is sold on, across the protocol versions
+its cohorts were measured under. Reports without campaign coordinates count as
+one host: they get a ratio, never an interval.
 
 ## Adding a test
 

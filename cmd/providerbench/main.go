@@ -268,6 +268,10 @@ func runCmd(args []string) int {
 			fmt.Fprintf(os.Stderr, "--duration must be at least %s: the sustained metrics are defined over nine 10 s windows\n", bench.MinSustainedDuration)
 			return 2
 		}
+		if *duration%bench.SustainedWindow != 0 {
+			fmt.Fprintf(os.Stderr, "--duration must be a whole number of %s windows\n", bench.SustainedWindow)
+			return 2
+		}
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

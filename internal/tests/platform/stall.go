@@ -142,7 +142,7 @@ func (stallTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
 	if waitOK && waitAfterOK && waitAfter >= waitBefore {
 		res.Add("runqueue_wait", float64(waitAfter-waitBefore)/float64(total.ran)*100, "%", false)
 	} else {
-		res.Note("runqueue_wait needs /proc/self/task/*/schedstat and is only available on Linux")
+		res.Note("runqueue_wait needs the scheduler statistics in /proc/self/task/*/schedstat, which this system does not keep")
 	}
 	// Only Linux counts exactly the preemptions meant here; other kernels
 	// fold unrelated events into the same counter.

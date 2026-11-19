@@ -70,8 +70,7 @@ func (f Filter) Matches(r *Report) bool {
 		(f.CPU == "" || strings.Contains(strings.ToLower(r.System.CPUModel), strings.ToLower(f.CPU)))
 }
 
-// NamedReport is a report together with the name it was loaded from, which
-// identifies its host when the report carries no campaign coordinates.
+// NamedReport is a report together with the name it was loaded from.
 type NamedReport struct {
 	Name   string
 	Report *Report
@@ -259,9 +258,11 @@ func buildSide(reports []NamedReport) (*comparisonSide, error) {
 			continue
 		}
 		side.summary.Reports++
-		key := cohortKey(r) + "\x1f" + nr.Name
+		// Without campaign coordinates nothing says which reports share a
+		// machine, so they count as one host: a ratio, never an interval.
+		key := cohortKey(r)
 		if r.Measurement.CampaignID != "" {
-			key = cohortKey(r) + "\x1f" + strconv.Itoa(r.Measurement.SampleIndex)
+			key += "\x1f" + strconv.Itoa(r.Measurement.SampleIndex)
 		}
 		h, ok := hosts[key]
 		if !ok {
@@ -336,25 +337,28 @@ func compareMetric(
 		return out
 	}
 
-	ratios := make([]float64, 0, resamples)
+	ratios := make([]float64, resamples)
 	drawA := make([]float64, len(a))
 	drawB := make([]float64, len(b))
-	for range resamples {
-		for i := range drawA {
-			drawA[i] = a[rng.Intn(len(a))]
+	for i := range ratios {
+		for j := range drawA {
+			drawA[j] = a[rng.Intn(len(a))]
 		}
-		for i := range drawB {
-			drawB[i] = b[rng.Intn(len(b))]
+		for j := range drawB {
+			drawB[j] = b[rng.Intn(len(b))]
 		}
+		// A draw with a zero baseline has no finite ratio. It stays in as
+		// unbounded: dropping it would pull the interval towards A.
+		ratios[i] = math.Inf(1)
 		if base := quantile(drawA, 0.5); base > 0 {
-			ratios = append(ratios, quantile(drawB, 0.5)/base)
+			ratios[i] = quantile(drawB, 0.5) / base
 		}
 	}
-	if len(ratios) < resamples/2 {
+	low, high := quantile(ratios, 0.025), quantile(ratios, 0.975)
+	if math.IsInf(high, 1) {
 		out.Verdict = VerdictZeroBaseline
 		return out
 	}
-	low, high := quantile(ratios, 0.025), quantile(ratios, 0.975)
 	out.Low, out.High = &low, &high
 	switch {
 	case low > 1:

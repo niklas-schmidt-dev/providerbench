@@ -410,11 +410,20 @@ func TestRunnerRejectsAReportFromADifferentSuite(t *testing.T) {
 }
 
 func TestRunnerKeepsTheDefaultCommandLineForComputeCampaigns(t *testing.T) {
-	args := benchmarkArgs(Config{Plan: "cpx22", Tier: "medium", Region: "fsn1", Campaign: "c"}, 1, 1, "/tmp/r.json")
-	for _, arg := range args {
-		if arg == "--category" || arg == "--profile" {
-			t.Fatalf("an unset suite must not add flags: %v", args)
+	// The CLI resolves the suite first, so a default campaign arrives with
+	// compute/standard filled in.
+	for _, cfg := range []Config{{}, {Category: "compute", Profile: bench.StandardProfile}} {
+		args := benchmarkArgs(cfg, 1, 1, "/tmp/r.json")
+		for _, arg := range args {
+			if arg == "--category" || arg == "--profile" {
+				t.Fatalf("the default suite must not add flags: %v", args)
+			}
 		}
+	}
+	cfg := validConfig(t)
+	cfg.Category = "storage"
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a storage campaign has no endpoint here and must be refused")
 	}
 	if category, profile := suiteIdentity(Config{}); category != "compute" || profile != bench.StandardProfile {
 		t.Fatalf("default suite is %s/%s, want compute/standard", category, profile)

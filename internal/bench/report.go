@@ -22,9 +22,12 @@ const (
 	// benchmark binary was built with.
 	GoVersionKey = "go_version"
 
-	// MinSustainedDuration is the shortest sustained run: nine ten-second
-	// windows, so the initial and the sustained segment do not overlap.
-	MinSustainedDuration = 90 * time.Second
+	// SustainedWindow is the sampling window of the sustained profile.
+	SustainedWindow = 10 * time.Second
+
+	// MinSustainedDuration is the shortest sustained run: nine windows, so
+	// the initial and the sustained segment do not overlap.
+	MinSustainedDuration = 9 * SustainedWindow
 )
 
 // ProtocolFor returns the pinned protocol version for a category. The

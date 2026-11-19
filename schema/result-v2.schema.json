@@ -193,7 +193,10 @@
         "required": ["profile"]
       },
       "then": {
-        "properties": { "quick": { "const": false } }
+        "properties": {
+          "quick": { "const": false },
+          "category": { "const": "compute" }
+        }
       }
     }
   ]

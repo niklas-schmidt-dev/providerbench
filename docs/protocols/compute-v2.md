@@ -122,7 +122,8 @@ it.
 A sustained report is never quick and never enters the composite ranking.
 `--duration` shortens both tests for exploration; such a report is marked
 `exclude_from_aggregate`, records `environment.sustained_duration`, and is an
-audit-trail pilot, not cohort evidence. The windows need at least 90 seconds.
+audit-trail pilot, not cohort evidence. It takes a whole number of 10-second
+windows, at least nine.
 
 The versioned-method rule follows the reproducibility principle that published
 results remain interpretable under the method used to produce them. See the

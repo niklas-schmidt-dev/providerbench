@@ -110,7 +110,9 @@ Reading them together:
   This is hypervisor steal, whether or not `reported_steal` admits it.
 
 `runqueue_wait` also counts waits shorter than 100 µs and the runtime's helper
-threads, so it can slightly exceed `lost_time`.
+threads, so it can slightly exceed `lost_time`. A kernel built without
+scheduler statistics reports none; the metric is then left out and a note says
+so, because a zero would read as "all lost time is steal".
 
 The detector was checked against a known answer: eight spinning threads under
 a two-CPU container quota must lose 75% of their time. It reported 74.98%

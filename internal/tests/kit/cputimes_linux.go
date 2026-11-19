@@ -9,7 +9,8 @@ import (
 )
 
 // ReadCPUTicks parses the aggregate "cpu" line of /proc/stat.
-// Fields: user nice system idle iowait irq softirq steal guest guest_nice
+// Fields: user nice system idle iowait irq softirq steal guest guest_nice.
+// The two guest fields are already counted in user and nice.
 func ReadCPUTicks() (CPUTicks, bool) {
 	data, err := os.ReadFile("/proc/stat")
 	if err != nil {
@@ -24,7 +25,7 @@ func ReadCPUTicks() (CPUTicks, bool) {
 			return CPUTicks{}, false
 		}
 		var t CPUTicks
-		for i, f := range fields {
+		for i, f := range fields[:8] {
 			v, err := strconv.ParseUint(f, 10, 64)
 			if err != nil {
 				return CPUTicks{}, false

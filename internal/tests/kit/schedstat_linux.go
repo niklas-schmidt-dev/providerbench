@@ -20,7 +20,7 @@ func RunqueueWait() (time.Duration, bool) {
 		return 0, false
 	}
 	var total time.Duration
-	read := false
+	var onCPU int64
 	for _, path := range paths {
 		data, err := os.ReadFile(path)
 		if err != nil {
@@ -31,12 +31,18 @@ func RunqueueWait() (time.Duration, bool) {
 		if len(fields) < 2 {
 			return 0, false
 		}
+		ran, err := strconv.ParseInt(fields[0], 10, 64)
+		if err != nil {
+			return 0, false
+		}
 		wait, err := strconv.ParseInt(fields[1], 10, 64)
 		if err != nil {
 			return 0, false
 		}
+		onCPU += ran
 		total += time.Duration(wait)
-		read = true
 	}
-	return total, read
+	// A kernel without scheduler accounting prints zeros for every thread.
+	// No time on CPU means there are no statistics, not that nothing waited.
+	return total, onCPU > 0
 }

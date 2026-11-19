@@ -35,7 +35,8 @@ How to read it: repeats on one host collapse to their median, then each side
 is summarised across hosts. "B vs A" is the ratio of the two medians. The
 interval is a 95% percentile bootstrap over hosts — with ten hosts a side it
 is indicative, not exact. A verdict is given only when the whole interval
-lies on one side of "no change".
+lies on one side of "no change". Reports without campaign coordinates count
+as one host and get a ratio only.
 
 Examples:
   providerbench compare data/results \

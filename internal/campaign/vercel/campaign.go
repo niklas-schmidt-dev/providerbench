@@ -82,6 +82,10 @@ type Runner struct {
 	NewRunID func() (string, error)
 }
 
+// sustainedRepeatTimeout is the least a command may be given to finish one
+// sustained repeat: ten minutes of CPU, five of disk, and laying out the file.
+const sustainedRepeatTimeout = 20 * time.Minute
+
 // Validate checks inputs before Vercel is contacted.
 func Validate(cfg Config) error {
 	var problems []error
@@ -123,6 +127,16 @@ func Validate(cfg Config) error {
 	}
 	if cfg.CommandTimeout <= 0 || cfg.CommandTimeout > cfg.SandboxTimeout {
 		problems = append(problems, errors.New("--command-timeout must be positive and no longer than --sandbox-timeout"))
+	}
+	if session := time.Duration(cfg.Repeats) * sustainedRepeatTimeout; cfg.Profile == bench.SustainedProfile &&
+		(cfg.CommandTimeout < sustainedRepeatTimeout || cfg.SandboxTimeout < session) {
+		problems = append(problems, fmt.Errorf(
+			"a sustained repeat runs for 15 minutes: --command-timeout must be at least %s and --sandbox-timeout at least %s for %d repeats",
+			sustainedRepeatTimeout, session, cfg.Repeats,
+		))
+	}
+	if cfg.Category == "storage" {
+		problems = append(problems, errors.New("the storage suite needs an endpoint and credentials: use `providerbench campaign storage`"))
 	}
 	if cfg.PricingAsOf != "" {
 		if _, err := time.Parse(time.DateOnly, cfg.PricingAsOf); err != nil {
@@ -305,11 +319,9 @@ func benchmarkArgs(cfg Config, cliVersion string, sample, repeat int, report str
 	if cfg.Tests != "" {
 		args = append(args, "--tests", cfg.Tests)
 	}
-	if cfg.Category != "" {
-		args = append(args, "--category", cfg.Category)
-	}
-	if cfg.Profile != "" {
-		args = append(args, "--profile", cfg.Profile)
+	// The default suite keeps the command line it always had.
+	if category, profile := suiteIdentity(cfg); category != "compute" || profile != bench.StandardProfile {
+		args = append(args, "--category", category, "--profile", profile)
 	}
 	if cfg.Quick {
 		args = append(args, "--quick")

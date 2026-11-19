@@ -358,3 +358,40 @@ func TestRunnerRejectsAReportFromADifferentSuite(t *testing.T) {
 		t.Fatalf("a rejected report was left behind: %d entries", len(left))
 	}
 }
+
+func TestRunnerKeepsTheDefaultCommandLineForComputeCampaigns(t *testing.T) {
+	// The CLI resolves the suite first, so a default campaign arrives with
+	// compute/standard filled in.
+	for _, cfg := range []Config{{}, {Category: "compute", Profile: bench.StandardProfile}} {
+		args := benchmarkArgs(cfg, "1.0.0", 1, 1, "/tmp/r.json")
+		for _, arg := range args {
+			if arg == "--category" || arg == "--profile" {
+				t.Fatalf("the default suite must not add flags: %v", args)
+			}
+		}
+	}
+}
+
+func TestValidateRefusesSuitesTheSandboxCannotFinish(t *testing.T) {
+	cfg := validConfig(t)
+	cfg.Category = "storage"
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a storage campaign has no endpoint here and must be refused")
+	}
+
+	cfg = validConfig(t)
+	cfg.Profile = bench.SustainedProfile
+	cfg.Repeats = 3
+	cfg.CommandTimeout, cfg.SandboxTimeout = 4*time.Minute, 10*time.Minute
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a four-minute command timeout cannot hold a 15-minute sustained repeat")
+	}
+	cfg.CommandTimeout, cfg.SandboxTimeout = 20*time.Minute, 40*time.Minute
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a 40-minute Sandbox cannot hold three sustained repeats")
+	}
+	cfg.SandboxTimeout = time.Hour
+	if err := Validate(cfg); err != nil {
+		t.Fatalf("timeouts that fit every repeat were refused: %v", err)
+	}
+}

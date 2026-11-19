@@ -105,6 +105,9 @@ func TestValidateReportProblems(t *testing.T) {
 		{"unitless metric", func(r *Report) { r.Results[0].Metrics[0].Unit = "" }, "/unit"},
 		{"wrong compute protocol", func(r *Report) { r.ProtocolVersion = "compute-v3" }, "compute-v2"},
 		{"quick sustained profile", func(r *Report) { r.Profile = SustainedProfile; r.Quick = true }, "/quick"},
+		{"sustained outside compute", func(r *Report) {
+			r.Profile, r.Category, r.ProtocolVersion = SustainedProfile, "workload", WorkloadProtocol
+		}, "/category"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

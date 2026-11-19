@@ -157,6 +157,41 @@ func TestCompareHandlesSmallAndZeroSides(t *testing.T) {
 	}
 }
 
+func TestCompareKeepsZeroBaselineDrawsInTheInterval(t *testing.T) {
+	// A's median is 1, but a third of the resamples draw a median of 0.
+	// Dropping those left only ratios of 0.5 and below: "A better".
+	values := []float64{0, 0, 1, 2, 3}
+	a := cohort("a", "c1", "", 5, 1, func(host, _ int) float64 { return values[host-1] })
+	b := cohort("b", "c1", "", 5, 1, func(int, int) float64 { return 0.5 })
+	c, err := Compare(a, b, 1000, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m := onlyMetric(t, c); m.Verdict != VerdictZeroBaseline || m.Low != nil || m.High != nil {
+		t.Errorf("an interval that reaches a zero baseline carries no verdict: %+v", m)
+	}
+}
+
+func TestCompareCountsReportsWithoutCoordinatesAsOneHost(t *testing.T) {
+	adHoc := func(plan string, value float64) []NamedReport {
+		reports := cohort(plan, "", "", 6, 1, func(int, int) float64 { return value })
+		for _, nr := range reports {
+			nr.Report.Measurement = Measurement{}
+		}
+		return reports
+	}
+	c, err := Compare(adHoc("a", 100), adHoc("b", 200), 1000, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.A.Hosts != 1 || c.B.Hosts != 1 {
+		t.Errorf("six runs of unknown origin are not six hosts: A %d, B %d", c.A.Hosts, c.B.Hosts)
+	}
+	if m := onlyMetric(t, c); m.Verdict != VerdictTooFewHosts || m.Low != nil {
+		t.Errorf("unknown hosts cannot carry an interval: %+v", m)
+	}
+}
+
 func TestCompareSkipsReportsThatAreNotEvidence(t *testing.T) {
 	a := cohort("a", "c1", "", 10, 1, func(int, int) float64 { return 100 })
 	b := cohort("b", "c1", "", 10, 1, func(int, int) float64 { return 100 })

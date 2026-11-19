@@ -43,8 +43,9 @@ Measurement:
                           (default compute). One campaign measures one suite;
                           give each suite its own --campaign ID.
       --profile NAME      standard or sustained (default standard). A
-                          sustained run takes 15 minutes per repeat: raise
-                          --command-timeout and --sandbox-timeout to fit.
+                          sustained run takes 15 minutes per repeat: it needs
+                          --command-timeout 20m or more and a
+                          --sandbox-timeout of 20m per repeat.
       --quick             run shorter benchmark workloads
       --output-dir DIR    downloaded reports (default data/results)
 
@@ -108,16 +109,16 @@ func vercelCampaignCmd(args []string) int {
 		fmt.Fprintf(os.Stderr, "unexpected positional arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
-	if err := vercelcampaign.Validate(cfg); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 2
-	}
 	suite, err := bench.ResolveSuite(cfg.Category, cfg.Profile, cfg.Tests, cfg.Quick)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
 	cfg.Category, cfg.Profile = suite.Category, suite.Profile
+	if err := vercelcampaign.Validate(cfg); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
+	}
 	if dryRun {
 		vercelcampaign.Describe(os.Stdout, cfg, project, scope)
 		return 0

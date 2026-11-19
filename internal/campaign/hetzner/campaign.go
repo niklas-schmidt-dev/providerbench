@@ -155,6 +155,9 @@ func Validate(cfg Config) error {
 	if cfg.SSHTimeout <= 0 {
 		problems = append(problems, errors.New("--ssh-timeout must be greater than zero"))
 	}
+	if cfg.Category == "storage" {
+		problems = append(problems, errors.New("the storage suite needs an endpoint and credentials: use `providerbench campaign storage`"))
+	}
 	if cfg.PricingAsOf != "" {
 		if _, err := time.Parse(time.DateOnly, cfg.PricingAsOf); err != nil {
 			problems = append(problems, errors.New("--pricing-as-of must use YYYY-MM-DD"))
@@ -474,11 +477,9 @@ func benchmarkArgs(cfg Config, sample, repeat int, report string) []string {
 	if cfg.Tests != "" {
 		args = append(args, "--tests", cfg.Tests)
 	}
-	if cfg.Category != "" {
-		args = append(args, "--category", cfg.Category)
-	}
-	if cfg.Profile != "" {
-		args = append(args, "--profile", cfg.Profile)
+	// The default suite keeps the command line it always had.
+	if category, profile := suiteIdentity(cfg); category != "compute" || profile != bench.StandardProfile {
+		args = append(args, "--category", category, "--profile", profile)
 	}
 	if cfg.Quick {
 		args = append(args, "--quick")

@@ -17,7 +17,7 @@ import (
 // all look perfect in a three-second test.
 
 const (
-	sustainedWindow      = 10 * time.Second
+	sustainedWindow      = bench.SustainedWindow
 	sustainedInitial     = 3 // windows averaged for the initial rate (30 s)
 	sustainedFinal       = 6 // windows averaged for the sustained rate (60 s)
 	sustainedDropPercent = 80
