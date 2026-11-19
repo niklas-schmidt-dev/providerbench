@@ -8,7 +8,7 @@
 *.partial
 
 # benchmark scratch files
-.providerbench-disk.tmp
+.providerbench-*
 report*.json
 !data/results/*.json
 !data/report-manifest.json

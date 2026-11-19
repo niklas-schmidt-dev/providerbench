@@ -69,7 +69,61 @@ One missing or failed repeat excludes the entire cohort until the campaign is
 repeated and documented. A replacement host must not be silently substituted
 under an existing sample coordinate.
 
-`sustained` is reserved by schema but is not implemented by the v0.2 CLI.
+## Sustained profile
+
+Defined on 2026-11-19. Before that date the profile was reserved by the schema
+and no CLI could produce it, so no earlier report is affected.
+
+The standard profile measures each workload for seconds. The sustained profile
+asks whether that performance is still there after minutes: burstable plans,
+CPU-credit schemes, fair-share throttling and storage burst buckets all look
+perfect in a three-second test.
+
+| Test | Metric | Unit | Direction |
+|---|---|---|---|
+| cpu_sustained | `initial_throughput` | MB/s | higher |
+| cpu_sustained | `sustained_throughput` | MB/s | higher |
+| cpu_sustained | `retained` | % | higher |
+| cpu_sustained | `worst_window` | % | higher |
+| cpu_sustained | `window_cv` | % | lower |
+| cpu_sustained | `cpu_steal` | % | lower |
+| disk_sustained | `initial_write_iops` | IOPS | higher |
+| disk_sustained | `sustained_write_iops` | IOPS | higher |
+| disk_sustained | `retained` | % | higher |
+| disk_sustained | `worst_window` | % | higher |
+| disk_sustained | `window_cv` | % | lower |
+
+Both tests run one continuous workload and read its progress counter every ten
+seconds. A window's rate is the work completed in it divided by its measured
+length.
+
+- `initial_*` is the mean rate of the first three windows (30 s).
+- `sustained_*` is the mean rate of the last six windows (60 s).
+- `retained` is sustained over initial, in percent. It may exceed 100.
+- `worst_window` is the slowest window relative to the median window.
+- `window_cv` is the coefficient of variation across all windows.
+
+`cpu_sustained` hashes on every logical CPU for ten minutes with the same
+SHA-256 kernel as the standard CPU test, so its first windows line up with
+`multi_core_hash`. `cpu_steal` is read from `/proc/stat` across the whole run
+and exists on Linux only.
+
+`disk_sustained` first lays out a 1 GiB file of unique blocks and syncs it,
+untimed. It then overwrites random aligned 4 KiB blocks at queue depth four
+for five minutes, with direct I/O where supported and a fresh counter in every
+block. The file is synced once at the end; a failed write or sync fails the
+result.
+
+The result notes carry the complete window trace and the start of the first
+window after the initial three that fell below 80% of the initial rate, if
+any. A slow first window is a warm-up, not a throttle; `worst_window` reports
+it.
+
+A sustained report is never quick and never enters the composite ranking.
+`--duration` shortens both tests for exploration; such a report is marked
+`exclude_from_aggregate`, records `environment.sustained_duration`, and is an
+audit-trail pilot, not cohort evidence. It takes a whole number of 10-second
+windows, at least nine.
 
 The versioned-method rule follows the reproducibility principle that published
 results remain interpretable under the method used to produce them. See the

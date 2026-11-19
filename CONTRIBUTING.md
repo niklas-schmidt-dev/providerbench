@@ -65,7 +65,8 @@ benchmarks sequentially, refuses to overwrite campaign reports, and requires
 
 ## 2. Add a benchmark test
 
-Every test is one file in `internal/tests/compute/` implementing one interface:
+Every test is one file in `internal/tests/<category>/`, named after the test,
+implementing one interface:
 
 ```go
 func init() { bench.Register(myTest{}) }
@@ -77,9 +78,20 @@ func (myTest) Description() string { return "one line" }
 func (myTest) Run(ctx context.Context, opts Options) (*bench.Result, error) { ... }
 ```
 
+A test belongs to a category through `Category()` and, when it is long
+running, to the sustained profile through `Profile()`; without them it is a
+standard compute test. The standard compute suite is frozen at the five tests
+of `compute-v2` — a ranked cohort must contain exactly its 16 metrics — so a
+new test goes into another category, into a profile, or into a new protocol
+version, never into that suite.
+
 Ground rules for tests (the benchmark source is the methodology):
 
-- **Deterministic**: fixed seeds, identical work on every machine.
+- **Deterministic**: fixed seeds, identical work on every machine. Generate
+  inputs with integer arithmetic: floating-point library functions differ in
+  their last bit between CPUs, and with them the input.
+- **Self-checking**: verify the output of the work you time. A platform that
+  computes the wrong answer must fail, not post a fast number.
 - **Cache-honest**: if the number can be faked by a cache, bypass the cache.
 - **Cross-platform**: guard platform-specific code with build tags and degrade
   gracefully (report a note, not an error).
@@ -89,15 +101,20 @@ Ground rules for tests (the benchmark source is the methodology):
 
 ## 3. Propose a category
 
-Categories group benchmarks on the site (`compute` is live; `storage` ships
-in this CLI as `providerbench run -t s3` under `protocol_version:
-"storage-v1"` and awaits its first ranked campaigns). The architectural rule
-is **category = runner, schema = contract**: a category is not required to
-extend this CLI. `compute` and `storage` run as one zero-dependency static
-binary — `storage` drives object stores from whatever vantage host the CLI
-runs on, which is why its protocol records the vantage. A category whose
-workload doesn't fit that shape gets its own runner (an AI suite would hit
-provider APIs from a client).
+Categories group benchmarks on the site. `compute` is live. Four more ship in
+this CLI under their own pinned protocols and await their first published
+campaigns: `storage` (`providerbench run -t s3`, `storage-v1`), `workload`
+(`workload-v1`), `platform` (`platform-v1`) and `reach` (`reach-v1`). The
+architectural rule is **category = runner, schema = contract**: a category is
+not required to extend this CLI. The five above run as one static binary —
+`storage` drives object stores from whatever vantage host the CLI runs on,
+which is why its protocol records the vantage. A category whose workload
+doesn't fit that shape gets its own runner (an AI suite would hit provider
+APIs from a client).
+
+A category needs three things in this repository: a protocol document in
+`docs/protocols/`, an entry in `bench.ProtocolFor`, and the matching pin in
+`schema/result-v2.schema.json`.
 
 Every runner must satisfy the same contract: emit reports that pass
 `providerbench validate`, carry campaign/sample/repeat coordinates, and land

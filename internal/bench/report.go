@@ -12,8 +12,22 @@ const (
 	SchemaVersion       = 2
 	ComputeProtocol     = "compute-v2"
 	StorageProtocol     = "storage-v1"
+	WorkloadProtocol    = "workload-v1"
+	PlatformProtocol    = "platform-v1"
+	ReachProtocol       = "reach-v1"
 	StandardProfile     = "standard"
 	SustainedProfile    = "sustained"
+
+	// GoVersionKey is the environment entry that records the Go release a
+	// benchmark binary was built with.
+	GoVersionKey = "go_version"
+
+	// SustainedWindow is the sampling window of the sustained profile.
+	SustainedWindow = 10 * time.Second
+
+	// MinSustainedDuration is the shortest sustained run: nine windows, so
+	// the initial and the sustained segment do not overlap.
+	MinSustainedDuration = 9 * SustainedWindow
 )
 
 // ProtocolFor returns the pinned protocol version for a category. The
@@ -25,6 +39,12 @@ func ProtocolFor(category string) (string, bool) {
 		return ComputeProtocol, true
 	case "storage":
 		return StorageProtocol, true
+	case "workload":
+		return WorkloadProtocol, true
+	case "platform":
+		return PlatformProtocol, true
+	case "reach":
+		return ReachProtocol, true
 	}
 	return "", false
 }
@@ -61,8 +81,9 @@ type Report struct {
 	ProtocolVersion string `json:"protocol_version,omitempty"`
 	Profile         string `json:"profile,omitempty"`
 	CLIVersion      string `json:"cli_version"`
-	// Category groups reports on providerbench.dev: "compute" for this CLI's
-	// built-in tests; future suites (ai, storage, ...) use their own.
+	// Category groups reports on providerbench.dev: "compute" for the
+	// original suite; storage, workload, platform and reach carry their own
+	// pinned protocols (see ProtocolFor).
 	Category  string    `json:"category"`
 	CreatedAt time.Time `json:"created_at"`
 	Sample    bool      `json:"sample,omitempty"` // true = illustrative data, not a real measurement

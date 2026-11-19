@@ -22,6 +22,22 @@ type fakeClient struct {
 	removed             []string
 	deleteContextsValid bool
 	failBenchmark       bool
+	ignoreSuite         bool // behave like an old binary that always runs compute
+}
+
+// reportedSuite is the suite a remote run would report for its arguments.
+func (f *fakeClient) reportedSuite() (category, profile, protocol string) {
+	category, profile = "compute", bench.StandardProfile
+	if !f.ignoreSuite {
+		if v := f.lastArgs["--category"]; v != "" {
+			category = v
+		}
+		if v := f.lastArgs["--profile"]; v != "" {
+			profile = v
+		}
+	}
+	protocol, _ = bench.ProtocolFor(category)
+	return category, profile, protocol
 }
 
 func (f *fakeClient) Preflight(context.Context) error {
@@ -62,12 +78,13 @@ func (f *fakeClient) CopyFrom(_ context.Context, name, _, local string) error {
 	f.events = append(f.events, "copy-from-"+name)
 	sample, _ := strconv.Atoi(f.lastArgs["--sample-index"])
 	repeat, _ := strconv.Atoi(f.lastArgs["--repeat-index"])
+	category, profile, protocol := f.reportedSuite()
 	report := map[string]any{
 		"schema_version":   bench.SchemaVersion,
-		"protocol_version": bench.ComputeProtocol,
-		"profile":          bench.StandardProfile,
+		"protocol_version": protocol,
+		"profile":          profile,
 		"cli_version":      "test",
-		"category":         "compute",
+		"category":         category,
 		"created_at":       time.Date(2026, 7, 24, 12, 0, 0, 0, time.UTC),
 		"provider": map[string]any{
 			"name":            "vercel",
@@ -294,4 +311,92 @@ func countPrefix(values []string, prefix string) int {
 		}
 	}
 	return count
+}
+
+func TestRunnerMeasuresTheRequestedSuite(t *testing.T) {
+	client := &fakeClient{deleteContextsValid: true}
+	cfg := validConfig(t)
+	cfg.Campaign = "vercel-platform-2026-11"
+	cfg.Category = "platform"
+	cfg.Profile = bench.StandardProfile
+	runner := Runner{Client: client, NewRunID: func() (string, error) { return "abcd1234", nil }}
+
+	if err := runner.Run(context.Background(), cfg); err != nil {
+		t.Fatal(err)
+	}
+	if client.lastArgs["--category"] != "platform" || client.lastArgs["--profile"] != bench.StandardProfile {
+		t.Fatalf("suite was not passed to the Sandbox run: %v", client.lastArgs)
+	}
+	data, err := os.ReadFile(filepath.Join(cfg.OutputDir, "vercel-sandbox-2vcpu-iad1-vercel-platform-2026-11-1-1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, errs := bench.ValidateReport(data)
+	if len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	if report.Category != "platform" || report.ProtocolVersion != bench.PlatformProtocol {
+		t.Fatalf("saved report is %s under %s", report.Category, report.ProtocolVersion)
+	}
+}
+
+func TestRunnerRejectsAReportFromADifferentSuite(t *testing.T) {
+	client := &fakeClient{deleteContextsValid: true, ignoreSuite: true}
+	cfg := validConfig(t)
+	cfg.Category = "workload"
+	runner := Runner{Client: client, NewRunID: func() (string, error) { return "abcd1234", nil }}
+
+	err := runner.Run(context.Background(), cfg)
+	if err == nil || !strings.Contains(err.Error(), "want workload/standard under workload-v1") {
+		t.Fatalf("a compute report must not be saved into a workload campaign, got %v", err)
+	}
+	if len(client.removed) != 1 {
+		t.Fatalf("the active Sandbox was not removed after the rejected report: %v", client.events)
+	}
+	left, _ := os.ReadDir(cfg.OutputDir)
+	if len(left) != 0 {
+		t.Fatalf("a rejected report was left behind: %d entries", len(left))
+	}
+}
+
+func TestRunnerKeepsTheDefaultCommandLineForComputeCampaigns(t *testing.T) {
+	// The CLI resolves the suite first, so a default campaign arrives with
+	// compute/standard filled in.
+	for _, cfg := range []Config{{}, {Category: "compute", Profile: bench.StandardProfile}} {
+		args := benchmarkArgs(cfg, "1.0.0", 1, 1, "/tmp/r.json")
+		for _, arg := range args {
+			if arg == "--category" || arg == "--profile" {
+				t.Fatalf("the default suite must not add flags: %v", args)
+			}
+		}
+	}
+}
+
+func TestValidateRefusesSuitesTheSandboxCannotFinish(t *testing.T) {
+	cfg := validConfig(t)
+	cfg.Category = "storage"
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a storage campaign has no endpoint here and must be refused")
+	}
+
+	cfg = validConfig(t)
+	cfg.Profile = bench.SustainedProfile
+	cfg.Repeats = 3
+	cfg.CommandTimeout, cfg.SandboxTimeout = 4*time.Minute, 10*time.Minute
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a four-minute command timeout cannot hold a 15-minute sustained repeat")
+	}
+	cfg.CommandTimeout, cfg.SandboxTimeout = 20*time.Minute, 40*time.Minute
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a 40-minute Sandbox cannot hold three sustained repeats")
+	}
+	cfg.SandboxTimeout = time.Hour
+	if err := Validate(cfg); err != nil {
+		t.Fatalf("timeouts that fit every repeat were refused: %v", err)
+	}
+	cfg.Tests = "disk_sustained"
+	cfg.CommandTimeout, cfg.SandboxTimeout = 10*time.Minute, 35*time.Minute
+	if err := Validate(cfg); err != nil {
+		t.Fatalf("a subset shorter than the whole suite was held to its floor: %v", err)
+	}
 }

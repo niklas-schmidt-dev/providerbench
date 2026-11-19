@@ -162,11 +162,41 @@
     },
     {
       "if": {
+        "properties": { "category": { "const": "workload" } },
+        "required": ["category"]
+      },
+      "then": {
+        "properties": { "protocol_version": { "const": "workload-v1" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "category": { "const": "platform" } },
+        "required": ["category"]
+      },
+      "then": {
+        "properties": { "protocol_version": { "const": "platform-v1" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "category": { "const": "reach" } },
+        "required": ["category"]
+      },
+      "then": {
+        "properties": { "protocol_version": { "const": "reach-v1" } }
+      }
+    },
+    {
+      "if": {
         "properties": { "profile": { "const": "sustained" } },
         "required": ["profile"]
       },
       "then": {
-        "properties": { "quick": { "const": false } }
+        "properties": {
+          "quick": { "const": false },
+          "category": { "const": "compute" }
+        }
       }
     }
   ]

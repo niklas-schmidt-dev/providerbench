@@ -65,8 +65,24 @@ func (f *fakeCloud) DeleteServer(ctx context.Context, server Server) error {
 type fakeRemote struct {
 	events      *[]string
 	failRun     bool
+	ignoreSuite bool // behave like an old binary that always runs compute
 	last        map[string]string
 	pricingDate string
+}
+
+// reportedSuite is the suite a remote run would report for its arguments.
+func (f *fakeRemote) reportedSuite() (category, profile, protocol string) {
+	category, profile = "compute", bench.StandardProfile
+	if !f.ignoreSuite {
+		if v := f.last["--category"]; v != "" {
+			category = v
+		}
+		if v := f.last["--profile"]; v != "" {
+			profile = v
+		}
+	}
+	protocol, _ = bench.ProtocolFor(category)
+	return category, profile, protocol
 }
 
 func (f *fakeRemote) WaitReady(_ context.Context, server Server, _ time.Duration) error {
@@ -93,12 +109,13 @@ func (f *fakeRemote) CopyReport(_ context.Context, server Server, _, local strin
 	*f.events = append(*f.events, fmt.Sprintf("copy-report-%d", server.ID))
 	sample, _ := strconv.Atoi(f.last["--sample-index"])
 	repeat, _ := strconv.Atoi(f.last["--repeat-index"])
+	category, profile, protocol := f.reportedSuite()
 	report := map[string]any{
 		"schema_version":   bench.SchemaVersion,
-		"protocol_version": bench.ComputeProtocol,
-		"profile":          bench.StandardProfile,
+		"protocol_version": protocol,
+		"profile":          profile,
 		"cli_version":      "test",
-		"category":         "compute",
+		"category":         category,
 		"created_at":       time.Date(2026, 7, 24, 12, 0, 0, 0, time.UTC),
 		"provider": map[string]any{
 			"name":            "hetzner",
@@ -342,4 +359,73 @@ func countPrefix(values []string, prefix string) int {
 		}
 	}
 	return count
+}
+
+func TestRunnerMeasuresTheRequestedSuite(t *testing.T) {
+	var events []string
+	cloud := &fakeCloud{events: &events, deleteContextsValid: true}
+	remote := &fakeRemote{events: &events}
+	cfg := validConfig(t)
+	cfg.Campaign = "hetzner-workload-2026-11"
+	cfg.Category = "workload"
+	cfg.Profile = bench.StandardProfile
+
+	if err := (Runner{Cloud: cloud, Remote: remote}).Run(context.Background(), cfg); err != nil {
+		t.Fatal(err)
+	}
+	if remote.last["--category"] != "workload" || remote.last["--profile"] != bench.StandardProfile {
+		t.Fatalf("suite was not passed to the remote run: %v", remote.last)
+	}
+	data, err := os.ReadFile(filepath.Join(cfg.OutputDir, "hetzner-cloud-vps-cpx22-fsn1-hetzner-workload-2026-11-1-1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, errs := bench.ValidateReport(data)
+	if len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	if report.Category != "workload" || report.ProtocolVersion != bench.WorkloadProtocol {
+		t.Fatalf("saved report is %s under %s", report.Category, report.ProtocolVersion)
+	}
+}
+
+func TestRunnerRejectsAReportFromADifferentSuite(t *testing.T) {
+	var events []string
+	cloud := &fakeCloud{events: &events, deleteContextsValid: true}
+	remote := &fakeRemote{events: &events, ignoreSuite: true}
+	cfg := validConfig(t)
+	cfg.Category = "platform"
+
+	err := (Runner{Cloud: cloud, Remote: remote}).Run(context.Background(), cfg)
+	if err == nil || !strings.Contains(err.Error(), "want platform/standard under platform-v1") {
+		t.Fatalf("a compute report must not be saved into a platform campaign, got %v", err)
+	}
+	if len(cloud.deletedServers) != cfg.Count || !cloud.deletedGroup {
+		t.Fatalf("hosts were not cleaned up after the rejected report: %v", events)
+	}
+	left, _ := os.ReadDir(cfg.OutputDir)
+	if len(left) != 0 {
+		t.Fatalf("a rejected report was left behind: %d entries", len(left))
+	}
+}
+
+func TestRunnerKeepsTheDefaultCommandLineForComputeCampaigns(t *testing.T) {
+	// The CLI resolves the suite first, so a default campaign arrives with
+	// compute/standard filled in.
+	for _, cfg := range []Config{{}, {Category: "compute", Profile: bench.StandardProfile}} {
+		args := benchmarkArgs(cfg, 1, 1, "/tmp/r.json")
+		for _, arg := range args {
+			if arg == "--category" || arg == "--profile" {
+				t.Fatalf("the default suite must not add flags: %v", args)
+			}
+		}
+	}
+	cfg := validConfig(t)
+	cfg.Category = "storage"
+	if err := Validate(cfg); err == nil {
+		t.Fatal("a storage campaign has no endpoint here and must be refused")
+	}
+	if category, profile := suiteIdentity(Config{}); category != "compute" || profile != bench.StandardProfile {
+		t.Fatalf("default suite is %s/%s, want compute/standard", category, profile)
+	}
 }

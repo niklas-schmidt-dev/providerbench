@@ -37,7 +37,16 @@ Measurement:
       --count N           fresh Sandbox samples (default 10)
       --repeats N         measurements per Sandbox (default 3)
       --vcpus N           Sandbox vCPUs; RAM is 2 GB/vCPU (default 2)
-  -t, --tests LIST        comma-separated benchmark tests (default all)
+  -t, --tests LIST        comma-separated benchmark tests (default: the
+                          whole suite)
+      --category NAME     suite to run: compute, workload, platform, reach
+                          (default compute). One campaign measures one suite;
+                          give each suite its own --campaign ID.
+      --profile NAME      standard or sustained (default standard). The
+                          sustained suite takes 15 minutes per repeat: it
+                          needs --command-timeout 20m or more and a
+                          --sandbox-timeout of 20m per repeat. With --tests,
+                          size both to the tests you pick.
       --quick             run shorter benchmark workloads
       --output-dir DIR    downloaded reports (default data/results)
 
@@ -73,6 +82,8 @@ func vercelCampaignCmd(args []string) int {
 	fs.StringVar(&cfg.OutputDir, "output-dir", filepath.Join("data", "results"), "downloaded report directory")
 	fs.StringVar(&cfg.Tests, "tests", "", "comma-separated benchmark tests")
 	fs.StringVar(&cfg.Tests, "t", "", "alias for --tests")
+	fs.StringVar(&cfg.Category, "category", "", "benchmark category (default: inferred from --tests, else compute)")
+	fs.StringVar(&cfg.Profile, "profile", "", "measurement profile (default: inferred from --tests, else standard)")
 	fs.BoolVar(&cfg.Quick, "quick", false, "run shorter benchmark workloads")
 	fs.StringVar(&cfg.PricingAsOf, "pricing-as-of", time.Now().UTC().Format(time.DateOnly), "price observation date")
 	fs.StringVar(
@@ -99,15 +110,15 @@ func vercelCampaignCmd(args []string) int {
 		fmt.Fprintf(os.Stderr, "unexpected positional arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
-	if err := vercelcampaign.Validate(cfg); err != nil {
+	suite, err := bench.ResolveSuite(cfg.Category, cfg.Profile, cfg.Tests, cfg.Quick)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
-	if cfg.Tests != "" {
-		if _, err := bench.Select(strings.Split(cfg.Tests, ",")); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 2
-		}
+	cfg.Category, cfg.Profile = suite.Category, suite.Profile
+	if err := vercelcampaign.Validate(cfg); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
 	}
 	if dryRun {
 		vercelcampaign.Describe(os.Stdout, cfg, project, scope)

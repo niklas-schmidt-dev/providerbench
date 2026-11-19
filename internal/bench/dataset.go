@@ -183,6 +183,7 @@ func cohortConsistencyErrors(key string, records []*datasetRecord) []error {
 	priceMonth := first.report.Provider.PriceEURMonth
 	pricingAsOf := first.report.Environment["pricing_as_of"]
 	pricingBasis := first.report.Environment["pricing_basis"]
+	goVersion := first.report.Environment[GoVersionKey]
 	definitions := make(map[string]metricDefinition)
 	var errs []error
 
@@ -206,6 +207,13 @@ func cohortConsistencyErrors(key string, records []*datasetRecord) []error {
 		if record.report.Environment["pricing_as_of"] != pricingAsOf ||
 			record.report.Environment["pricing_basis"] != pricingBasis {
 			errs = append(errs, fmt.Errorf("cohort %q mixes pricing basis or observation date (%s)", key, record.file.Name))
+		}
+		// The benchmarks are compiled code: two toolchains are two methods.
+		if record.report.Environment[GoVersionKey] != goVersion {
+			errs = append(errs, fmt.Errorf(
+				"cohort %q mixes Go toolchains %q and %q (%s)",
+				key, goVersion, record.report.Environment[GoVersionKey], record.file.Name,
+			))
 		}
 
 		reportDefinitions := make(map[string]metricDefinition)

@@ -150,12 +150,70 @@ Full details: [the benchmark sources](https://github.com/niklas-schmidt-dev/prov
 and the immutable
 [`compute-v2` methodology](docs/protocols/compute-v2.md).
 
+## More suites
+
+The five tests above are the frozen `compute-v2` standard suite. Everything
+else is a suite of its own, with its own protocol and its own report:
+
+| Suite | Run it | Measures |
+|-------|--------|----------|
+| `workload` | `providerbench run --category workload` | compression, JSON, sorting, map lookups, allocation, TLS handshakes and HTTP serving — ordinary compiled code, so no single CPU extension decides a result |
+| `platform` | `providerbench run --category platform` | what the layer underneath costs: system call, thread wake-up, first-touch memory, clock read, process start, small files, and scheduling stalls |
+| `reach` | `providerbench run --category reach` | round-trip time to nine cloud regions on six continents |
+| `sustained` | `providerbench run --profile sustained` | ten minutes of CPU and five of disk writes in 10 s windows: what is left after the burst |
+
+Why they exist, in the dataset's own numbers:
+
+- The CPU test hashes with SHA-256, and SHA-256 is decided by one instruction
+  set extension. The cheapest Hetzner plan lands on hosts with and without it:
+  `single_core_hash` differs 5.5× between them, memory access latency by
+  nothing measurable. `workload` measures the code a service actually runs.
+- `cpu_steal` reads 0.00% on every Hetzner host, shared plans included — the
+  hypervisor does not report it. `platform`'s stall test measures lost time
+  from inside the workload instead: eight busy threads under a two-CPU
+  container quota lose 74.98% of their time while the steal counter shows
+  0.12%.
+- Every existing test finishes in seconds. Burst credits and fair-share
+  throttling start after minutes.
+
+Protocols: [`workload-v1`](docs/protocols/workload-v1.md),
+[`platform-v1`](docs/protocols/platform-v1.md),
+[`reach-v1`](docs/protocols/reach-v1.md), and the sustained profile in
+[`compute-v2`](docs/protocols/compute-v2.md#sustained-profile).
+
+The managed Hetzner and Vercel campaigns run any of them with `--category`
+or `--profile`. One campaign measures one suite, so give each its own
+`--campaign` ID.
+
+## Comparing results
+
+`providerbench compare` puts two selections of reports side by side, metric by
+metric:
+
+```sh
+providerbench compare data/results \
+  --a plan=cpx22,region=fsn1,campaign=hetzner-2026-07-24-v2 \
+  --b plan=ccx13,campaign=hetzner-2026-07-24-v2
+```
+
+Repeats on one host collapse to their median, then each side is summarised
+across hosts — the same reduction the site uses. Each metric gets the ratio of
+the two medians and a 95% bootstrap interval over hosts; a verdict is given
+only when the whole interval lies on one side of "no change". With ten hosts a
+side the interval is indicative, not exact. Filters take `provider`, `product`,
+`plan`, `region`, `campaign` and `cpu`, a substring of the reported CPU model:
+`--a plan=cx23,cpu=skylake --b plan=cx23,cpu=rome --across-protocols` compares
+the two hardware generations one plan is sold on, across the protocol versions
+its cohorts were measured under. Reports without campaign coordinates count as
+one host: they get a ratio, never an interval.
+
 ## Adding a test
 
 Implement one interface, register it, done — see
 [providerbench.dev/cli](https://providerbench.dev/cli) or
 [CONTRIBUTING.md](CONTRIBUTING.md). Test ideas that would be great PRs:
-PostgreSQL TPS, Redis ops/s, build-time benchmarks, sustained-load runs.
+PostgreSQL TPS, Redis ops/s, build-time benchmarks, random-write and
+tail-latency disk tests, IPv6 reach.
 
 ## Submitting results
 
@@ -198,14 +256,19 @@ comparison while all locations remain visible on the provider page.
 ```
 cmd/providerbench/   CLI entrypoint
 internal/            benchmark framework + built-in tests (zero dependencies)
+internal/tests/      one directory per suite: compute, workload, platform,
+                     reach, storage
+docs/protocols/      the methodology of every protocol version
 schema/              JSON schema for reports
 data/results/        the public dataset, one JSON file per run
 web/                 providerbench.dev (Next.js 16, monochrome UI, hand-drawn SVG charts)
 ```
 
-Benchmarks are organized in **categories** — `compute` is live; `ai`
-(inference TTFT/throughput) and `storage` (R2 vs S3 & friends) are planned.
-A report's `category` field decides where it appears on the site.
+Benchmarks are organized in **categories**. `compute` is live on the site.
+`storage` (R2 vs S3 & friends), `workload`, `platform` and `reach` ship in
+this CLI under their own protocols and await their first published campaigns;
+`ai` (inference TTFT/throughput) is planned. A report's `category` field
+decides where it appears on the site.
 
 ## License
 
