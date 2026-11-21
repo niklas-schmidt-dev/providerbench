@@ -425,6 +425,10 @@ func TestRunnerKeepsTheDefaultCommandLineForComputeCampaigns(t *testing.T) {
 	if err := Validate(cfg); err == nil {
 		t.Fatal("a storage campaign has no endpoint here and must be refused")
 	}
+	cfg.Category = "ai-language"
+	if err := Validate(cfg); err == nil {
+		t.Fatal("an ai-language campaign measures no host and must be refused")
+	}
 	if category, profile := suiteIdentity(Config{}); category != "compute" || profile != bench.StandardProfile {
 		t.Fatalf("default suite is %s/%s, want compute/standard", category, profile)
 	}

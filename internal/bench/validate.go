@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"sync"
 
@@ -151,8 +152,89 @@ func semanticV2Errors(r *Report) []error {
 		if result.StartedAt.IsZero() {
 			fail("results[%d] (%s): started_at must not be the zero timestamp", i, result.Test)
 		}
+		for _, problem := range outcomeErrors(&result) {
+			fail("results[%d] (%s): %s", i, result.Test, problem)
+		}
+	}
+	if r.Category == "ai-language" {
+		for _, problem := range aiLanguageErrors(r) {
+			fail("%s", problem)
+		}
 	}
 	return errs
+}
+
+// aiLanguageErrors checks the shape ai-language-v1 gives every test that
+// succeeded: it appears once, and it has outcomes for each of the four
+// languages and for each problem, 40 in a full run and 10 in a quick one.
+// Without this a report could drop a language or a problem and still be
+// summarised as if it were complete.
+func aiLanguageErrors(r *Report) []string {
+	var problems []string
+	want := 40
+	if r.Quick {
+		want = 10
+	}
+	seen := map[string]bool{}
+	for i, result := range r.Results {
+		if result.Error != "" {
+			continue
+		}
+		if seen[result.Test] {
+			problems = append(problems, fmt.Sprintf("results[%d] (%s): the test appears twice", i, result.Test))
+		}
+		seen[result.Test] = true
+		for _, language := range []string{"en", "de", "es", "zh"} {
+			if got := len(result.Outcomes[language]); got != want {
+				problems = append(problems, fmt.Sprintf("results[%d] (%s): outcomes[%s] covers %d problems, want %d", i, result.Test, language, got, want))
+			}
+		}
+	}
+	return problems
+}
+
+// outcomeErrors checks that a result's outcome strings and its accuracy
+// metrics say the same thing. Every variant covers the same items, and each
+// one's accuracy_<variant> metric is the share of items it solved, so a
+// summary recomputed from the outcomes can never disagree with the metrics.
+func outcomeErrors(result *Result) []string {
+	if len(result.Outcomes) == 0 {
+		return nil
+	}
+	var problems []string
+	metrics := make(map[string]float64, len(result.Metrics))
+	for _, m := range result.Metrics {
+		metrics[m.Name] = m.Value
+	}
+	for _, m := range result.Metrics {
+		if variant, ok := strings.CutPrefix(m.Name, "accuracy_"); ok && result.Outcomes[variant] == "" {
+			problems = append(problems, fmt.Sprintf("accuracy_%s has no outcomes[%s]", variant, variant))
+		}
+	}
+	items := -1
+	variants := make([]string, 0, len(result.Outcomes))
+	for variant := range result.Outcomes {
+		variants = append(variants, variant)
+	}
+	sort.Strings(variants)
+	for _, variant := range variants {
+		outcomes := result.Outcomes[variant]
+		if items < 0 {
+			items = len(outcomes)
+		}
+		if len(outcomes) != items {
+			problems = append(problems, "outcomes must cover the same items in every variant")
+			break
+		}
+		want := round2(100 * float64(strings.Count(outcomes, "1")) / float64(len(outcomes)))
+		got, ok := metrics["accuracy_"+variant]
+		if !ok {
+			problems = append(problems, fmt.Sprintf("outcomes[%s] has no accuracy_%s metric", variant, variant))
+		} else if got != want {
+			problems = append(problems, fmt.Sprintf("accuracy_%s is %v but its outcomes solve %v%%", variant, got, want))
+		}
+	}
+	return problems
 }
 
 func legacyReportErrors(r *Report) []error {

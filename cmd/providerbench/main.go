@@ -18,6 +18,7 @@ import (
 	"github.com/niklas-schmidt-dev/providerbench/internal/bench"
 	"github.com/niklas-schmidt-dev/providerbench/internal/output"
 	"github.com/niklas-schmidt-dev/providerbench/internal/sysinfo"
+	"github.com/niklas-schmidt-dev/providerbench/internal/tests/ai"         // registers the language-model tests
 	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/compute"  // registers built-in tests
 	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/platform" // registers platform-overhead tests
 	_ "github.com/niklas-schmidt-dev/providerbench/internal/tests/reach"    // registers network-reach tests
@@ -44,6 +45,9 @@ Usage:
   providerbench compare [flags] FILE|DIR ...
                               compare two selections of reports metric by
                               metric, with a bootstrap confidence interval
+  providerbench languages FILE|DIR ...
+                              compare ai-language reports: what each model
+                              solved in each input language
   providerbench list          list available tests
   providerbench system        show detected system info
   providerbench validate [--dataset] [--manifest FILE] FILE|DIR ...
@@ -55,8 +59,9 @@ Run flags:
   -t, --tests cpu,disk    comma-separated tests to run (default: all tests of
                           the category)
       --category NAME     benchmark category: compute, workload, platform,
-                          reach, storage (default: inferred from --tests,
-                          else compute). A report holds exactly one category.
+                          reach, storage, ai-language (default: inferred
+                          from --tests, else compute). A report holds exactly
+                          one category.
       --quick             faster, less precise runs
       --profile NAME      measurement profile: standard, sustained (default:
                           inferred from --tests, else standard). A report
@@ -93,6 +98,23 @@ environment — credentials never enter flags, reports or shell history:
   PB_S3_PREFIX        object key prefix   (default: providerbench)
   PB_S3_PATH_STYLE    "false" for virtual-hosted URLs (default: path-style)
 
+ai-language runs measure a language model, not this machine: the same
+generated problems in English, German, Spanish and Chinese. The model also
+comes from the environment, and it becomes the report's plan:
+  PB_AI_API           anthropic, or openai for any OpenAI-compatible endpoint
+                      (required)
+  PB_AI_MODEL         model id, e.g. claude-opus-5-5 (required)
+  PB_AI_BASE_URL      openai: API root (default: https://api.openai.com/v1)
+  PB_AI_API_KEY       openai: bearer token; OPENAI_API_KEY is used for
+                      api.openai.com only. Anthropic credentials are resolved
+                      by its SDK (ANTHROPIC_API_KEY, ...)
+  PB_AI_EFFORT        reasoning effort, passed through (default: the model's)
+  PB_AI_MAX_TOKENS    output limit per answer (default: 32000 for anthropic,
+                      the endpoint's own for openai)
+  PB_AI_CONCURRENCY   requests in flight (default: 4)
+  PB_AI_TRANSCRIPT    file to append every prompt and reply to, as JSON lines
+A full run is 800 requests, --quick 200. Requests are billed by the provider.
+
 Examples:
   providerbench run --provider hetzner --product cloud-vps --plan cax21 \
       --region fsn1 --env os_image=ubuntu-24.04 --json report.json
@@ -103,6 +125,9 @@ Examples:
   providerbench run --profile sustained     # 15 minutes: what survives the burst
   providerbench run -t s3 --provider cloudflare --product r2 \
       --plan standard --region auto --json report.json
+  PB_AI_API=anthropic PB_AI_MODEL=claude-opus-5-5 \
+      providerbench run --category ai-language --quick   # 200 billed requests
+  providerbench languages reports/           # models side by side
   providerbench campaign hetzner --dry-run \
       --campaign hetzner-2026q3 --plan cpx22 --tier medium --region fsn1 \
       --price-hour 0.03808 --price-month 23.7881
@@ -132,6 +157,8 @@ func main() {
 		os.Exit(validateCmd(os.Args[2:]))
 	case "compare":
 		os.Exit(compareCmd(os.Args[2:]))
+	case "languages":
+		os.Exit(languagesCmd(os.Args[2:]))
 	case "list":
 		for _, b := range bench.All() {
 			suite := bench.CategoryOf(b)
@@ -235,6 +262,20 @@ func runCmd(args []string) int {
 		fmt.Fprintln(os.Stderr, "--tier must be one of: cheap, medium, dedicated, usage-based")
 		return 2
 	}
+	suite, err := bench.ResolveSuite(*categoryFlag, *profileFlag, *testsFlag, *quick)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 2
+	}
+	// An ai-language run measures a model, not this machine: the model is
+	// read before anything runs, and it is what the report is about.
+	var target *ai.Target
+	if suite.Category == ai.Category {
+		if target, err = ai.LoadTarget(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return 2
+		}
+	}
 	identity := []*string{provider, product, plan, region}
 	emptyIdentity := 0
 	for _, value := range identity {
@@ -242,21 +283,19 @@ func runCmd(args []string) int {
 			emptyIdentity++
 		}
 	}
-	switch emptyIdentity {
-	case len(identity):
+	switch {
+	case emptyIdentity == len(identity) && target != nil:
+		*provider, *product, *plan, *region = target.Identity()
+	case emptyIdentity == len(identity):
 		*provider = "local"
 		*product = "machine"
 		*plan = "ad-hoc"
 		*region = "local"
-	case 0:
-	default:
+	case emptyIdentity != 0:
 		fmt.Fprintln(os.Stderr, "--provider, --product, --plan and --region must be supplied together")
 		return 2
-	}
-
-	suite, err := bench.ResolveSuite(*categoryFlag, *profileFlag, *testsFlag, *quick)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	case target != nil && *plan != target.Model:
+		fmt.Fprintf(os.Stderr, "--plan %q is not the model being measured (PB_AI_MODEL=%s): in an ai-language report the plan is the model\n", *plan, target.Model)
 		return 2
 	}
 	if *duration != 0 {
@@ -322,6 +361,13 @@ func runCmd(args []string) int {
 	// method: a cohort must come from one release. It is a fact about this
 	// binary, so it is not open to --env.
 	env[bench.GoVersionKey] = runtime.Version()
+	if target != nil {
+		// How the model was asked is part of the method, so these are facts
+		// about the run as well.
+		for key, value := range target.Environment() {
+			env[key] = value
+		}
+	}
 	report.Environment = env
 
 	exitCode := 0
@@ -372,6 +418,9 @@ func runCmd(args []string) int {
 
 	if !quiet {
 		output.PrintReport(os.Stdout, report)
+		if summary, ok := ai.Summarize(report); ok {
+			summary.Print(os.Stdout)
+		}
 	}
 
 	// A machine-readable report is always written — the JSON is the product;

@@ -383,3 +383,63 @@ func TestSlugify(t *testing.T) {
 		}
 	}
 }
+
+func aiReport() *Report {
+	r := validReport()
+	r.Category, r.ProtocolVersion = "ai-language", AILanguageProtocol
+	r.Provider = Provider{Name: "anthropic", Product: "api", Plan: "claude-opus-5-5", Region: "global"}
+	r.Quick = true
+	all := "1111111111"
+	r.Results = []Result{{
+		Test: "calendar", StartedAt: r.CreatedAt, DurationSeconds: 60,
+		Metrics: []Metric{
+			{Name: "accuracy_en", Value: 100, Unit: "%", HigherIsBetter: true},
+			{Name: "accuracy_de", Value: 100, Unit: "%", HigherIsBetter: true},
+			{Name: "accuracy_es", Value: 100, Unit: "%", HigherIsBetter: true},
+			{Name: "accuracy_zh", Value: 70, Unit: "%", HigherIsBetter: true},
+		},
+		Outcomes: map[string]string{"en": all, "de": all, "es": all, "zh": "1-10111011"},
+	}}
+	return r
+}
+
+func TestOutcomesMustAgreeWithTheAccuracyMetrics(t *testing.T) {
+	if _, errs := ValidateReport(mustJSON(t, aiReport())); len(errs) != 0 {
+		t.Fatalf("valid ai report rejected: %v", errs)
+	}
+	cases := []struct {
+		name   string
+		mutate func(*Report)
+		want   string
+	}{
+		{"metric disagrees", func(r *Report) { r.Results[0].Metrics[3].Value = 100 }, "accuracy_zh is 100 but its outcomes solve 70%"},
+		{"variants cover different items", func(r *Report) { r.Results[0].Outcomes["zh"] = "1-" }, "same items in every variant"},
+		{"variant without a metric", func(r *Report) { r.Results[0].Outcomes["fr"] = "1111111111" }, "no accuracy_fr metric"},
+		{"metric without outcomes", func(r *Report) { delete(r.Results[0].Outcomes, "zh") }, "accuracy_zh has no outcomes[zh]"},
+		{"result without outcomes", func(r *Report) { r.Results[0].Outcomes = nil }, "outcomes[en] covers 0 problems, want 10"},
+		{"a language dropped with its metric", func(r *Report) {
+			delete(r.Results[0].Outcomes, "zh")
+			r.Results[0].Metrics = r.Results[0].Metrics[:3]
+		}, "outcomes[zh] covers 0 problems, want 10"},
+		{"problems dropped in every language", func(r *Report) {
+			for code, outcomes := range r.Results[0].Outcomes {
+				r.Results[0].Outcomes[code] = outcomes[:9]
+			}
+			r.Results[0].Metrics[3].Value = 66.67
+		}, "outcomes[en] covers 9 problems, want 10"},
+		{"a quick set in a full report", func(r *Report) { r.Quick = false }, "outcomes[en] covers 10 problems, want 40"},
+		{"a test counted twice", func(r *Report) { r.Results = append(r.Results, r.Results[0]) }, "the test appears twice"},
+		{"unknown outcome character", func(r *Report) { r.Results[0].Outcomes["zh"] = "1?10111011" }, "/outcomes/zh"},
+		{"empty outcomes", func(r *Report) { r.Results[0].Outcomes["zh"] = "" }, "/outcomes/zh"},
+		{"wrong protocol", func(r *Report) { r.ProtocolVersion = "ai-language-v2" }, "ai-language-v1"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			r := aiReport()
+			tc.mutate(r)
+			if _, errs := ValidateReport(mustJSON(t, r)); !hasError(errs, tc.want) {
+				t.Fatalf("expected error containing %q, got: %v", tc.want, errs)
+			}
+		})
+	}
+}

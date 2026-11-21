@@ -15,6 +15,7 @@ const (
 	WorkloadProtocol    = "workload-v1"
 	PlatformProtocol    = "platform-v1"
 	ReachProtocol       = "reach-v1"
+	AILanguageProtocol  = "ai-language-v1"
 	StandardProfile     = "standard"
 	SustainedProfile    = "sustained"
 
@@ -45,6 +46,8 @@ func ProtocolFor(category string) (string, bool) {
 		return PlatformProtocol, true
 	case "reach":
 		return ReachProtocol, true
+	case "ai-language":
+		return AILanguageProtocol, true
 	}
 	return "", false
 }
@@ -82,8 +85,8 @@ type Report struct {
 	Profile         string `json:"profile,omitempty"`
 	CLIVersion      string `json:"cli_version"`
 	// Category groups reports on providerbench.dev: "compute" for the
-	// original suite; storage, workload, platform and reach carry their own
-	// pinned protocols (see ProtocolFor).
+	// original suite; storage, workload, platform, reach and ai-language carry
+	// their own pinned protocols (see ProtocolFor).
 	Category  string    `json:"category"`
 	CreatedAt time.Time `json:"created_at"`
 	Sample    bool      `json:"sample,omitempty"` // true = illustrative data, not a real measurement

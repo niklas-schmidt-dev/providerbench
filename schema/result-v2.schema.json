@@ -122,6 +122,13 @@
             "type": "array",
             "items": { "type": "string" }
           },
+          "outcomes": {
+            "description": "How each item of the test went, per variant of the items (a language in the ai-language suite): one character per item in protocol order, 1 solved, 0 wrong, - no usable answer.",
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": { "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+            "additionalProperties": { "type": "string", "pattern": "^[01-]+$" }
+          },
           "error": { "type": "string", "minLength": 1 }
         },
         "oneOf": [
@@ -185,6 +192,15 @@
       },
       "then": {
         "properties": { "protocol_version": { "const": "reach-v1" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "category": { "const": "ai-language" } },
+        "required": ["category"]
+      },
+      "then": {
+        "properties": { "protocol_version": { "const": "ai-language-v1" } }
       }
     },
     {

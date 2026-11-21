@@ -161,6 +161,7 @@ else is a suite of its own, with its own protocol and its own report:
 | `platform` | `providerbench run --category platform` | what the layer underneath costs: system call, thread wake-up, first-touch memory, clock read, process start, small files, and scheduling stalls |
 | `reach` | `providerbench run --category reach` | round-trip time to nine cloud regions on six continents |
 | `sustained` | `providerbench run --profile sustained` | ten minutes of CPU and five of disk writes in 10 s windows: what is left after the burst |
+| `ai-language` | `providerbench run --category ai-language` | a language model, not a machine: the same 200 generated reasoning problems asked in English, German, Spanish and Chinese |
 
 Why they exist, in the dataset's own numbers:
 
@@ -181,9 +182,29 @@ Protocols: [`workload-v1`](docs/protocols/workload-v1.md),
 [`reach-v1`](docs/protocols/reach-v1.md), and the sustained profile in
 [`compute-v2`](docs/protocols/compute-v2.md#sustained-profile).
 
-The managed Hetzner and Vercel campaigns run any of them with `--category`
-or `--profile`. One campaign measures one suite, so give each its own
-`--campaign` ID.
+The managed Hetzner and Vercel campaigns run any of the machine suites with
+`--category` or `--profile`. One campaign measures one suite, so give each its
+own `--campaign` ID.
+
+### Language models by input language
+
+`ai-language` asks a model the same problems in four languages and compares
+the answers problem by problem, so a gap between the scores is the language
+and not the question. The problems are generated from a fixed seed (nothing a
+model could have read in training) and every answer is checked by rule.
+
+```
+PB_AI_API=anthropic PB_AI_MODEL=claude-opus-5-5 \
+    providerbench run --category ai-language --quick   # 200 billed requests
+providerbench languages reports/                       # models side by side
+```
+
+`PB_AI_API=openai` with `PB_AI_BASE_URL` reaches any OpenAI-compatible
+endpoint, local servers included. A full run is 800 requests; in a trial with
+seven models one run took 14 to 58 minutes and 0.4 to 2 million output tokens.
+The summary gives each language's distance to English with a 95% interval and
+calls it a difference only when the whole interval is on one side of zero.
+Method and limits: [`ai-language-v1`](docs/protocols/ai-language-v1.md).
 
 ## Comparing results
 
@@ -255,9 +276,9 @@ comparison while all locations remain visible on the provider page.
 
 ```
 cmd/providerbench/   CLI entrypoint
-internal/            benchmark framework + built-in tests (zero dependencies)
+internal/            benchmark framework + built-in tests
 internal/tests/      one directory per suite: compute, workload, platform,
-                     reach, storage
+                     reach, storage, ai
 docs/protocols/      the methodology of every protocol version
 schema/              JSON schema for reports
 data/results/        the public dataset, one JSON file per run
@@ -265,9 +286,10 @@ web/                 providerbench.dev (Next.js 16, monochrome UI, hand-drawn SV
 ```
 
 Benchmarks are organized in **categories**. `compute` is live on the site.
-`storage` (R2 vs S3 & friends), `workload`, `platform` and `reach` ship in
-this CLI under their own protocols and await their first published campaigns;
-`ai` (inference TTFT/throughput) is planned. A report's `category` field
+`storage` (R2 vs S3 & friends), `workload`, `platform`, `reach` and
+`ai-language` (models by input language) ship in this CLI under their own
+protocols and await their first published campaigns; `ai` (inference
+TTFT/throughput) is planned. A report's `category` field
 decides where it appears on the site.
 
 ## License
