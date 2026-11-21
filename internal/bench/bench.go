@@ -28,7 +28,14 @@ type Result struct {
 	DurationSeconds float64   `json:"duration_seconds"`
 	Metrics         []Metric  `json:"metrics"`
 	Notes           []string  `json:"notes,omitempty"`
-	Error           string    `json:"error,omitempty"`
+	// Outcomes records how each item of a test went, for tests whose metrics
+	// are shares of items solved. Each key names one variant of the items (a
+	// language in the ai-language suite) and holds one character per item in
+	// protocol order: 1 solved, 0 wrong, - no usable answer. Variants share
+	// the item order, which is what makes a paired comparison possible
+	// afterwards.
+	Outcomes map[string]string `json:"outcomes,omitempty"`
+	Error    string            `json:"error,omitempty"`
 }
 
 func (r *Result) Add(name string, value float64, unit string, higherIsBetter bool) {

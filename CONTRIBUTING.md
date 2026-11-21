@@ -97,20 +97,22 @@ Ground rules for tests (the benchmark source is the methodology):
   gracefully (report a note, not an error).
 - **Self-contained workloads**: benchmark tests use the standard library and
   the CLI remains a static binary. Provider orchestration may use the
-  provider's maintained Go SDK.
+  provider's maintained Go SDK; so does the `ai-language` suite to reach
+  Claude models, because the vendor's SDK is the supported way in.
 
 ## 3. Propose a category
 
-Categories group benchmarks on the site. `compute` is live. Four more ship in
+Categories group benchmarks on the site. `compute` is live. Five more ship in
 this CLI under their own pinned protocols and await their first published
 campaigns: `storage` (`providerbench run -t s3`, `storage-v1`), `workload`
-(`workload-v1`), `platform` (`platform-v1`) and `reach` (`reach-v1`). The
-architectural rule is **category = runner, schema = contract**: a category is
-not required to extend this CLI. The five above run as one static binary —
-`storage` drives object stores from whatever vantage host the CLI runs on,
-which is why its protocol records the vantage. A category whose workload
-doesn't fit that shape gets its own runner (an AI suite would hit provider
-APIs from a client).
+(`workload-v1`), `platform` (`platform-v1`), `reach` (`reach-v1`) and
+`ai-language` (`ai-language-v1`). The architectural rule is **category =
+runner, schema = contract**: a category is not required to extend this CLI.
+The six above run as one static binary — `storage` drives object stores from
+whatever vantage host the CLI runs on, which is why its protocol records the
+vantage, and `ai-language` asks a model behind an API, which is why its
+reports record the endpoint and name the model as the plan. A category whose
+workload doesn't fit that shape gets its own runner.
 
 A category needs three things in this repository: a protocol document in
 `docs/protocols/`, an entry in `bench.ProtocolFor`, and the matching pin in

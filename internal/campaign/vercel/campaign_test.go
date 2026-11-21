@@ -378,6 +378,10 @@ func TestValidateRefusesSuitesTheSandboxCannotFinish(t *testing.T) {
 	if err := Validate(cfg); err == nil {
 		t.Fatal("a storage campaign has no endpoint here and must be refused")
 	}
+	cfg.Category = "ai-language"
+	if err := Validate(cfg); err == nil {
+		t.Fatal("an ai-language campaign measures no host and must be refused")
+	}
 
 	cfg = validConfig(t)
 	cfg.Profile = bench.SustainedProfile

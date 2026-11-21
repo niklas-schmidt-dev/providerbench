@@ -139,6 +139,9 @@ func Validate(cfg Config) error {
 	if cfg.Category == "storage" {
 		problems = append(problems, errors.New("the storage suite needs an endpoint and credentials: use `providerbench campaign storage`"))
 	}
+	if cfg.Category == "ai-language" {
+		problems = append(problems, errors.New("the ai-language suite measures a model, not a host: use `providerbench run --category ai-language`"))
+	}
 	if cfg.PricingAsOf != "" {
 		if _, err := time.Parse(time.DateOnly, cfg.PricingAsOf); err != nil {
 			problems = append(problems, errors.New("--pricing-as-of must use YYYY-MM-DD"))
