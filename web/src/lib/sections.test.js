@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { categoryMeta } from "@/lib/categories";
+import { categoryHref, categoryMeta } from "@/lib/categories";
 import { buildSections, collectTests } from "@/lib/sections";
 
 function stat(unit, higherIsBetter = true) {
@@ -164,4 +164,11 @@ describe("a dashboard laid out from its reports", () => {
     expect(tests.find((t) => t.test === "cpu").sourceUrl).toMatch(/internal\/tests\/compute\/cpu\.go$/);
     expect(tests.find((t) => t.test === "extra").sourceUrl).toMatch(/internal\/tests$/);
   });
+});
+
+test("a category named like a page of the site gets a path of its own", () => {
+  expect(categoryHref("compute")).toBe("/");
+  expect(categoryHref("storage")).toBe("/storage");
+  expect(categoryHref("cli")).toBe("/cli-benchmarks");
+  expect(categoryHref("providers")).toBe("/providers-benchmarks");
 });

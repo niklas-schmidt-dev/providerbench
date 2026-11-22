@@ -161,8 +161,13 @@ export const CATEGORY_ORDER = REGISTRY.map((meta) => meta.slug);
 /** The category whose dashboard is the homepage. */
 export const HOME_CATEGORY = "compute";
 
-/** Top-level routes a category slug must not shadow. */
-export const RESERVED_SLUGS = ["benchmarks", "cli", "providers"];
+/** Pages the site serves itself. */
+const RESERVED_SLUGS = ["benchmarks", "cli", "providers"];
+
+/** The path segment of a category's page: its slug, unless a page of the site owns that path. */
+export function categoryRoute(slug: string): string {
+  return RESERVED_SLUGS.includes(slug) ? `${slug}-benchmarks` : slug;
+}
 
 export function categoryMeta(slug: string): CategoryMeta {
   return (
@@ -177,7 +182,7 @@ export function categoryMeta(slug: string): CategoryMeta {
 }
 
 export function categoryHref(slug: string): string {
-  return slug === HOME_CATEGORY ? "/" : `/${slug}`;
+  return slug === HOME_CATEGORY ? "/" : `/${categoryRoute(slug)}`;
 }
 
 export function variantLabel(meta: CategoryMeta, variant: string): string {

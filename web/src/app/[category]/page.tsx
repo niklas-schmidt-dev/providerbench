@@ -5,10 +5,10 @@ import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/code-block";
 import { CompanyBadge } from "@/components/company-logo";
 import { Dashboard } from "@/components/dashboard/dashboard";
-import { categoryMeta, HOME_CATEGORY } from "@/lib/categories";
+import { categoryMeta, categoryRoute, HOME_CATEGORY } from "@/lib/categories";
 import { loadDashboard } from "@/lib/dashboard-data";
 import { protocolUrl } from "@/lib/plans";
-import { siteCategories, siteCategory, type SiteCategory } from "@/lib/site";
+import { siteCategories, siteCategoryAt, type SiteCategory } from "@/lib/site";
 
 // One page per category the data, the CLI or the registry knows. A category
 // with a published report renders as a dashboard laid out from its reports;
@@ -19,11 +19,11 @@ export const dynamicParams = false;
 export function generateStaticParams() {
   return siteCategories()
     .filter((category) => category.slug !== HOME_CATEGORY)
-    .map((category) => ({ category: category.slug }));
+    .map((category) => ({ category: categoryRoute(category.slug) }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }): Promise<Metadata> {
-  const category = siteCategory((await params).category);
+  const category = siteCategoryAt((await params).category);
   return { title: category?.name, description: category?.description };
 }
 
@@ -134,7 +134,7 @@ function AwaitingCategory({ category }: { category: SiteCategory }) {
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const category = siteCategory((await params).category);
+  const category = siteCategoryAt((await params).category);
   if (!category || category.slug === HOME_CATEGORY) notFound();
   if (category.live) return <Dashboard data={loadDashboard(category.slug)} />;
   return <AwaitingCategory category={category} />;
