@@ -6,9 +6,9 @@ import "@fontsource-variable/geist-mono/index.css";
 import { SiteNav, type NavItem } from "@/components/site/site-nav";
 import { SiteSearch } from "@/components/site/site-search";
 import { THEME_SCRIPT, ThemeToggle } from "@/components/site/theme-toggle";
-import { CATEGORIES } from "@/lib/categories";
-import { loadRuns } from "@/lib/data";
 import { RAW_DATA_URL } from "@/lib/plans";
+import { buildSearchIndex } from "@/lib/search-index";
+import { siteCategories } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · ProviderBench",
   },
   description:
-    "Independent, reproducible benchmarks for cloud providers: compute today, object storage next. Open data, open method, no affiliate links.",
+    "Independent, reproducible benchmarks for cloud providers: compute today, more categories as their first reports land. Open data, open method, no affiliate links.",
 };
 
 export const viewport: Viewport = {
@@ -30,16 +30,21 @@ export const viewport: Viewport = {
 
 const REPO = "https://github.com/niklas-schmidt-dev/providerbench";
 
-const NAV: NavItem[] = [
-  { href: "/", label: "Compute" },
-  ...CATEGORIES.filter((c) => c.status !== "live").map((c) => ({
-    href: `/${c.slug}`,
-    label: c.slug === "storage" ? "Storage" : c.name,
-    muted: true,
-  })),
-  { href: "/providers", label: "Providers" },
-  { href: "/cli", label: "CLI" },
-];
+// Categories with published reports get a place in the navigation; the
+// rest are one click away under "All benchmarks".
+function navItems(): NavItem[] {
+  const categories = siteCategories();
+  return [
+    ...categories.filter((c) => c.live).map((c) => ({ href: c.href, label: c.name })),
+    {
+      href: "/benchmarks",
+      label: "All benchmarks",
+      also: categories.filter((c) => !c.live).map((c) => c.href),
+    },
+    { href: "/providers", label: "Providers" },
+    { href: "/cli", label: "CLI" },
+  ];
+}
 
 function Wordmark() {
   return (
@@ -59,9 +64,7 @@ function GitHubIcon() {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const providersWithRuns = [
-    ...new Set(loadRuns().flatMap((r) => (r.provider.name ? [r.provider.name] : []))),
-  ];
+  const nav = navItems();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -77,10 +80,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="sticky top-0 z-40 border-b border-border bg-background">
             <div className="flex h-14 items-center gap-8 px-4 sm:px-7">
               <Wordmark />
-              <SiteNav items={NAV} className="hidden md:flex" />
+              <SiteNav items={nav} className="hidden md:flex" />
               <div className="flex-1" />
               <div className="flex items-center gap-1.5">
-                <SiteSearch providersWithRuns={providersWithRuns} />
+                <SiteSearch entries={buildSearchIndex()} />
                 <ThemeToggle />
                 <a
                   href={REPO}
@@ -91,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </a>
               </div>
             </div>
-            <SiteNav items={NAV} className="no-scrollbar h-10 overflow-x-auto border-t border-border px-4 md:hidden" />
+            <SiteNav items={nav} className="no-scrollbar h-10 overflow-x-auto border-t border-border px-4 md:hidden" />
           </header>
 
           <div className="flex-1">{children}</div>

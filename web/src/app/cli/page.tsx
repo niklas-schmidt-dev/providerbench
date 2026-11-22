@@ -97,7 +97,8 @@ func (myTest) Run(ctx context.Context, opts Options) (*bench.Result, error) {
         <p className="text-[13px] leading-[20px] text-pretty text-muted-foreground">
           That is the whole contract. The test shows up in{" "}
           <code className="font-mono text-[12px] text-foreground">providerbench list</code>, runs with everything else
-          and lands in the JSON report.
+          and lands in the JSON report. This site needs no change either: it lays every category out from its reports,
+          so a new test or a new category gets its charts with the first published report.
         </p>
       </Step>
 

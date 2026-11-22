@@ -4,32 +4,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ChartPanel } from "@/components/charts/chart-panel";
 import { GroupedBars, type BarAccessor } from "@/components/charts/grouped-bars";
-import { PricePerformanceChart, type YAxisOption } from "@/components/charts/price-performance-chart";
+import { PricePerformanceChart } from "@/components/charts/price-performance-chart";
 import { BoardTable } from "@/components/dashboard/board-table";
+import { MatrixPanel } from "@/components/dashboard/matrix-panel";
 import { MethodSection } from "@/components/dashboard/method-section";
+import { OutcomesPanel } from "@/components/dashboard/outcomes-panel";
 import { isVisible, PlanSidebar, type PlanFilters } from "@/components/dashboard/plan-sidebar";
 import { SuitePanel } from "@/components/dashboard/suite-panel";
 import { ViewTabs, type View } from "@/components/dashboard/view-tabs";
-import { METRICS, TEST_SUMMARIES } from "@/lib/metrics";
-import { metricKey, RAW_DATA_URL, type PlanDatum } from "@/lib/plans";
-import type { MetricRef, ScatterMetricRef } from "@/lib/report";
-import { SUITE_LABELS } from "@/lib/scoring";
-
-export type DashboardStats = {
-  providers: number;
-  plans: number;
-  hosts: number;
-  runs: number;
-  updated: string;
-};
-
-const SUITE_ORDER = ["cpu", "memory", "disk", "network", "steal"];
-const SUITE_DEFAULT: Record<string, string> = {
-  cpu: "multi_core_hash",
-  disk: "rand_read_4k",
-  network: "download",
-  steal: "consistency_cv",
-};
+import type { DashboardData } from "@/lib/dashboard-data";
+import { RAW_DATA_URL } from "@/lib/plans";
+import { capitalize } from "@/lib/text";
 
 const EMPTY_FILTERS: PlanFilters = {
   hidden: new Set(),
@@ -38,23 +23,20 @@ const EMPTY_FILTERS: PlanFilters = {
   query: "",
 };
 
-export function Dashboard({
-  categorySlug,
-  eyebrow,
-  plans,
-  stats,
-  tableMetrics,
-  scatterMetrics,
-  sample,
-}: {
-  categorySlug: string;
-  eyebrow: string;
-  plans: PlanDatum[];
-  stats: DashboardStats;
-  tableMetrics: MetricRef[];
-  scatterMetrics: ScatterMetricRef[];
-  sample: boolean;
-}) {
+const VALUE: BarAccessor = {
+  value: (plan) => plan.value,
+  higherIsBetter: true,
+  unit: "index",
+  format: (v) => String(Math.round(v)),
+};
+
+/**
+ * One category's dashboard. The sections come from the data: a test becomes
+ * a bar chart or a matrix, item outcomes get their own view, and the price
+ * and composite views appear where the category has prices and a ranking.
+ */
+export function Dashboard({ data }: { data: DashboardData }) {
+  const { meta, plans, stats, sections, scored, priced, yOptions } = data;
   const [filters, setFilters] = useState<PlanFilters>(EMPTY_FILTERS);
   const [plansOpen, setPlansOpen] = useState(false);
   const closePlans = useCallback(() => setPlansOpen(false), []);
@@ -69,81 +51,47 @@ export function Dashboard({
   }, []);
   const visible = useMemo(() => plans.filter((plan) => isVisible(plan, filters)), [plans, filters]);
 
-  const suites = useMemo(
-    () =>
-      SUITE_ORDER.map((test) => ({
-        test,
-        metrics: METRICS.filter((m) => m.category === categorySlug && m.test === test),
-      })).filter((suite) => suite.metrics.length > 0),
-    [categorySlug],
-  );
-
+  const scatter = priced && yOptions.length > 0;
   const views = useMemo<View[]>(
     () => [
-      { id: "price-performance", label: "Price vs performance" },
-      { id: "value", label: "Value" },
-      ...suites.map((suite) => ({
-        id: suite.test,
-        label: suite.test === "steal" ? "Consistency" : SUITE_LABELS[suite.test],
-      })),
+      ...(scatter ? [{ id: "price-performance", label: scored ? "Price vs performance" : "Price" }] : []),
+      ...(scored && priced ? [{ id: "value", label: "Value" }] : []),
+      ...sections.map((section) => ({ id: section.id, label: section.tab })),
       { id: "board", label: "Board" },
       { id: "method", label: "Method" },
     ],
-    [suites],
+    [sections, scatter, scored, priced],
   );
 
-  const yOptions: YAxisOption[] = [
-    { id: "score", label: "Composite score" },
-    ...scatterMetrics.map((ref) => {
-      const def = METRICS.find((m) => m.test === ref.test && m.metric === ref.metric);
-      return {
-        id: ref.id,
-        label: ref.shortLabel ?? def?.title ?? ref.metric,
-        metric: metricKey(ref.test, ref.metric),
-        unit: def?.unit,
-      };
-    }),
+  const many = capitalize(meta.noun.many);
+  const figures: Array<[string, string | number]> = [
+    ["Providers", stats.providers],
+    [many, stats.plans],
+    ...(stats.freshHosts > 0 ? ([["Fresh hosts", stats.freshHosts]] as Array<[string, number]>) : []),
+    ["Raw runs", stats.runs],
+    ["Updated", stats.updated],
   ];
-
-  const valueAccessor = useMemo<BarAccessor>(
-    () => ({
-      value: (plan) => plan.value,
-      higherIsBetter: true,
-      unit: "index",
-      format: (v) => String(Math.round(v)),
-    }),
-    [],
-  );
 
   return (
     <div className="grid lg:grid-cols-[minmax(0,1fr)_var(--sidebar-width)]">
       <main id="main" className="min-w-0" inert={plansOpen || undefined}>
         <header className="border-b border-border px-4 pt-8 pb-7 sm:px-7">
-          <p className="text-[12px] text-subtle">{eyebrow}</p>
+          <p className="text-[12px] text-subtle">{[meta.name, meta.tagline].filter(Boolean).join(" · ")}</p>
           <h1 className="mt-1.5 text-[28px] leading-[34px] font-medium tracking-[-0.03em] text-balance sm:text-[32px] sm:leading-[38px]">
-            Measured, not marketed.
+            {meta.headline ?? `${meta.name} benchmarks`}
           </h1>
           <p className="mt-2 max-w-[62ch] text-[14px] leading-[22px] text-pretty text-muted-foreground">
-            Every provider sells &ldquo;vCPUs&rdquo; and &ldquo;NVMe&rdquo;. We measure what you actually get: fresh hosts, one
-            open harness, every sample published as raw JSON.
+            {meta.lead ?? meta.description}
           </p>
           <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-4">
-            {(
-              [
-                ["Providers", stats.providers],
-                ["Plans", stats.plans],
-                ["Fresh hosts", stats.hosts],
-                ["Raw runs", stats.runs],
-                ["Updated", stats.updated],
-              ] as const
-            ).map(([label, value]) => (
+            {figures.map(([label, value]) => (
               <div key={label} className="flex flex-col gap-0.5">
                 <dt className="text-[12px] text-subtle">{label}</dt>
                 <dd className="text-[20px] leading-7 font-medium tracking-tight">{value}</dd>
               </div>
             ))}
           </dl>
-          {sample && (
+          {data.sample && (
             <p className="mt-5 text-[13px] text-muted-foreground">
               Sample data: these numbers illustrate the layout and are not measurements.
             </p>
@@ -153,36 +101,43 @@ export function Dashboard({
         <ViewTabs
           views={views}
           onOpenPlans={() => setPlansOpen(true)}
-          planSummary={`Plans ${visible.length}/${plans.length}`}
+          planSummary={`${many} ${visible.length}/${plans.length}`}
         />
 
-        <PricePerformanceChart
-          id="price-performance"
-          plans={visible}
-          yOptions={yOptions}
-          description="What each euro of monthly price buys. Up and to the left is better; plans on the Pareto line are beaten by nothing on both axes."
-        />
-
-        <ChartPanel
-          id="value"
-          title="Work per euro"
-          description="Composite performance per euro of monthly price, normalized so the best-value plan is 100."
-          footer="Neither the price column nor the score column answers the question alone. This index is the combination: measured composite work divided by monthly price."
-        >
-          <GroupedBars plans={visible} accessor={valueAccessor} label="Value index per plan" />
-        </ChartPanel>
-
-        {suites.map((suite) => (
-          <SuitePanel
-            key={suite.test}
-            id={suite.test}
-            title={suite.test === "steal" ? "Consistency & steal" : SUITE_LABELS[suite.test]}
-            summary={TEST_SUMMARIES[suite.test]}
-            metrics={suite.metrics}
+        {scatter && (
+          <PricePerformanceChart
+            id="price-performance"
             plans={visible}
-            defaultMetric={SUITE_DEFAULT[suite.test]}
+            yOptions={yOptions}
+            noun={meta.noun.one}
+            description={
+              scored
+                ? "What each euro of monthly price buys. Up and to the left is better; plans on the Pareto line are beaten by nothing on both axes."
+                : `Monthly price against any metric the reports hold. The Pareto line joins the ${meta.noun.many} that nothing beats on both price and the chosen metric.`
+            }
           />
-        ))}
+        )}
+
+        {scored && priced && (
+          <ChartPanel
+            id="value"
+            title="Work per euro"
+            description="Composite performance per euro of monthly price, normalized so the best-value plan is 100."
+            footer="Neither the price column nor the score column answers the question alone. This index is the combination: measured composite work divided by monthly price."
+          >
+            <GroupedBars plans={visible} accessor={VALUE} label="Value index per plan" />
+          </ChartPanel>
+        )}
+
+        {sections.map((section) =>
+          section.kind === "suite" ? (
+            <SuitePanel key={section.id} section={section} plans={visible} noun={meta.noun.one} />
+          ) : section.kind === "matrix" ? (
+            <MatrixPanel key={section.id} section={section} plans={visible} noun={meta.noun} />
+          ) : (
+            <OutcomesPanel key={section.id} section={section} plans={visible} noun={meta.noun} />
+          ),
+        )}
 
         <section id="board" aria-labelledby="board-title" className="border-b border-border py-6 sm:py-7">
           <div className="flex flex-col gap-0.5 px-4 sm:px-7">
@@ -190,16 +145,24 @@ export function Dashboard({
               The board
             </h2>
             <p className="max-w-[68ch] text-[13px] text-pretty text-muted-foreground">
-              Every plan in the current selection, ranked by composite cross-host P50 in its best-measured region. The
-              best cell per column is set in ink.
+              {scored
+                ? "Every plan in the current selection, ranked by composite cross-host P50 in its best-measured region. The best cell per column is set in ink."
+                : `Every ${meta.noun.one} in the current selection with every metric its reports hold. Nothing is ranked: sort by the column you care about. The best cell per column is set in ink.`}
             </p>
           </div>
           <div className="mt-5">
-            <BoardTable plans={visible} metricRefs={tableMetrics} />
+            <BoardTable
+              plans={visible}
+              columns={data.boardColumns}
+              scored={scored}
+              priced={priced}
+              measuresMachine={meta.measuresMachine}
+              noun={meta.noun}
+            />
           </div>
         </section>
 
-        <MethodSection id="method" />
+        <MethodSection id="method" method={data.method} scored={scored} />
       </main>
 
       <PlanSidebar
@@ -209,9 +172,12 @@ export function Dashboard({
         onReset={() => setFilters(EMPTY_FILTERS)}
         open={plansOpen}
         onClose={closePlans}
+        noun={meta.noun}
         footer={
           <>
-            {stats.runs} raw runs from {stats.hosts} fresh hosts.{" "}
+            {stats.freshHosts > 0
+              ? `${stats.runs} raw runs from ${stats.freshHosts} fresh hosts.`
+              : `${stats.runs} raw ${stats.runs === 1 ? "report" : "reports"}.`}{" "}
             <a href={RAW_DATA_URL} className="text-muted-foreground underline decoration-border-strong underline-offset-3 hover:text-foreground">
               Download the dataset
             </a>

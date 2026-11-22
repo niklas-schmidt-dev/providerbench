@@ -109,6 +109,23 @@ func ProfileOf(b Benchmark) string {
 	return StandardProfile
 }
 
+// Conditional lets a benchmark that only works on some systems say so. It
+// stays registered everywhere, so the catalog of tests does not depend on the
+// machine that wrote it. Where it cannot run, no suite includes it and naming
+// it fails with the reason.
+type Conditional interface {
+	// Unavailable returns why the benchmark cannot run here, or "" when it can.
+	Unavailable() string
+}
+
+// Unavailable returns why a benchmark cannot run on this system, or "".
+func Unavailable(b Benchmark) string {
+	if c, ok := b.(Conditional); ok {
+		return c.Unavailable()
+	}
+	return ""
+}
+
 var registry []Benchmark
 
 // Register adds a benchmark to the global registry. Call it from an init
@@ -129,10 +146,11 @@ func All() []Benchmark {
 
 // Suite returns the registered benchmarks of one category and profile in
 // registration order — the set a run executes when no tests are named.
+// Benchmarks that cannot run on this system are left out.
 func Suite(category, profile string) []Benchmark {
 	var out []Benchmark
 	for _, b := range registry {
-		if CategoryOf(b) == category && ProfileOf(b) == profile {
+		if CategoryOf(b) == category && ProfileOf(b) == profile && Unavailable(b) == "" {
 			out = append(out, b)
 		}
 	}
@@ -157,13 +175,17 @@ func round2(v float64) float64 {
 	return math.Round(v*100) / 100
 }
 
-// Select resolves test names to benchmarks, erroring on unknown names.
+// Select resolves test names to benchmarks, erroring on unknown names and on
+// tests that cannot run on this system.
 func Select(names []string) ([]Benchmark, error) {
 	out := make([]Benchmark, 0, len(names))
 	for _, n := range names {
 		found := false
 		for _, b := range registry {
 			if b.Name() == n {
+				if reason := Unavailable(b); reason != "" {
+					return nil, fmt.Errorf("test %q cannot run here: %s", n, reason)
+				}
 				out = append(out, b)
 				found = true
 				break

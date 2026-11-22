@@ -85,6 +85,11 @@ of `compute-v2` — a ranked cohort must contain exactly its 16 metrics — so a
 new test goes into another category, into a profile, or into a new protocol
 version, never into that suite.
 
+After adding or renaming a test, run
+`go run ./cmd/providerbench list --json > data/catalog.json`. CI compares the
+file with the registry. The website reads it for the description of every
+test, so the test needs no change to the site.
+
 Ground rules for tests (the benchmark source is the methodology):
 
 - **Deterministic**: fixed seeds, identical work on every machine. Generate
@@ -94,7 +99,10 @@ Ground rules for tests (the benchmark source is the methodology):
   computes the wrong answer must fail, not post a fast number.
 - **Cache-honest**: if the number can be faked by a cache, bypass the cache.
 - **Cross-platform**: guard platform-specific code with build tags and degrade
-  gracefully (report a note, not an error).
+  gracefully (report a note, not an error). A test that cannot run on a system
+  at all still registers there and says why through `Unavailable()`, as `spawn`
+  does outside Linux: no suite runs it there, but the list of tests, and with
+  it `data/catalog.json`, is the same on every machine.
 - **Self-contained workloads**: benchmark tests use the standard library and
   the CLI remains a static binary. Provider orchestration may use the
   provider's maintained Go SDK; so does the `ai-language` suite to reach
@@ -122,7 +130,9 @@ Every runner must satisfy the same contract: emit reports that pass
 `providerbench validate`, carry campaign/sample/repeat coordinates, and land
 as one JSON file per run in `data/results/`. The dataset is the interface —
 the site never knows which runner produced a report, only its `category`
-value and an entry in `web/src/lib/categories.ts`. Open an issue with
+value. It gives every category a page and lays it out from the reports; an
+entry in `web/src/lib/categories.ts` is optional and adds what a report cannot
+hold: a name, a description, what a row is called. Open an issue with
 proposed metrics first — methodology gets debated before code.
 
 ## Website
@@ -146,9 +156,28 @@ an existing provider. Charts are hand-drawn SVG in
 `web/src/components/charts/`. DM Sans and Geist Mono are bundled via
 Fontsource, so production builds never fetch fonts.
 
+Pages are laid out from the data, not written per category
+(`web/src/lib/sections.ts`): a test is a bar chart with a metric switch, four
+or more metrics of one unit and direction are one table on one scale, tests
+that share such metrics share that table, and `outcomes` get a mark per item.
+Titles for tests and metrics come from `web/src/lib/metrics.ts` where an entry
+exists and from the identifier otherwise. A provider without an entry in
+`providers.ts` takes a free hue of the palette on each page.
+
+To see reports on the site before they are published, point the build at a
+directory of report files:
+
+```sh
+cd web && PROVIDERBENCH_DATA_OVERLAY=../my-reports bun dev
+```
+
+The reports are added on top of the dataset and never rank. A production
+build does not set the variable.
+
 `bun run test:e2e` builds the site and runs the Playwright smoke tests. It
 honors `PORT`, so `portless run --name e2e bun run test:e2e` runs beside a
-dev server.
+dev server. The test build overlays the synthetic reports in
+`web/e2e/fixtures/reports`, marked `"sample": true`.
 
 ## Ground rules
 

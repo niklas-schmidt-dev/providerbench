@@ -5,10 +5,17 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-export type NavItem = { href: string; label: string; muted?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  /** Other paths this item stands for. */
+  also?: string[];
+};
 
-function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" || pathname === "/compute" : pathname.startsWith(href);
+function isActive(pathname: string, item: NavItem) {
+  if (item.also?.includes(pathname)) return true;
+  if (item.href === "/") return pathname === "/" || pathname === "/compute";
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
 export function SiteNav({ items, className }: { items: NavItem[]; className?: string }) {
@@ -16,7 +23,7 @@ export function SiteNav({ items, className }: { items: NavItem[]; className?: st
   return (
     <nav aria-label="Primary" className={cn("flex items-center gap-5", className)}>
       {items.map((item) => {
-        const active = isActive(pathname, item.href);
+        const active = isActive(pathname, item);
         return (
           <Link
             key={item.href}
@@ -28,7 +35,6 @@ export function SiteNav({ items, className }: { items: NavItem[]; className?: st
             )}
           >
             {item.label}
-            {item.muted && <span className="ml-1 text-[11px] text-faint">soon</span>}
           </Link>
         );
       })}

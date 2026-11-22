@@ -15,6 +15,12 @@ export type TestResult = {
   duration_seconds: number;
   metrics: Metric[];
   notes?: string[];
+  /**
+   * How each item of a test went, per variant of the items (a language in
+   * the ai-language suite): one character per item in protocol order,
+   * 1 solved, 0 wrong, - no usable answer.
+   */
+  outcomes?: Record<string, string>;
   error?: string;
 };
 
@@ -94,7 +100,45 @@ function loadManifest(dataRoot: string): ReportManifest {
   return manifest;
 }
 
+export type CatalogTest = {
+  name: string;
+  profile: string;
+  description: string;
+};
+
+/** One category the CLI can measure, as `providerbench list --json` prints it. */
+export type CatalogCategory = {
+  name: string;
+  protocol?: string;
+  tests: CatalogTest[];
+};
+
+let catalog: CatalogCategory[] | undefined;
+
+/** What the CLI can measure, whether or not anyone has published a report. */
+export function loadCatalog(): CatalogCategory[] {
+  if (catalog) return catalog;
+  const catalogPath = path.join(process.cwd(), "data", "catalog.json");
+  const parsed = JSON.parse(readFileSync(catalogPath, "utf8")) as {
+    catalog_version: number;
+    categories: CatalogCategory[];
+  };
+  if (parsed.catalog_version !== 1 || !Array.isArray(parsed.categories)) {
+    throw new Error(`unsupported test catalog: ${catalogPath}`);
+  }
+  catalog = parsed.categories;
+  return catalog;
+}
+
+let runs: Run[] | undefined;
+
+// Every page reads the dataset; a build worker verifies and parses it once.
 export function loadRuns(): Run[] {
+  runs ??= readRuns();
+  return runs;
+}
+
+function readRuns(): Run[] {
   const dataRoot = path.join(process.cwd(), "data");
   const manifest = loadManifest(dataRoot);
   const resultsDir = path.join(dataRoot, "results");

@@ -70,6 +70,11 @@ export const COMPANIES: CompanyMeta[] = logoManifest.companies.map((company) => 
 
 const bySlug = new Map(COMPANIES.map((company) => [company.slug, company]));
 
+/** A wordmark already spells the company's name, so no label goes beside it. */
+export function isWordmark(slug: CompanySlug | undefined): boolean {
+  return slug !== undefined && bySlug.get(slug)?.logoKind === "wordmark";
+}
+
 export function getCompany(slug: CompanySlug): CompanyMeta {
   const company = bySlug.get(slug);
 

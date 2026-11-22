@@ -4,35 +4,30 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ChartPanel, Segmented } from "@/components/charts/chart-panel";
 import { GroupedBars, type BarAccessor } from "@/components/charts/grouped-bars";
-import type { MetricDef } from "@/lib/metrics";
-import { metricKey, sourceUrl, type PlanDatum } from "@/lib/plans";
+import type { MetricInfo } from "@/lib/metrics";
+import { metricKey, type PlanDatum } from "@/lib/plans";
+import type { SuiteSection } from "@/lib/sections";
 
-export function metricAnchor(def: Pick<MetricDef, "test" | "metric">): string {
+export function metricAnchor(def: Pick<MetricInfo, "test" | "metric">): string {
   return `${def.test}-${def.metric}`;
 }
 
-function shortLabel(def: MetricDef): string {
-  const tail = def.title.split(" · ")[1] ?? def.title;
-  return tail.charAt(0).toUpperCase() + tail.slice(1);
-}
+export const SOURCE_LINK =
+  "text-muted-foreground underline decoration-border-strong underline-offset-3 transition-colors hover:text-foreground";
 
-/** One benchmark suite: a metric switch above one grouped bar chart. */
+/** One test of a suite: a metric switch above one grouped bar chart. */
 export function SuitePanel({
-  id,
-  title,
-  summary,
-  metrics,
+  section,
   plans,
-  defaultMetric,
+  noun,
 }: {
-  id: string;
-  title: string;
-  summary?: string;
-  metrics: MetricDef[];
+  section: SuiteSection;
   plans: PlanDatum[];
-  defaultMetric?: string;
+  /** What one bar is: a plan, a model. */
+  noun: string;
 }) {
-  const [selected, setSelected] = useState(defaultMetric ?? metrics[0]?.metric ?? "");
+  const { metrics } = section;
+  const [selected, setSelected] = useState(section.defaultMetric ?? metrics[0]?.metric ?? "");
   const def = metrics.find((m) => m.metric === selected) ?? metrics[0];
 
   // Deep links (#cpu-single_core_hash, e.g. from ⌘K) select their metric.
@@ -55,6 +50,7 @@ export function SuitePanel({
         const stat = plan.metrics[key];
         return stat && stat.p90 !== stat.p10 ? [stat.p10, stat.p90] : undefined;
       },
+      hosts: (plan) => plan.metrics[key]?.hosts,
       unit: def.unit,
       higherIsBetter: def.higherIsBetter,
     };
@@ -62,36 +58,41 @@ export function SuitePanel({
 
   if (!def) return null;
 
+  // A cohort of several hosts has a spread; a single report has one value.
+  const key = metricKey(def.test, def.metric);
+  const cohorts = plans.some((plan) => (plan.metrics[key]?.hosts ?? 0) > 1);
+
   return (
     <ChartPanel
-      id={id}
+      id={section.id}
       anchors={metrics.map(metricAnchor)}
-      title={title}
-      description={summary}
+      title={section.title}
+      description={section.summary}
       controls={
         metrics.length > 1 ? (
           <Segmented
-            label={`${title} metric`}
+            label={`${section.title} metric`}
             value={def.metric}
             onChange={setSelected}
-            options={metrics.map((m) => ({ value: m.metric, label: shortLabel(m) }))}
+            options={metrics.map((m) => ({ value: m.metric, label: m.label }))}
           />
         ) : undefined
       }
       footer={
         <>
-          <span className="text-muted-foreground">{def.title}.</span> {def.workload}
-          {def.note ? ` ${def.note}` : ""} Bars are the cross-host P50; whiskers span P10–P90.{" "}
-          <a
-            href={sourceUrl(def.category, def.test)}
-            className="text-muted-foreground underline decoration-border-strong underline-offset-3 transition-colors hover:text-foreground"
-          >
+          <span className="text-muted-foreground">{def.title}.</span>
+          {def.workload ? ` ${def.workload}` : ""}
+          {def.note ? ` ${def.note}` : ""}{" "}
+          {cohorts
+            ? "Bars are the cross-host P50; whiskers span P10–P90."
+            : "Bars are the value each report measured."}{" "}
+          <a href={section.sourceUrl} className={SOURCE_LINK}>
             Benchmark source
           </a>
         </>
       }
     >
-      <GroupedBars plans={plans} accessor={accessor} label={`${def.title} per plan`} />
+      <GroupedBars plans={plans} accessor={accessor} label={`${def.title} per ${noun}`} />
     </ChartPanel>
   );
 }

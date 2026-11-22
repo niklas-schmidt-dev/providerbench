@@ -3,14 +3,14 @@
 import { useMemo, useState } from "react";
 
 import { ChartPanel, Segmented, ToggleCheck } from "@/components/charts/chart-panel";
-import { ChartTooltip, TooltipHeader, TooltipRow } from "@/components/charts/chart-tooltip";
+import { ChartTooltip, TooltipEvidence, TooltipHeader, TooltipRow } from "@/components/charts/chart-tooltip";
 import { formatEuro, formatTick, linearScale, logScale } from "@/components/charts/scales";
 import { useWidth } from "@/components/charts/use-width";
 import { CompanyLogo } from "@/components/company-logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { isWordmark } from "@/lib/companies";
 import { formatMetricValue } from "@/lib/format";
-import { priceLabel, type PlanDatum } from "@/lib/plans";
-import { providerColor } from "@/lib/providers";
+import { priceLabel, regionLabel, type PlanDatum } from "@/lib/plans";
 
 export type YAxisOption = {
   id: string;
@@ -18,6 +18,8 @@ export type YAxisOption = {
   /** `${test}.${metric}`; omitted = composite score. */
   metric?: string;
   unit?: string;
+  /** Default: higher is better, as for the composite. */
+  higherIsBetter?: boolean;
 };
 
 type Point = { plan: PlanDatum; x: number; y: number; price: number; value: number };
@@ -39,12 +41,15 @@ export function PricePerformanceChart({
   yOptions,
   title = "Price vs performance",
   description,
+  noun = "plan",
 }: {
   id?: string;
   plans: PlanDatum[];
   yOptions: YAxisOption[];
   title?: string;
   description?: string;
+  /** What one point is. */
+  noun?: string;
 }) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const [scale, setScale] = useState<"log" | "linear">("log");
@@ -71,11 +76,10 @@ export function PricePerformanceChart({
       scale === "log"
         ? logScale([Math.min(...prices), Math.max(...prices)], [margin.left, margin.left + plotW])
         : linearScale([0, Math.max(...prices)], [margin.left, margin.left + plotW], compact ? 4 : 6);
-    const y = linearScale(
-      [0, Math.max(...raw.map((p) => p.value))],
-      [margin.top + plotH, margin.top],
-      compact ? 4 : 5,
-    );
+    // The axis always holds zero, whatever sign the metric has.
+    const low = Math.min(0, ...raw.map((p) => p.value));
+    const high = Math.max(0, ...raw.map((p) => p.value));
+    const y = linearScale([low, high === low ? 1 : high], [margin.top + plotH, margin.top], compact ? 4 : 5);
     const points: Point[] = raw.map((p) => ({ ...p, x: x(p.price), y: y(p.value) }));
 
     const series = new Map<string, Point[]>();
@@ -102,9 +106,10 @@ export function PricePerformanceChart({
 
     // Only ranked cohorts can define the frontier; provisional points stay plotted.
     const frontier: Point[] = [];
-    const ranked = points.filter((p) => p.plan.rankEligible);
-    for (const point of ranked.sort((a, b) => a.price - b.price || b.value - a.value)) {
-      if (frontier.length === 0 || point.value > frontier[frontier.length - 1].value) frontier.push(point);
+    const better = (a: number, b: number) => (option?.higherIsBetter === false ? a < b : a > b);
+    const ranked = points.filter((p) => !p.plan.provisional);
+    for (const point of ranked.sort((a, b) => a.price - b.price || (better(a.value, b.value) ? -1 : 1))) {
+      if (frontier.length === 0 || better(point.value, frontier[frontier.length - 1].value)) frontier.push(point);
     }
 
     return { x, y, points, series, labels, frontier };
@@ -153,18 +158,22 @@ export function PricePerformanceChart({
       controls={controls}
       footer={
         <>
-          Each point is one plan: monthly price (net, excl. VAT) against the cross-host P50 of{" "}
-          {option?.label.toLowerCase() ?? "the composite score"}. Lines join a provider&rsquo;s plans from cheapest to
-          most expensive. Hollow points are provisional cohorts that do not rank yet. Usage-based plans have no list
-          price; their monthly figure is an estimate at 730 hours of full use (≈), as recorded in each report&rsquo;s
-          pricing basis.
+          Each point is one {noun}: monthly price (net, excl. VAT) against{" "}
+          {plans.some((plan) => plan.hostCount > 1) ? "the cross-host P50 of " : ""}
+          {option?.label.toLowerCase() ?? "the composite score"}
+          {option?.higherIsBetter === false ? ", where lower is better" : ""}. Lines join a provider&rsquo;s {noun}s
+          from cheapest to most expensive.
+          {plans.some((plan) => plan.provisional) ? " Hollow points are provisional cohorts that do not rank yet." : ""}
+          {plans.some((plan) => plan.tier === "usage-based")
+            ? " Usage-based plans have no list price; their monthly figure is an estimate at 730 hours of full use (≈), as recorded in each report’s pricing basis."
+            : ""}
         </>
       }
     >
       <div ref={ref} className="relative">
         {!model ? (
           <p className="py-16 text-center text-[13px] text-muted-foreground">
-            No priced plans in the current selection. Turn plans back on in the sidebar.
+            Nothing with a price in the current selection. Turn {noun}s back on in the sidebar.
           </p>
         ) : (
           <>
@@ -253,7 +262,7 @@ export function PricePerformanceChart({
                 ))}
 
               {[...model.series.entries()].map(([provider, points]) => {
-                const color = providerColor(provider);
+                const color = points[0].plan.color;
                 const dimmed = hoveredProvider !== undefined && hoveredProvider !== provider;
                 return (
                   <g key={provider} opacity={dimmed ? 0.25 : 1} className="transition-opacity duration-150">
@@ -271,7 +280,7 @@ export function PricePerformanceChart({
                       <a
                         key={point.plan.id}
                         href={`/providers/${provider}`}
-                        aria-label={`${point.plan.providerName} ${point.plan.plan}${point.plan.region ? `, ${point.plan.region}` : ""}: ${priceLabel(point.plan)} per month, ${option?.label ?? "score"} ${formatMetricValue(point.value)}${point.plan.rankEligible ? "" : ", provisional"}`}
+                        aria-label={`${point.plan.providerName} ${point.plan.plan}${regionLabel(point.plan) ? `, ${regionLabel(point.plan)}` : ""}: ${priceLabel(point.plan)} per month, ${option?.label ?? "score"} ${formatMetricValue(point.value)}${point.plan.provisional ? ", provisional" : ""}`}
                         onMouseEnter={() => setHovered(point.plan.id)}
                         onMouseLeave={() => setHovered(null)}
                         onFocus={() => setHovered(point.plan.id)}
@@ -286,15 +295,15 @@ export function PricePerformanceChart({
                             y={(points[index + 1]?.y ?? Infinity) < point.y ? point.y + 17 : point.y - 9}
                             className="pointer-events-none fill-subtle text-[11px]"
                           >
-                            {point.plan.plan}
+                            {point.plan.label}
                           </text>
                         )}
                         <circle
                           cx={point.x}
                           cy={point.y}
                           r={hovered === point.plan.id ? 6 : 4.5}
-                          fill={point.plan.rankEligible ? color : "var(--background)"}
-                          stroke={point.plan.rankEligible ? "var(--background)" : color}
+                          fill={point.plan.provisional ? "var(--background)" : color}
+                          stroke={point.plan.provisional ? color : "var(--background)"}
                           strokeWidth={2}
                           className="transition-[r] duration-150"
                         />
@@ -316,25 +325,24 @@ export function PricePerformanceChart({
                     opacity: hoveredProvider && hoveredProvider !== label.provider ? 0.3 : 1,
                   }}
                 >
-                  <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: providerColor(label.provider) }} />
-                  {label.plan.company && <CompanyLogo company={label.plan.company} size="sm" decorative />}
-                  {label.plan.providerName}
+                  <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: label.plan.color }} />
+                  {label.plan.company && (
+                    <CompanyLogo company={label.plan.company} size="sm" decorative={!isWordmark(label.plan.company)} />
+                  )}
+                  {!isWordmark(label.plan.company) && label.plan.providerName}
                 </div>
               ))}
 
             {hoveredPoint && (
               <ChartTooltip x={hoveredPoint.x} y={hoveredPoint.y} width={width}>
                 <TooltipHeader plan={hoveredPoint.plan} />
-                {hoveredPoint.plan.region && <TooltipRow label="Region" value={hoveredPoint.plan.region} />}
+                {regionLabel(hoveredPoint.plan) && <TooltipRow label="Region" value={regionLabel(hoveredPoint.plan)} />}
                 <TooltipRow label="Price / month" value={priceLabel(hoveredPoint.plan)} />
                 <TooltipRow
                   label={option?.label ?? "Score"}
                   value={`${formatMetricValue(hoveredPoint.value)}${unit ? ` ${unit}` : ""}`}
                 />
-                <TooltipRow label="Fresh hosts" value={hoveredPoint.plan.hostCount} />
-                {!hoveredPoint.plan.rankEligible && (
-                  <p className="mt-1 text-subtle">Provisional · not ranked yet</p>
-                )}
+                <TooltipEvidence plan={hoveredPoint.plan} />
               </ChartTooltip>
             )}
 
@@ -342,7 +350,7 @@ export function PricePerformanceChart({
               <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[12px]">
                 {[...model.series.values()].map((points) => (
                   <li key={points[0].plan.provider} className="flex items-center gap-1.5">
-                    <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: providerColor(points[0].plan.provider) }} />
+                    <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: points[0].plan.color }} />
                     {points[0].plan.providerName}
                   </li>
                 ))}

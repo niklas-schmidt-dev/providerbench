@@ -1,7 +1,10 @@
-// Single source of truth for what each benchmark metric actually measures.
-// Charts render these descriptions so a number is never shown without its
-// workload. Keep the texts accurate to internal/tests/* — they describe the
-// real implementation, not marketing.
+// What each benchmark metric measures. A report already carries a metric's
+// name, unit and direction, so any metric renders without an entry here; the
+// registry adds what a report cannot hold: a title and the workload behind the
+// number. Keep the texts accurate to internal/tests/* — they describe the real
+// implementation, not marketing.
+
+import { humanize } from "@/lib/text";
 
 export type MetricDef = {
   category: string;
@@ -14,14 +17,6 @@ export type MetricDef = {
   workload: string;
   /** Optional interpretation aid shown under the chart. */
   note?: string;
-};
-
-export const TEST_SUMMARIES: Record<string, string> = {
-  cpu: "Deterministic SHA-256 hashing — same bytes on every machine; differences are the silicon and the hypervisor.",
-  memory: "Big-buffer copies and a prefetch-proof pointer chase with a fixed random seed.",
-  disk: "1 GiB test file with unique-stamped blocks; reads bypass the page cache via direct I/O.",
-  network: "Timed transfers against speed.cloudflare.com — the nearest neutral edge, no hand-picked peering.",
-  steal: "Identical work units plus /proc/stat steal ticks — signals for contention, throttling and run-to-run consistency.",
 };
 
 export const METRICS: MetricDef[] = [
@@ -191,6 +186,106 @@ export const METRICS: MetricDef[] = [
   },
 ];
 
-export function getMetricDef(test: string, metric: string): MetricDef | undefined {
-  return METRICS.find((m) => m.test === test && m.metric === metric);
+export function getMetricDef(category: string, test: string, metric: string): MetricDef | undefined {
+  return METRICS.find((m) => m.category === category && m.test === test && m.metric === metric);
+}
+
+/** Presentation of one test (a "suite" on the dashboard) beyond its name. */
+type SuiteDef = {
+  /** Section title. */
+  label: string;
+  /** Shorter name for the view tabs. */
+  tab?: string;
+  /** Metric shown first. */
+  defaultMetric?: string;
+  /** What the test does. Default: the description the CLI gives it. */
+  summary?: string;
+};
+
+const SUITES: Record<string, SuiteDef> = {
+  "compute/cpu": {
+    label: "CPU",
+    defaultMetric: "multi_core_hash",
+    summary:
+      "Deterministic SHA-256 hashing — same bytes on every machine; differences are the silicon and the hypervisor.",
+  },
+  "compute/memory": {
+    label: "Memory",
+    summary: "Big-buffer copies and a prefetch-proof pointer chase with a fixed random seed.",
+  },
+  "compute/disk": {
+    label: "Disk",
+    defaultMetric: "rand_read_4k",
+    summary: "1 GiB test file with unique-stamped blocks; reads bypass the page cache via direct I/O.",
+  },
+  "compute/network": {
+    label: "Network",
+    defaultMetric: "download",
+    summary: "Timed transfers against speed.cloudflare.com — the nearest neutral edge, no hand-picked peering.",
+  },
+  "compute/steal": {
+    label: "Consistency & steal",
+    tab: "Consistency",
+    defaultMetric: "consistency_cv",
+    summary:
+      "Identical work units plus /proc/stat steal ticks — signals for contention, throttling and run-to-run consistency.",
+  },
+};
+
+export function suiteDef(category: string, test: string): SuiteDef {
+  return SUITES[`${category}/${test}`] ?? { label: humanize(test) };
+}
+
+/** A metric ready to render: registry texts where they exist, the report's own facts otherwise. */
+export type MetricInfo = {
+  category: string;
+  test: string;
+  metric: string;
+  /** Full title, e.g. "CPU · single core". */
+  title: string;
+  /** Short label inside its suite, e.g. "Single core". */
+  label: string;
+  unit: string;
+  higherIsBetter: boolean;
+  workload?: string;
+  note?: string;
+};
+
+/**
+ * Describe a metric found in a report. `measured` is what the report says
+ * about it; `label` overrides the short label (a category can name its
+ * variants, e.g. "English" for accuracy_en).
+ */
+export function describeMetric(
+  category: string,
+  test: string,
+  metric: string,
+  measured: { unit: string; higherIsBetter: boolean },
+  label?: string,
+): MetricInfo {
+  const def = getMetricDef(category, test, metric);
+  if (def) {
+    const tail = def.title.split(" · ")[1] ?? def.title;
+    return {
+      category,
+      test,
+      metric,
+      title: def.title,
+      label: label ?? tail.charAt(0).toUpperCase() + tail.slice(1),
+      unit: def.unit,
+      higherIsBetter: def.higherIsBetter,
+      workload: def.workload,
+      note: def.note,
+    };
+  }
+  const short = label ?? humanize(metric);
+  return {
+    category,
+    test,
+    metric,
+    title: `${suiteDef(category, test).label} · ${short}`,
+    label: short,
+    unit: measured.unit,
+    higherIsBetter: measured.higherIsBetter,
+  };
 }

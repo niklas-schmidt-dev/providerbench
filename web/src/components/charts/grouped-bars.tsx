@@ -2,19 +2,21 @@
 
 import { useMemo, useState } from "react";
 
-import { ChartTooltip, TooltipHeader, TooltipRow } from "@/components/charts/chart-tooltip";
+import { ChartTooltip, TooltipEvidence, TooltipHeader, TooltipRow } from "@/components/charts/chart-tooltip";
 import { formatTick, linearScale } from "@/components/charts/scales";
 import { useWidth } from "@/components/charts/use-width";
 import { CompanyLogo } from "@/components/company-logo";
+import { isWordmark } from "@/lib/companies";
 import { formatMetricValue } from "@/lib/format";
-import { priceLabel, type PlanDatum } from "@/lib/plans";
-import { providerColor } from "@/lib/providers";
+import { priceLabel, regionLabel, type PlanDatum } from "@/lib/plans";
 
 export type BarAccessor = {
   /** Value to plot; undefined drops the plan from this chart. */
   value: (plan: PlanDatum) => number | undefined;
   /** Optional cross-host spread drawn as a whisker (P10–P90). */
   range?: (plan: PlanDatum) => [number, number] | undefined;
+  /** Hosts behind the plotted value; default: the row's host count. */
+  hosts?: (plan: PlanDatum) => number | undefined;
   unit?: string;
   higherIsBetter: boolean;
   format?: (value: number) => string;
@@ -37,12 +39,25 @@ type Bar = {
   value: number;
   range?: [number, number];
   shade: number;
+  /** Label under the column. */
+  label: string;
 };
 
 const MIN_SLOT = 46;
 
 function truncate(text: string): string {
   return text.length > 9 ? `${text.slice(0, 8)}…` : text;
+}
+
+// Names in one group often share a family prefix ("claude-opus-5",
+// "claude-haiku-5"). Cut after eight characters they would all read the
+// same, so the part every name shares is dropped, up to its last separator.
+function distinctLabels(names: string[]): string[] {
+  if (names.length < 2) return names;
+  let shared = 0;
+  while (shared < names[0].length && names.every((name) => name[shared] === names[0][shared])) shared++;
+  const cut = Math.max(...["-", "_", " ", "."].map((sep) => names[0].lastIndexOf(sep, shared - 1))) + 1;
+  return cut > 0 && names.every((name) => name.length > cut) ? names.map((name) => name.slice(cut)) : names;
 }
 
 /**
@@ -72,14 +87,16 @@ export function GroupedBars({
       if (value === undefined || !Number.isFinite(value)) continue;
       const key = grouping.key(plan);
       const list = byProvider.get(key) ?? [];
-      list.push({ plan, value, range: accessor.range?.(plan), shade: 1 });
+      list.push({ plan, value, range: accessor.range?.(plan), shade: 1, label: "" });
       byProvider.set(key, list);
     }
     const result = [...byProvider.entries()].map(([provider, bars]) => {
       bars.sort((a, b) => (a.plan.priceMonth ?? Infinity) - (b.plan.priceMonth ?? Infinity));
+      const labels = distinctLabels(bars.map((bar) => grouping.barLabel?.(bar.plan) ?? bar.plan.label));
       bars.forEach((bar, i) => {
         bar.shade =
           grouping.shadeByPrice === false || bars.length === 1 ? 1 : 0.5 + (0.5 * i) / (bars.length - 1);
+        bar.label = labels[i];
       });
       const best = accessor.higherIsBetter
         ? Math.max(...bars.map((b) => b.value))
@@ -101,10 +118,12 @@ export function GroupedBars({
 
   const layout = useMemo(() => {
     if (barCount === 0) return null;
-    const maxValue = Math.max(
-      ...groups.flatMap((g) => g.bars.map((b) => Math.max(b.value, b.range?.[1] ?? 0))),
-    );
-    const y = linearScale([0, maxValue], [margin.top + plotH, margin.top], 4);
+    // The axis always holds zero: bars grow from it, upward or downward. A
+    // metric that is zero everywhere still gets a scale to sit on.
+    const extent = groups.flatMap((g) => g.bars.flatMap((b) => [b.value, ...(b.range ?? [])]));
+    const low = Math.min(0, ...extent);
+    const high = Math.max(0, ...extent);
+    const y = linearScale([low, high === low ? 1 : high], [margin.top + plotH, margin.top], 4);
     const slot = Math.min(84, (plotW - Math.max(0, groups.length - 1) * groupGap) / barCount);
     const barWidth = Math.min(30, slot * 0.62);
     const used = slot * barCount + Math.max(0, groups.length - 1) * groupGap;
@@ -130,7 +149,7 @@ export function GroupedBars({
     return (
       <div ref={ref}>
         <p className="py-16 text-center text-[13px] text-muted-foreground">
-          No plan in the current selection reports this metric.
+          Nothing in the current selection reports this metric.
         </p>
       </div>
     );
@@ -138,6 +157,8 @@ export function GroupedBars({
 
   const { y, placed, barWidth } = layout;
   const baseline = margin.top + plotH;
+  const zero = y(0);
+  const hoveredHosts = hoveredBar ? (accessor.hosts?.(hoveredBar.plan) ?? hoveredBar.plan.hostCount) : 0;
 
   return (
     <div ref={ref} className="relative">
@@ -173,22 +194,26 @@ export function GroupedBars({
           )}
 
           {placed.map((group) => {
-            const color = providerColor(group.bars[0].plan.provider);
+            const color = group.bars[0].plan.color;
             const dimmed = hoveredBar !== undefined && grouping.key(hoveredBar.plan) !== group.provider;
             return (
               <g key={group.provider} opacity={dimmed ? 0.35 : 1} className="transition-opacity duration-150">
                 {group.bars.map((bar) => {
-                  const top = y(bar.value);
-                  const h = Math.max(1, baseline - top);
-                  const r = Math.min(4, barWidth / 2, h);
+                  // A bar is at least a pixel long and rounds the end that carries its value.
+                  const up = bar.value >= 0;
+                  const end = up ? Math.min(y(bar.value), zero - 1) : Math.max(y(bar.value), zero + 1);
+                  const r = Math.min(4, barWidth / 2, Math.abs(zero - end));
+                  const turn = up ? end + r : end - r;
                   const x0 = bar.cx - barWidth / 2;
-                  const capY = bar.range ? Math.min(top, y(bar.range[1])) : top;
+                  const labelY = up
+                    ? Math.min(end, bar.range ? y(bar.range[1]) : end) - 7
+                    : Math.max(end, bar.range ? y(bar.range[0]) : end) + 15;
                   return (
                     <g
                       key={bar.plan.id}
                       tabIndex={0}
                       role="img"
-                      aria-label={`${bar.plan.providerName} ${bar.plan.plan}: ${format(bar.value)}${accessor.unit ? ` ${accessor.unit}` : ""}`}
+                      aria-label={`${bar.plan.providerName} ${bar.plan.label}: ${format(bar.value)}${accessor.unit ? ` ${accessor.unit}` : ""}`}
                       onMouseEnter={() => setHovered(bar.plan.id)}
                       onMouseLeave={() => setHovered(null)}
                       onFocus={() => setHovered(bar.plan.id)}
@@ -197,10 +222,10 @@ export function GroupedBars({
                     >
                       <rect x={bar.cx - 22} y={margin.top} width={44} height={plotH} fill="transparent" />
                       <path
-                        d={`M${x0},${baseline} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + barWidth - r} Q${x0 + barWidth},${top} ${x0 + barWidth},${top + r} V${baseline} Z`}
+                        d={`M${x0},${zero} V${turn} Q${x0},${end} ${x0 + r},${end} H${x0 + barWidth - r} Q${x0 + barWidth},${end} ${x0 + barWidth},${turn} V${zero} Z`}
                         fill={`color-mix(in oklch, ${color} ${Math.round(bar.shade * 100)}%, var(--background))`}
                         strokeWidth={1.5}
-                        opacity={bar.plan.rankEligible ? 1 : 0.55}
+                        opacity={bar.plan.provisional ? 0.55 : 1}
                       />
                       {bar.range && (
                         <g stroke="var(--foreground)" strokeOpacity={0.45} strokeWidth={1}>
@@ -209,11 +234,11 @@ export function GroupedBars({
                           <line x1={bar.cx - 3} x2={bar.cx + 3} y1={y(bar.range[0])} y2={y(bar.range[0])} />
                         </g>
                       )}
-                      <text x={bar.cx} y={capY - 7} textAnchor="middle" className="num fill-foreground text-[12px] font-medium">
+                      <text x={bar.cx} y={labelY} textAnchor="middle" className="num fill-foreground text-[12px] font-medium">
                         {format(bar.value)}
                       </text>
                       <text x={bar.cx} y={baseline + 16} textAnchor="middle" className="fill-subtle text-[11px]">
-                        {truncate(grouping.barLabel?.(bar.plan) ?? bar.plan.plan)}
+                        {truncate(bar.label)}
                       </text>
                     </g>
                   );
@@ -238,7 +263,10 @@ export function GroupedBars({
                   {group.bars[0].plan.company && (
                     <CompanyLogo company={group.bars[0].plan.company} size="sm" decorative />
                   )}
-                  <span className="whitespace-nowrap">{group.bars[0].plan.providerName}</span>
+                  {/* The captions are a visual echo of the bars' own labels, which name the provider. */}
+                  {!isWordmark(group.bars[0].plan.company) && (
+                    <span className="whitespace-nowrap">{group.bars[0].plan.providerName}</span>
+                  )}
                 </>
               )}
             </div>
@@ -249,9 +277,9 @@ export function GroupedBars({
       {hoveredBar && (
         <ChartTooltip x={Math.min(hoveredBar.cx, width - 20)} y={y(hoveredBar.value)} width={width}>
           <TooltipHeader plan={hoveredBar.plan} />
-          {hoveredBar.plan.region && <TooltipRow label="Region" value={hoveredBar.plan.region} />}
+          {regionLabel(hoveredBar.plan) && <TooltipRow label="Region" value={regionLabel(hoveredBar.plan)} />}
           <TooltipRow
-            label="P50"
+            label={hoveredHosts > 1 ? "P50" : "Value"}
             value={`${format(hoveredBar.value)}${accessor.unit ? ` ${accessor.unit}` : ""}`}
           />
           {hoveredBar.range && (
@@ -260,8 +288,7 @@ export function GroupedBars({
           {hoveredBar.plan.priceMonth !== undefined && (
             <TooltipRow label="Price / month" value={priceLabel(hoveredBar.plan)} />
           )}
-          <TooltipRow label="Fresh hosts" value={hoveredBar.plan.hostCount} />
-          {!hoveredBar.plan.rankEligible && <p className="mt-1 text-subtle">Provisional · not ranked yet</p>}
+          <TooltipEvidence plan={hoveredBar.plan} hosts={hoveredHosts} />
         </ChartTooltip>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Building2, FileTerminal, LayoutDashboard, LineChart, Search } from "lucide-react";
+import { BarChart3, Building2, LayoutDashboard, LineChart, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
@@ -11,79 +11,36 @@ import {
 } from "@/components/premium/command-palette/dialog-command-palette";
 import { CommandKbd } from "@/components/premium/command-palette/command-palette-kbd";
 import type { MorphicCommandItem } from "@/components/premium/command-palette/command-palette-types";
-import { CATEGORIES } from "@/lib/categories";
-import { METRICS } from "@/lib/metrics";
-import { PROVIDERS } from "@/lib/providers";
+import type { SearchEntry } from "@/lib/search-index";
 
-const CHART_VIEWS = [
-  { id: "price-performance", label: "Price vs performance", keywords: ["cost", "scatter", "pareto"] },
-  { id: "value", label: "Work per euro", keywords: ["value", "price", "cheap"] },
-  { id: "board", label: "The board", keywords: ["table", "ranking", "leaderboard"] },
-  { id: "method", label: "How the numbers are made", keywords: ["methodology", "scoring", "weights"] },
-];
+const ICONS = { page: LayoutDashboard, chart: LineChart, metric: BarChart3, provider: Building2 };
 
 /** Global ⌘K search over pages, charts, benchmarks and providers. */
-export function SiteSearch({ providersWithRuns }: { providersWithRuns: string[] }) {
+export function SiteSearch({ entries }: { entries: SearchEntry[] }) {
   const router = useRouter();
 
   const items = useMemo<MorphicCommandItem[]>(() => {
-    const go = (href: string) => () => router.push(href);
-    // Dashboard targets: on "/" set the hash natively so the browser scrolls
-    // and listeners (metric deep links) see a hashchange.
-    const goHash = (anchor: string) => () => {
-      if (window.location.pathname !== "/") return router.push(`/#${anchor}`);
+    const open = (href: string) => () => {
+      const [path, anchor] = href.split("#");
+      if (!anchor || window.location.pathname !== path) return router.push(href);
+      // Already on that dashboard: set the hash natively so the browser
+      // scrolls and listeners (metric deep links) see a hashchange.
       if (window.location.hash !== `#${anchor}`) return void (window.location.hash = anchor);
       // Same fragment: scroll and re-announce it so the metric is selected again.
       document.getElementById(anchor)?.scrollIntoView();
       window.dispatchEvent(new HashChangeEvent("hashchange"));
     };
-    const withRuns = new Set(providersWithRuns);
-    return [
-      { id: "page-home", label: "Compute dashboard", group: "Pages", icon: LayoutDashboard, onSelect: go("/") },
-      ...CATEGORIES.filter((c) => c.status !== "live").map((c) => ({
-        id: `page-${c.slug}`,
-        label: `${c.name} benchmarks`,
-        description: "Planned",
-        group: "Pages",
-        icon: BarChart3,
-        onSelect: go(`/${c.slug}`),
-      })),
-      { id: "page-providers", label: "All providers", group: "Pages", icon: Building2, onSelect: go("/providers") },
-      {
-        id: "page-cli",
-        label: "CLI & contributing",
-        group: "Pages",
-        icon: FileTerminal,
-        keywords: ["install", "run", "method", "submit"],
-        onSelect: go("/cli"),
-      },
-      ...CHART_VIEWS.map((view) => ({
-        id: `chart-${view.id}`,
-        label: view.label,
-        group: "Charts",
-        icon: LineChart,
-        keywords: view.keywords,
-        onSelect: goHash(view.id),
-      })),
-      ...METRICS.map((m) => ({
-        id: `metric-${m.test}-${m.metric}`,
-        label: m.title,
-        hint: m.unit,
-        group: "Benchmarks",
-        icon: BarChart3,
-        keywords: [m.test, m.metric],
-        onSelect: goHash(`${m.test}-${m.metric}`),
-      })),
-      ...PROVIDERS.map((p) => ({
-        id: `provider-${p.slug}`,
-        label: p.name,
-        description: withRuns.has(p.slug) ? undefined : "Awaiting data",
-        group: "Providers",
-        icon: Building2,
-        onSelect: go(withRuns.has(p.slug) ? `/providers/${p.slug}` : "/providers"),
-      })),
-    ];
-  }, [router, providersWithRuns]);
+    return entries.map((entry) => ({
+      id: entry.id,
+      label: entry.label,
+      description: entry.description,
+      hint: entry.hint,
+      group: entry.group,
+      keywords: entry.keywords,
+      icon: ICONS[entry.kind],
+      onSelect: open(entry.href),
+    }));
+  }, [router, entries]);
 
   return (
     <CommandPalette items={items} shortcut="k" labels={{ placeholder: "Benchmarks, providers, pages…" }}>

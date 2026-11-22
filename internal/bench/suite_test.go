@@ -87,3 +87,41 @@ func TestResultFinishRoundsToTwoDecimals(t *testing.T) {
 		t.Errorf("result timing is incomplete: %+v", res)
 	}
 }
+
+type conditionalProbe struct {
+	categorizedProbe
+	reason string
+}
+
+func (p conditionalProbe) Unavailable() string { return p.reason }
+
+// A test that cannot run here stays in the catalog, so the catalog is the
+// same on every system, but no suite runs it and naming it says why.
+func TestUnavailableTestsStayListedButNeverRun(t *testing.T) {
+	saved := registry
+	t.Cleanup(func() { registry = saved })
+	registry = nil
+	Register(categorizedProbe{suiteProbe{name: "always", category: "platform"}})
+	Register(conditionalProbe{categorizedProbe{suiteProbe{name: "elsewhere", category: "platform"}}, "it needs another system"})
+	Register(conditionalProbe{categorizedProbe{suiteProbe{name: "here", category: "platform"}}, ""})
+
+	var suite []string
+	for _, b := range Suite("platform", StandardProfile) {
+		suite = append(suite, b.Name())
+	}
+	if len(suite) != 2 || suite[0] != "always" || suite[1] != "here" {
+		t.Errorf("suite = %v, want [always here]", suite)
+	}
+
+	if _, err := Select([]string{"elsewhere"}); err == nil || err.Error() != `test "elsewhere" cannot run here: it needs another system` {
+		t.Errorf("Select(elsewhere) error = %v", err)
+	}
+	if got, err := Select([]string{"here", "always"}); err != nil || len(got) != 2 {
+		t.Errorf("Select(here, always) = %v, %v", got, err)
+	}
+
+	catalog := BuildCatalog()
+	if len(catalog.Categories) != 1 || len(catalog.Categories[0].Tests) != 3 || catalog.Categories[0].Tests[1].Name != "elsewhere" {
+		t.Errorf("catalog = %+v, want all three tests in registration order", catalog.Categories)
+	}
+}

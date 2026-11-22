@@ -1,0 +1,74 @@
+{
+  "schema_version": 2,
+  "protocol_version": "gpu-inference-v1",
+  "profile": "standard",
+  "cli_version": "0.0.0-fixture",
+  "category": "gpu-inference",
+  "created_at": "2026-01-15T09:00:00Z",
+  "sample": true,
+  "provider": {
+    "name": "initech",
+    "product": "gpu-cloud",
+    "plan": "h100",
+    "region": "us-west-1",
+    "price_eur_month": 2400.0
+  },
+  "measurement": {},
+  "system": {
+    "os": "linux",
+    "arch": "amd64",
+    "cpu_cores": 2
+  },
+  "results": [
+    {
+      "test": "decode",
+      "started_at": "2026-01-15T09:00:00Z",
+      "duration_seconds": 60,
+      "metrics": [
+        {
+          "name": "tokens_per_second",
+          "value": 310.2,
+          "unit": "tok/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "time_to_first_token_p50",
+          "value": 29.0,
+          "unit": "ms",
+          "higher_is_better": false
+        }
+      ]
+    },
+    {
+      "test": "batch",
+      "started_at": "2026-01-15T09:01:00Z",
+      "duration_seconds": 60,
+      "metrics": [
+        {
+          "name": "throughput_b1",
+          "value": 310.2,
+          "unit": "tok/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "throughput_b4",
+          "value": 940.4,
+          "unit": "tok/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "throughput_b16",
+          "value": 2850.6,
+          "unit": "tok/s",
+          "higher_is_better": true
+        },
+        {
+          "name": "throughput_b64",
+          "value": 8641.4,
+          "unit": "tok/s",
+          "higher_is_better": true
+        }
+      ]
+    }
+  ]
+}

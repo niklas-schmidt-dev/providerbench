@@ -1,10 +1,6 @@
-import type { LucideIcon } from "lucide-react";
-import { Cpu, Database } from "lucide-react";
-
 import type { CompanySlug } from "@/lib/companies";
 import type { ReportSpec } from "@/lib/report";
-
-export type CategoryStatus = "live" | "planned";
+import { humanize } from "@/lib/text";
 
 export type PlannedCompany = {
   company: CompanySlug;
@@ -12,79 +8,64 @@ export type PlannedCompany = {
   label?: string;
 };
 
-export type Category = {
+/**
+ * How a category presents itself. Nothing here is required for a category to
+ * appear: a report with an unknown `category` gets a page laid out from its
+ * own tests and metrics. An entry adds the words a report cannot carry.
+ */
+export type CategoryMeta = {
   slug: string;
   name: string;
   tagline: string;
   description: string;
-  status: CategoryStatus;
-  icon: LucideIcon;
-  /** Headline metrics this category measures (or will). */
-  metrics: string[];
-  /** For planned categories: companies/products on the roadmap. */
-  plannedCompanies?: PlannedCompany[];
-  /**
-   * Live categories: the declarative report every page renders from —
-   * homepage leaders, category sections, ledger columns, scatter axes.
-   * A new benchmark category adds one spec and its pages exist.
-   */
+  /** What one row of the board is. A report calls it `provider.plan`. */
+  noun: { one: string; many: string };
+  /** Headline and lead of the dashboard. Default: the name and the description. */
+  headline?: string;
+  lead?: string;
+  /** The machine that ran the test is what was measured, so its CPU and memory describe the row. */
+  measuresMachine?: boolean;
+  /** Directory under internal/tests that holds the suite's source. */
+  sourceDir?: string;
+  /** Tests in this order first; the rest follow in the order reports list them. */
+  testOrder?: string[];
+  /** Curated columns and axes. Without it, every metric of the reports is offered. */
   report?: ReportSpec;
+  /** A short label for a metric whose name alone reads badly. */
+  metricLabel?: (test: string, metric: string) => string | undefined;
+  /** Label for a variant key of a test's outcomes (a language code). */
+  variantLabel?: (variant: string) => string | undefined;
+  /** Title of the table that sets a test's like-for-like metrics side by side. */
+  matrixTitle?: string;
+  /** The items of a test come in this many equal groups, in order. */
+  itemGroups?: { count: number; label: string };
+  /** Shown while the category has no published report. */
+  roadmap?: { metrics?: string[]; companies?: PlannedCompany[] };
 };
 
-// Adding a category = adding an entry here plus result files with a matching
-// `category` field in data/results/. Pages, nav and provider views pick it up.
-// Going live = attaching a `report` spec; every page then renders itself.
-export const CATEGORIES: Category[] = [
+const LANGUAGES = new Map([
+  ["en", "English"],
+  ["de", "German"],
+  ["es", "Spanish"],
+  ["zh", "Chinese"],
+]);
+
+// Order here is the order in the navigation. Categories that exist only in
+// the data or in the CLI's catalog follow, sorted by name.
+const REGISTRY: CategoryMeta[] = [
   {
     slug: "compute",
     name: "Compute",
     tagline: "VPS & dedicated servers",
     description:
       "CPU, memory, disk and network performance — plus contention and consistency signals that a spec sheet cannot show.",
-    status: "live",
-    icon: Cpu,
-    metrics: [
-      "CPU single/all-core",
-      "Memory bandwidth & latency",
-      "Disk IOPS & fsync",
-      "Network throughput",
-      "CPU steal & consistency",
-    ],
+    noun: { one: "plan", many: "plans" },
+    headline: "Measured, not marketed.",
+    lead: "Every provider sells “vCPUs” and “NVMe”. We measure what you actually get: fresh hosts, one open harness, every sample published as raw JSON.",
+    measuresMachine: true,
+    sourceDir: "compute",
+    testOrder: ["cpu", "memory", "disk", "network", "steal"],
     report: {
-      leaderCharts: [
-        { test: "cpu", metric: "single_core_hash" },
-        { test: "cpu", metric: "multi_core_hash" },
-        { test: "disk", metric: "rand_read_4k" },
-        { test: "network", metric: "download" },
-        { test: "steal", metric: "cpu_steal" },
-        { test: "disk", metric: "fsync_latency_p50" },
-      ],
-      sections: [
-        {
-          title: "Raw performance",
-          description:
-            "Identical deterministic workloads on every machine — differences are the hardware, never the benchmark.",
-          charts: [
-            { test: "cpu", metric: "single_core_hash" },
-            { test: "cpu", metric: "multi_core_hash" },
-            { test: "memory", metric: "copy_bandwidth" },
-            { test: "memory", metric: "random_access_latency" },
-            { test: "disk", metric: "rand_read_4k" },
-            { test: "network", metric: "download" },
-          ],
-        },
-        {
-          title: "Contention & consistency signals",
-          description:
-            "Identical work should have a stable runtime. These metrics expose variance, tail latency and hypervisor-reported steal time without assigning a single cause.",
-          charts: [
-            { test: "steal", metric: "consistency_cv" },
-            { test: "steal", metric: "cpu_steal" },
-            { test: "steal", metric: "p99_over_p50" },
-            { test: "disk", metric: "fsync_latency_p50" },
-          ],
-        },
-      ],
       tableMetrics: [
         { test: "cpu", metric: "single_core_hash", shortLabel: "CPU 1-core" },
         { test: "cpu", metric: "multi_core_hash", shortLabel: "CPU all-core" },
@@ -97,41 +78,108 @@ export const CATEGORIES: Category[] = [
         { test: "steal", metric: "cpu_steal", shortLabel: "Steal", decimals: 2 },
       ],
       scatterMetrics: [
-        { id: "cpu-multi", test: "cpu", metric: "multi_core_hash", shortLabel: "CPU all-core" },
-        { id: "cpu-single", test: "cpu", metric: "single_core_hash", shortLabel: "CPU 1-core" },
-        { id: "memory", test: "memory", metric: "copy_bandwidth", shortLabel: "Memory BW" },
-        { id: "disk", test: "disk", metric: "rand_read_4k", shortLabel: "4K read" },
-        { id: "network", test: "network", metric: "download", shortLabel: "Download" },
+        { test: "cpu", metric: "multi_core_hash", shortLabel: "CPU all-core" },
+        { test: "cpu", metric: "single_core_hash", shortLabel: "CPU 1-core" },
+        { test: "memory", metric: "copy_bandwidth", shortLabel: "Memory BW" },
+        { test: "disk", metric: "rand_read_4k", shortLabel: "4K read" },
+        { test: "network", metric: "download", shortLabel: "Download" },
       ],
     },
   },
-  // AI inference is deliberately absent until we actually measure it — no
-  // empty dashboards. Re-add the category entry here when the suite ships.
+  {
+    slug: "workload",
+    name: "Workload",
+    tagline: "Application work",
+    description:
+      "What a server gets done in the work applications do: compression, JSON, TLS handshakes, HTTP requests, sorting, key lookups and allocation, on one core and on all of them.",
+    noun: { one: "plan", many: "plans" },
+    measuresMachine: true,
+    sourceDir: "workload",
+  },
+  {
+    slug: "platform",
+    name: "Platform",
+    tagline: "Kernel & virtualization overhead",
+    description:
+      "What the platform under a workload costs: system calls, thread wake-ups, first-touch memory, small-file operations and scheduling stalls.",
+    noun: { one: "plan", many: "plans" },
+    measuresMachine: true,
+    sourceDir: "platform",
+  },
+  {
+    slug: "reach",
+    name: "Reach",
+    tagline: "Network distance to the world",
+    description: "Round-trip time from a plan's datacenter to fixed anchors in nine cloud regions on six continents.",
+    noun: { one: "plan", many: "plans" },
+    sourceDir: "reach",
+    matrixTitle: "Round-trip time by region",
+    metricLabel: (_test, metric) =>
+      metric.startsWith("rtt_") ? metric.slice("rtt_".length).replaceAll("_", "-") : undefined,
+  },
   {
     slug: "storage",
     name: "Object Storage",
     tagline: "S3-compatible & blob stores",
     description:
       "Upload and download throughput, time to first byte, small-object latency and list performance — R2 vs S3 vs the rest, from multiple regions.",
-    status: "planned",
-    icon: Database,
-    metrics: [
-      "Upload / download throughput",
-      "Time to first byte",
-      "Small-object p50/p99",
-      "List operations",
-      "Egress cost per TB",
-    ],
-    plannedCompanies: [
-      { company: "cloudflare", label: "Cloudflare R2" },
-      { company: "aws", label: "AWS S3" },
-      { company: "backblaze", label: "Backblaze B2" },
-      { company: "google", label: "Google Cloud Storage" },
-      { company: "tigris" },
-    ],
+    noun: { one: "plan", many: "plans" },
+    sourceDir: "storage",
+    roadmap: {
+      companies: [
+        { company: "cloudflare", label: "Cloudflare R2" },
+        { company: "aws", label: "AWS S3" },
+        { company: "backblaze", label: "Backblaze B2" },
+        { company: "google", label: "Google Cloud Storage" },
+        { company: "tigris" },
+      ],
+    },
+  },
+  {
+    slug: "ai-language",
+    name: "AI language",
+    tagline: "Language models by input language",
+    description:
+      "The same generated problems in English, German, Spanish and Chinese: what a model solves when only the language of the question changes.",
+    noun: { one: "model", many: "models" },
+    sourceDir: "ai",
+    matrixTitle: "Problems solved by input language",
+    itemGroups: { count: 5, label: "Level" },
+    variantLabel: (variant) => LANGUAGES.get(variant),
+    metricLabel: (_test, metric) => {
+      const code = metric.startsWith("accuracy_") ? metric.slice("accuracy_".length) : undefined;
+      return code ? (LANGUAGES.get(code) ?? code.toUpperCase()) : undefined;
+    },
   },
 ];
 
-export function getCategory(slug: string): Category | undefined {
-  return CATEGORIES.find((c) => c.slug === slug);
+const bySlug = new Map(REGISTRY.map((meta) => [meta.slug, meta]));
+
+/** Registered categories in navigation order. */
+export const CATEGORY_ORDER = REGISTRY.map((meta) => meta.slug);
+
+/** The category whose dashboard is the homepage. */
+export const HOME_CATEGORY = "compute";
+
+/** Top-level routes a category slug must not shadow. */
+export const RESERVED_SLUGS = ["benchmarks", "cli", "providers"];
+
+export function categoryMeta(slug: string): CategoryMeta {
+  return (
+    bySlug.get(slug) ?? {
+      slug,
+      name: humanize(slug),
+      tagline: "",
+      description: `Reports of the ${slug} category, laid out from their own tests and metrics.`,
+      noun: { one: "plan", many: "plans" },
+    }
+  );
+}
+
+export function categoryHref(slug: string): string {
+  return slug === HOME_CATEGORY ? "/" : `/${slug}`;
+}
+
+export function variantLabel(meta: CategoryMeta, variant: string): string {
+  return meta.variantLabel?.(variant) ?? humanize(variant);
 }
