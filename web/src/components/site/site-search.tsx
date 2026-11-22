@@ -11,6 +11,7 @@ import {
 } from "@/components/premium/command-palette/dialog-command-palette";
 import { CommandKbd } from "@/components/premium/command-palette/command-palette-kbd";
 import type { MorphicCommandItem } from "@/components/premium/command-palette/command-palette-types";
+import { currentHash } from "@/lib/hash";
 import type { SearchEntry } from "@/lib/search-index";
 
 const ICONS = { page: LayoutDashboard, chart: LineChart, metric: BarChart3, provider: Building2 };
@@ -25,7 +26,7 @@ export function SiteSearch({ entries }: { entries: SearchEntry[] }) {
       if (!anchor || window.location.pathname !== path) return router.push(href);
       // Already on that dashboard: set the hash natively so the browser
       // scrolls and listeners (metric deep links) see a hashchange.
-      if (window.location.hash !== `#${anchor}`) return void (window.location.hash = anchor);
+      if (currentHash() !== anchor) return void (window.location.hash = anchor);
       // Same fragment: scroll and re-announce it so the metric is selected again.
       document.getElementById(anchor)?.scrollIntoView();
       window.dispatchEvent(new HashChangeEvent("hashchange"));

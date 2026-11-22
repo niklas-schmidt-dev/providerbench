@@ -171,8 +171,10 @@ directory of report files:
 cd web && PROVIDERBENCH_DATA_OVERLAY=../my-reports bun dev
 ```
 
-The reports are added on top of the dataset and never rank. A production
-build does not set the variable.
+The reports are added on top of the dataset and never rank. Give them their
+own campaign id: a report that joins a published campaign takes that campaign
+out of the ranking in the preview. A production build does not set the
+variable.
 
 `bun run test:e2e` builds the site and runs the Playwright smoke tests. It
 honors `PORT`, so `portless run --name e2e bun run test:e2e` runs beside a

@@ -8,6 +8,7 @@ import { useWidth } from "@/components/charts/use-width";
 import { CompanyLogo } from "@/components/company-logo";
 import type { OutcomeSummary } from "@/lib/aggregate";
 import { isWordmark } from "@/lib/companies";
+import { currentHash } from "@/lib/hash";
 import { outcomesOf, planTitle, type PlanDatum } from "@/lib/plans";
 import type { OutcomesSection } from "@/lib/sections";
 
@@ -66,7 +67,7 @@ export function OutcomesPanel({
   // A deep link to a test (#arithmetic) selects it here too.
   useEffect(() => {
     const sync = () => {
-      const hash = window.location.hash.slice(1);
+      const hash = currentHash();
       if (section.tests.some((entry) => entry.test === hash)) setTest(hash);
     };
     sync();

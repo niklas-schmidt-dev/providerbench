@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ChartPanel, Segmented } from "@/components/charts/chart-panel";
 import { GroupedBars, type BarAccessor } from "@/components/charts/grouped-bars";
+import { currentHash } from "@/lib/hash";
 import type { MetricInfo } from "@/lib/metrics";
 import { metricKey, type PlanDatum } from "@/lib/plans";
 import type { SuiteSection } from "@/lib/sections";
@@ -33,7 +34,7 @@ export function SuitePanel({
   // Deep links (#cpu-single_core_hash, e.g. from ⌘K) select their metric.
   useEffect(() => {
     const sync = () => {
-      const hash = window.location.hash.slice(1);
+      const hash = currentHash();
       const match = metrics.find((m) => metricAnchor(m) === hash);
       if (match) setSelected(match.metric);
     };

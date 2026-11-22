@@ -32,7 +32,7 @@
           "higher_is_better": true
         },
         {
-          "name": "time_to_first_token_p50",
+          "name": "time to first token p50",
           "value": 74.7,
           "unit": "ms",
           "higher_is_better": false

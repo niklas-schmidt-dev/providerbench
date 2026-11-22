@@ -10,6 +10,7 @@ import { CompanyLogo } from "@/components/company-logo";
 import { SOURCE_LINK } from "@/components/dashboard/suite-panel";
 import { isWordmark } from "@/lib/companies";
 import { uniformFormat } from "@/lib/format";
+import { currentHash } from "@/lib/hash";
 import { metricKey, outcomesOf, planTitle, regionLabel, TESTS_SOURCE_URL, type PlanDatum } from "@/lib/plans";
 import type { MatrixSection } from "@/lib/sections";
 import { capitalize } from "@/lib/text";
@@ -84,7 +85,7 @@ export function MatrixPanel({
   useEffect(() => {
     if (!several) return;
     const sync = () => {
-      const hash = window.location.hash.slice(1);
+      const hash = currentHash();
       const match =
         tests.find((test) => hash === test.anchor) ??
         tests.find((test) => columns.some((column) => hash === `${test.test}-${column.metric}`));

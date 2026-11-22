@@ -16,7 +16,8 @@ export const metadata: Metadata = {
 
 export default function ProvidersPage() {
   const runs = loadRuns();
-  const plans = bestRegionPerPlan(currentScoredGroups(aggregateRuns(runs)));
+  const current = currentScoredGroups(aggregateRuns(runs));
+  const plans = bestRegionPerPlan(current);
   // Registered providers, measured or not, and every other provider a report names.
   const measured = [...new Set(runs.flatMap((run) => (run.provider.name ? [run.provider.name] : [])))].sort();
   const slugs = [...new Set([...PROVIDERS.map((provider) => provider.slug), ...measured])];
@@ -24,8 +25,9 @@ export default function ProvidersPage() {
     .map((slug) => {
       const provider = getProvider(slug);
       const own = plans.filter((plan) => plan.provider.name === slug);
-      const cheapest = own
-        .filter((plan) => plan.provider.price_eur_month)
+      // The entry price is the lowest in any region, not only where a plan measured best.
+      const cheapest = current
+        .filter((plan) => plan.provider.name === slug && plan.provider.price_eur_month)
         .sort((a, b) => a.provider.price_eur_month! - b.provider.price_eur_month!)[0];
       const scores = own.flatMap((plan) => (plan.performanceScore === undefined ? [] : [plan.performanceScore]));
       const categories = [...new Set(own.map((plan) => categoryMeta(plan.category).name))];

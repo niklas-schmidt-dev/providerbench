@@ -171,5 +171,15 @@ test("a provider nobody registered has a page, and search finds what the reports
   await input.press("Enter");
   await expect(page).toHaveURL(/\/gpu-inference#batch-throughput_b16$/);
   await expect(page.locator("#batch table")).toBeVisible();
+
+  // A metric may be named with spaces: its link still selects it.
+  await page.keyboard.press("Control+k");
+  await input.fill("Time to first token");
+  await input.press("Enter");
+  await expect(page).toHaveURL(/#decode-time%20to%20first%20token%20p50$/);
+  await expect(page.getByRole("group", { name: "Decode metric" }).getByRole("button", { name: "Time to first token P50" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   expect(errors).toEqual([]);
 });
