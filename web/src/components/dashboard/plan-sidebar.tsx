@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef } from "react";
 
 import { CompanyLogo } from "@/components/company-logo";
-import { priceLabel, type PlanDatum } from "@/lib/plans";
-import { providerColor } from "@/lib/providers";
+import { isWordmark } from "@/lib/companies";
+import { priceLabel, regionLabel, type PlanDatum } from "@/lib/plans";
+import { capitalize } from "@/lib/text";
 import { cn } from "@/lib/utils";
 
 export type PlanFilters = {
@@ -28,8 +29,8 @@ export function tierOf(plan: PlanDatum): string {
 }
 
 /**
- * The plan list: every measured plan, grouped by provider, each with its
- * series dot. A filled dot is on the charts, a hollow one is off. Tier
+ * The row list: every measured plan (or model, or whatever the category
+ * calls a row), grouped by provider, each with its series dot. A filled dot is on the charts, a hollow one is off. Tier
  * chips and the provisional switch narrow every chart at once.
  */
 export function PlanSidebar({
@@ -40,7 +41,10 @@ export function PlanSidebar({
   open,
   onClose,
   footer,
+  noun,
 }: {
+  /** What one row is, e.g. plan/plans or model/models. */
+  noun: { one: string; many: string };
   plans: PlanDatum[];
   filters: PlanFilters;
   onChange: (next: PlanFilters) => void;
@@ -112,7 +116,7 @@ export function PlanSidebar({
   }, [plans, query]);
 
   const visibleCount = plans.filter((plan) => isVisible(plan, filters)).length;
-  const anyProvisional = plans.some((plan) => !plan.rankEligible);
+  const anyProvisional = plans.some((plan) => plan.provisional);
   const dirty =
     filters.hidden.size > 0 || filters.excludedTiers.size > 0 || !filters.showProvisional || filters.query !== "";
 
@@ -131,7 +135,7 @@ export function PlanSidebar({
       <aside
         id="plan-sidebar"
         ref={asideRef}
-        aria-label="Plans"
+        aria-label={capitalize(noun.many)}
         aria-modal={open || undefined}
         role={open ? "dialog" : undefined}
         className={cn(
@@ -144,7 +148,7 @@ export function PlanSidebar({
       >
         <div className="flex items-center justify-between gap-2 px-5 pt-5">
           <h2 className="flex items-baseline gap-2 text-base font-medium tracking-tight">
-            Plans
+            {capitalize(noun.many)}
             <span className="num text-[12px] font-normal text-subtle">
               {visibleCount === plans.length ? plans.length : `${visibleCount} / ${plans.length}`}
             </span>
@@ -158,7 +162,7 @@ export function PlanSidebar({
                 searchRef.current?.focus();
               }}
               disabled={!dirty}
-              aria-label="Reset plan filters"
+              aria-label={`Reset ${noun.one} filters`}
               className="grid size-8 place-items-center rounded-md text-subtle transition-colors hover:bg-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
             >
               <RotateCcw aria-hidden className="size-3.5" />
@@ -166,7 +170,7 @@ export function PlanSidebar({
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close plan filters"
+              aria-label={`Close ${noun.one} filters`}
               className="grid size-8 place-items-center rounded-md text-subtle transition-colors hover:bg-hover hover:text-foreground lg:hidden"
             >
               <X aria-hidden className="size-4" />
@@ -176,13 +180,13 @@ export function PlanSidebar({
 
         <label className="mx-5 mt-3 flex h-9 items-center gap-2 border-b border-border text-[13px] focus-within:border-foreground">
           <Search aria-hidden className="size-3.5 text-subtle" />
-          <span className="sr-only">Find plans</span>
+          <span className="sr-only">Find {noun.many}</span>
           <input
             ref={searchRef}
             type="search"
             value={filters.query}
             onChange={(event) => onChange({ ...filters, query: event.target.value })}
-            placeholder="Find plans"
+            placeholder={`Find ${noun.many}`}
             className="min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-subtle sm:text-[13px]"
           />
           <kbd className="font-sans text-[12px] text-faint">/</kbd>
@@ -216,7 +220,7 @@ export function PlanSidebar({
 
           {groups.length === 0 && (
             <p className="text-[13px] text-muted-foreground">
-              No plan matches &ldquo;{filters.query}&rdquo;.
+              No {noun.one} matches &ldquo;{filters.query}&rdquo;.
             </p>
           )}
 
@@ -228,8 +232,10 @@ export function PlanSidebar({
                   href={`/providers/${first.provider}`}
                   className="mb-1 flex items-center gap-2 text-[12px] font-medium transition-colors hover:text-muted-foreground"
                 >
-                  {first.company && <CompanyLogo company={first.company} size="xs" decorative />}
-                  {first.providerName}
+                  {first.company && (
+                    <CompanyLogo company={first.company} size="xs" decorative={!isWordmark(first.company)} />
+                  )}
+                  {!isWordmark(first.company) && first.providerName}
                 </Link>
                 {group.map((plan) => {
                   const on = isVisible(plan, filters);
@@ -248,7 +254,7 @@ export function PlanSidebar({
                     >
                       <span className="min-w-0 flex-1 truncate">
                         {plan.plan}
-                        {plan.region && <span className="ml-1.5 text-[12px] text-subtle">{plan.region}</span>}
+                        {regionLabel(plan) && <span className="ml-1.5 text-[12px] text-subtle">{regionLabel(plan)}</span>}
                       </span>
                       {plan.priceMonth !== undefined && (
                         <span className="num text-[12px] text-subtle">{priceLabel(plan)}</span>
@@ -257,8 +263,8 @@ export function PlanSidebar({
                         aria-hidden
                         className="size-2 shrink-0 rounded-full border-[1.5px]"
                         style={{
-                          borderColor: providerColor(plan.provider),
-                          background: on ? providerColor(plan.provider) : "transparent",
+                          borderColor: plan.color,
+                          background: on ? plan.color : "transparent",
                         }}
                       />
                     </button>
@@ -313,6 +319,6 @@ export function isVisible(plan: PlanDatum, filters: PlanFilters): boolean {
     matchesQuery(plan, filters.query) &&
     !filters.hidden.has(plan.id) &&
     !filters.excludedTiers.has(tierOf(plan)) &&
-    (filters.showProvisional || plan.rankEligible)
+    (filters.showProvisional || !plan.provisional)
   );
 }

@@ -236,6 +236,14 @@ Implement one interface, register it, done — see
 PostgreSQL TPS, Redis ops/s, build-time benchmarks, random-write and
 tail-latency disk tests, IPv6 reach.
 
+The site needs no change for a new test or a new category. It reads what the
+CLI can measure from `data/catalog.json` (`providerbench list --json`, kept in
+step by CI) and lays every category out from its reports: a test becomes a
+bar chart with a switch between its metrics, four or more like-for-like
+metrics become one table on one scale, and item outcomes get a view of their
+own. A category shows up in the list of benchmarks as soon as the CLI has it,
+and turns into a dashboard with its first published report.
+
 ## Submitting results
 
 1. Create a campaign and run the same plan on exactly **10 fresh instances**.
@@ -282,6 +290,7 @@ internal/tests/      one directory per suite: compute, workload, platform,
 docs/protocols/      the methodology of every protocol version
 schema/              JSON schema for reports
 data/results/        the public dataset, one JSON file per run
+data/catalog.json    what the CLI can measure; the site reads it
 web/                 providerbench.dev (Next.js 16, monochrome UI, hand-drawn SVG charts)
 ```
 
@@ -290,7 +299,8 @@ Benchmarks are organized in **categories**. `compute` is live on the site.
 `ai-language` (models by input language) ship in this CLI under their own
 protocols and await their first published campaigns; `ai` (inference
 TTFT/throughput) is planned. A report's `category` field
-decides where it appears on the site.
+decides where it appears on the site; a category the site has never heard of
+still gets its page.
 
 ## License
 

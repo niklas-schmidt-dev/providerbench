@@ -3,9 +3,13 @@ import { describe, expect, test } from "bun:test";
 import {
   aggregateRuns,
   currentScoredGroups,
+  dashboardSubjects,
+  isScoredCategory,
   latestMeasurementGroups,
   scoreGroups,
+  subjectsOf,
 } from "@/lib/aggregate";
+import { distinguishPlans, outcomesOf, planTitle, toPlanDatum } from "@/lib/plans";
 
 // The full scoring suite. `factor` scales quality in one direction: for
 // lower-is-better metrics the emitted value is inverted so a higher factor
@@ -291,5 +295,194 @@ describe("dated benchmark cohorts", () => {
     expect(new Set(groups.map((group) => group.seriesId)).size).toBe(2);
     expect(latestMeasurementGroups(groups)).toHaveLength(1);
     expect(latestMeasurementGroups(groups)[0].protocolVersion).toBe("compute-v2");
+  });
+});
+
+function inCategory(runs, category, profile = "standard") {
+  return runs.map((run) => ({
+    ...run,
+    slug: `${category}-${profile}-${run.slug}`,
+    category,
+    manifest: { ...run.manifest, category, profile, rank_eligible: false },
+  }));
+}
+
+function inRegion(runs, region) {
+  return runs.map((run) => ({
+    ...run,
+    slug: `${region}-${run.slug}`,
+    provider: { ...run.provider, region },
+  }));
+}
+
+function withResults(run, results) {
+  return {
+    ...run,
+    results: results.map((result) => ({
+      started_at: run.created_at,
+      duration_seconds: 1,
+      metrics: [],
+      ...result,
+    })),
+  };
+}
+
+describe("reports of any category", () => {
+  test("a category without a ranking gets no score and leaves the compute scale alone", () => {
+    const compute = campaign("provider-2026q3", 24, 10, 100);
+    const workload = inCategory(campaign("provider-workload", 24, 10, 100000), "workload");
+    const scored = currentScoredGroups(aggregateRuns([...compute, ...workload]));
+
+    expect(scored.find((group) => group.category === "compute")?.performanceScore).toBeCloseTo(100);
+    const other = scored.find((group) => group.category === "workload");
+    expect(other?.performanceScore).toBeUndefined();
+    expect(other?.valueIndex).toBeUndefined();
+  });
+
+  test("a sustained cohort never replaces the standard one; both describe the same row", () => {
+    const standard = campaign("provider-2026q3", 1, 10, 100);
+    const sustained = inCategory(campaign("provider-sustained", 24, 1, 100), "compute", "sustained").map((run) =>
+      withResults(run, [
+        { test: "cpu_sustained", metrics: [{ name: "retained", value: 97, unit: "%", higher_is_better: true }] },
+      ]),
+    );
+    const current = currentScoredGroups(aggregateRuns([...standard, ...sustained]));
+
+    expect(current.map((group) => group.profile).sort()).toEqual(["standard", "sustained"]);
+    expect(current.find((group) => group.profile === "sustained")?.performanceScore).toBeUndefined();
+
+    const subjects = subjectsOf(current);
+    expect(subjects).toHaveLength(1);
+    expect(subjects[0].primary.profile).toBe("standard");
+    const row = toPlanDatum(subjects[0], "var(--provider-other)");
+    expect(row.score).toBeCloseTo(100);
+    expect(row.metrics["cpu.single_core_hash"].p50).toBe(100);
+    expect(row.metrics["cpu_sustained.retained"]).toMatchObject({ p50: 97, hosts: 1, unit: "%" });
+    expect(row.quick).toBe(false);
+
+    // A quick sustained cohort marks the row that carries its metrics.
+    const quickSustained = sustained.map((run) => ({ ...run, quick: true }));
+    const merged = subjectsOf(currentScoredGroups(aggregateRuns([...standard, ...quickSustained])));
+    expect(merged).toHaveLength(1);
+    expect(merged[0].primary.quick).toBe(false);
+    expect(toPlanDatum(merged[0], "var(--provider-other)").quick).toBe(true);
+  });
+
+  test("a ranked plan shows once, in its best region; without a ranking every region is a row", () => {
+    const fast = inRegion(campaign("provider-fast", 24, 10, 200), "eu-2");
+    const slow = campaign("provider-slow", 24, 10, 100);
+
+    const ranked = dashboardSubjects(currentScoredGroups(aggregateRuns([...fast, ...slow])));
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0].primary.provider.region).toBe("eu-2");
+
+    const open = dashboardSubjects(
+      currentScoredGroups(aggregateRuns(inCategory([...fast, ...slow], "workload"))),
+    );
+    expect(open.map((subject) => subject.primary.provider.region).sort()).toEqual(["eu-1", "eu-2"]);
+    expect(toPlanDatum(open[0], "var(--provider-other)").provisional).toBe(false);
+  });
+
+  test("where nothing ranks, a quick or a failed cohort still never replaces a complete one", () => {
+    const full = inCategory(campaign("reach-2026q2", 1, 1, 100), "reach");
+    const quick = inCategory(campaign("reach-2026q3-quick", 24, 1, 50, { quick: true }), "reach");
+    const failed = inCategory(campaign("reach-2026q3-failed", 25, 1, 100), "reach").map((run) =>
+      withResults(run, [{ test: "regions", error: "no route" }]),
+    );
+    const latest = (runs) => latestMeasurementGroups(aggregateRuns(runs)).map((group) => group.cohortId);
+
+    expect(latest([...full, ...quick])).toEqual(["reach-2026q2"]);
+    expect(latest([...full, ...failed])).toEqual(["reach-2026q2"]);
+    // With nothing complete, the newest cohort is still shown rather than nothing.
+    expect(latest([...quick])).toEqual(["reach-2026q3-quick"]);
+    // And a newer complete cohort does replace the older one.
+    expect(latest([...full, ...inCategory(campaign("reach-2026q4", 26, 1, 120), "reach")])).toEqual(["reach-2026q4"]);
+  });
+
+  test("a test may have a dot in its name", () => {
+    const [run] = inCategory(campaign("odd-2026", 24, 1, 100), "odd");
+    const metric = (name) => [{ name, value: 1, unit: "x", higher_is_better: true }];
+    const groups = aggregateRuns([
+      withResults(run, [
+        { test: "tls.handshake", metrics: metric("single_core") },
+        { test: "tls.resume", metrics: metric("single.core") },
+      ]),
+    ]);
+    expect(groups[0].results.map((result) => [result.test, result.metrics[0].name])).toEqual([
+      ["tls.handshake", "single_core"],
+      ["tls.resume", "single.core"],
+    ]);
+  });
+
+  test("rows that share a plan name are told apart by region or product", () => {
+    const here = inCategory(campaign("reach-a", 24, 1, 100), "reach");
+    const there = inRegion(inCategory(campaign("reach-b", 24, 1, 100), "reach"), "eu-2");
+    const other = asProvider(inCategory(campaign("reach-c", 24, 1, 100), "reach"), "peer");
+    const rows = distinguishPlans(
+      dashboardSubjects(currentScoredGroups(aggregateRuns([...here, ...there, ...other]))).map((subject) =>
+        toPlanDatum(subject, "var(--provider-other)"),
+      ),
+    );
+    expect(rows.map((row) => planTitle(row)).sort()).toEqual([
+      "Peer two-core",
+      "Provider two-core · eu-1",
+      "Provider two-core · eu-2",
+    ]);
+  });
+
+  test("item outcomes add up per item across the reports of a cohort", () => {
+    const [first, second] = inCategory(campaign("quiz-2026", 24, 2, 100), "quiz");
+    const metrics = [{ name: "accuracy_en", value: 50, unit: "%", higher_is_better: true }];
+    const groups = aggregateRuns([
+      withResults(first, [{ test: "sums", metrics, outcomes: { en: "110-" } }]),
+      withResults(second, [{ test: "sums", metrics, outcomes: { en: "1001" } }]),
+    ]);
+
+    expect(groups[0].results[0].outcomes.en).toEqual({
+      solved: [1, 0.5, 0, 0.5],
+      unanswered: [0, 0, 0, 0.5],
+      reports: 2,
+    });
+  });
+
+  test("a quick report asks fewer items and does not blur the full ones", () => {
+    const [full, quick] = inCategory(campaign("quiz-2026", 24, 2, 100), "quiz");
+    const metrics = [{ name: "accuracy_en", value: 50, unit: "%", higher_is_better: true }];
+    const groups = aggregateRuns([
+      withResults(full, [{ test: "sums", metrics, outcomes: { en: "1100" } }]),
+      withResults(quick, [{ test: "sums", metrics, outcomes: { en: "10" } }]),
+    ]);
+
+    expect(groups[0].results[0].outcomes.en).toEqual({ solved: [1, 1, 0, 0], unanswered: [0, 0, 0, 0], reports: 1 });
+  });
+
+  test("a report may name a category or a test after something every object has", () => {
+    expect(isScoredCategory("constructor")).toBe(false);
+    const [run] = inCategory(campaign("odd-2026", 24, 1, 100), "constructor");
+    const metrics = [{ name: "value", value: 1, unit: "x", higher_is_better: true }];
+    const scored = currentScoredGroups(aggregateRuns([withResults(run, [{ test: "toString", metrics }])]));
+    expect(scored[0].performanceScore).toBeUndefined();
+    const row = toPlanDatum(subjectsOf(scored)[0], "var(--provider-other)");
+    expect(row.metrics["toString.value"].p50).toBe(1);
+    expect(outcomesOf(row, "toString")).toBeUndefined();
+    expect(outcomesOf({ outcomes: {} }, "constructor")).toBeUndefined();
+  });
+
+  test("tests and metrics keep the order the reports list them in", () => {
+    const [run] = inCategory(campaign("reach-2026", 24, 1, 100), "reach");
+    const rtt = (region, value) => ({ name: `rtt_${region}`, value, unit: "ms", higher_is_better: false });
+    const groups = aggregateRuns([
+      withResults(run, [
+        { test: "regions", metrics: [rtt("us_east_1", 90), rtt("eu_west_1", 20), rtt("ap_south_1", 140)] },
+        { test: "anchors", metrics: [rtt("b", 2), rtt("a", 1)] },
+      ]),
+    ]);
+
+    expect(groups[0].results.map((result) => result.test)).toEqual(["regions", "anchors"]);
+    expect(groups[0].results[0].metrics.map((metric) => metric.name)).toEqual([
+      "rtt_us_east_1",
+      "rtt_eu_west_1",
+      "rtt_ap_south_1",
+    ]);
   });
 });

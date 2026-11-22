@@ -48,7 +48,8 @@ Usage:
   providerbench languages FILE|DIR ...
                               compare ai-language reports: what each model
                               solved in each input language
-  providerbench list          list available tests
+  providerbench list [--json] list available tests; --json prints the catalog
+                              the website reads from data/catalog.json
   providerbench system        show detected system info
   providerbench validate [--dataset] [--manifest FILE] FILE|DIR ...
                               check reports against the schema; directories
@@ -160,13 +161,7 @@ func main() {
 	case "languages":
 		os.Exit(languagesCmd(os.Args[2:]))
 	case "list":
-		for _, b := range bench.All() {
-			suite := bench.CategoryOf(b)
-			if profile := bench.ProfileOf(b); profile != bench.StandardProfile {
-				suite += "/" + profile
-			}
-			fmt.Printf("  %-15s %-18s %s\n", b.Name(), suite, b.Description())
-		}
+		os.Exit(listCmd(os.Args[2:]))
 	case "system":
 		info := sysinfo.Collect()
 		fmt.Printf("os: %s/%s\nkernel: %s\ncpu: %s (%d cores)\nmemory: %d MB\nvirtualization: %s\n",

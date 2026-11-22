@@ -4,31 +4,45 @@ import { ArrowUpRight } from "lucide-react";
 
 import { CompanyLogo } from "@/components/company-logo";
 import { aggregateRuns, bestRegionPerPlan, currentScoredGroups } from "@/lib/aggregate";
+import { categoryMeta } from "@/lib/categories";
 import { loadRuns } from "@/lib/data";
 import { priceLabel } from "@/lib/plans";
-import { PROVIDERS } from "@/lib/providers";
+import { getProvider, PROVIDERS } from "@/lib/providers";
 
 export const metadata: Metadata = {
   title: "Providers",
-  description: "Every provider on the bench: measured plans, best composite score and entry price.",
+  description: "Every provider on the bench: what was measured, the best composite score and the entry price.",
 };
 
 export default function ProvidersPage() {
   const runs = loadRuns();
-  const plans = bestRegionPerPlan(currentScoredGroups(aggregateRuns(runs)));
-  const rows = PROVIDERS.map((provider) => {
-    const own = plans.filter((plan) => plan.provider.name === provider.slug);
-    const cheapest = own
-      .filter((plan) => plan.provider.price_eur_month)
-      .sort((a, b) => a.provider.price_eur_month! - b.provider.price_eur_month!)[0];
-    return {
-      provider,
-      plans: own.length,
-      runs: runs.filter((run) => run.provider.name === provider.slug).length,
-      best: own.length ? Math.max(...own.map((plan) => plan.performanceScore)) : undefined,
-      from: cheapest ? priceLabel({ priceMonth: cheapest.provider.price_eur_month, tier: cheapest.provider.tier }) : undefined,
-    };
-  }).sort((a, b) => (b.best ?? -1) - (a.best ?? -1));
+  const current = currentScoredGroups(aggregateRuns(runs));
+  const plans = bestRegionPerPlan(current);
+  // Registered providers, measured or not, and every other provider a report names.
+  const measured = [...new Set(runs.flatMap((run) => (run.provider.name ? [run.provider.name] : [])))].sort();
+  const slugs = [...new Set([...PROVIDERS.map((provider) => provider.slug), ...measured])];
+  const rows = slugs
+    .map((slug) => {
+      const provider = getProvider(slug);
+      const own = plans.filter((plan) => plan.provider.name === slug);
+      // The entry price is the lowest in any region, not only where a plan measured best.
+      const cheapest = current
+        .filter((plan) => plan.provider.name === slug && plan.provider.price_eur_month)
+        .sort((a, b) => a.provider.price_eur_month! - b.provider.price_eur_month!)[0];
+      const scores = own.flatMap((plan) => (plan.performanceScore === undefined ? [] : [plan.performanceScore]));
+      const categories = [...new Set(own.map((plan) => categoryMeta(plan.category).name))];
+      return {
+        provider,
+        blurb: provider.blurb || (categories.length ? `Measured in ${categories.join(", ")}.` : ""),
+        // A plan measured in two categories is still one plan.
+        plans: new Set(own.map((plan) => `${plan.provider.product}\n${plan.provider.plan}`)).size,
+        runs: runs.filter((run) => run.provider.name === slug).length,
+        best: scores.length ? Math.max(...scores) : undefined,
+        benchmarks: categories.length,
+        from: cheapest ? priceLabel({ priceMonth: cheapest.provider.price_eur_month, tier: cheapest.provider.tier }) : undefined,
+      };
+    })
+    .sort((a, b) => (b.best ?? -1) - (a.best ?? -1) || Number(b.runs > 0) - Number(a.runs > 0));
 
   return (
     <main id="main">
@@ -44,16 +58,16 @@ export default function ProvidersPage() {
       </header>
 
       <ul className="divide-y divide-border border-b border-border">
-        {rows.map(({ provider, plans: planCount, runs: runCount, best, from }) => {
+        {rows.map(({ provider, blurb, plans: planCount, runs: runCount, best, benchmarks, from }) => {
           const measured = runCount > 0;
           const body = (
             <>
               <span className="flex min-w-0 items-center gap-3.5">
                 <span aria-hidden className="h-6 w-0.5 shrink-0 rounded-full" style={{ background: provider.color }} />
-                <CompanyLogo company={provider.company} size="md" decorative />
+                {provider.company && <CompanyLogo company={provider.company} size="md" decorative />}
                 <span className="flex min-w-0 flex-col">
                   <span className="font-medium">{provider.name}</span>
-                  <span className="truncate text-[13px] text-muted-foreground">{provider.blurb}</span>
+                  <span className="truncate text-[13px] text-muted-foreground">{blurb}</span>
                 </span>
               </span>
               {measured ? (
@@ -62,9 +76,10 @@ export default function ProvidersPage() {
                     <dt className="text-[12px] text-subtle">Plans</dt>
                     <dd className="num">{planCount}</dd>
                   </div>
+                  {/* A score exists only where a category defines one. */}
                   <div>
-                    <dt className="text-[12px] text-subtle">Best score</dt>
-                    <dd className="num">{best?.toFixed(1) ?? "—"}</dd>
+                    <dt className="text-[12px] text-subtle">{best === undefined ? "Benchmarks" : "Best score"}</dt>
+                    <dd className="num">{best === undefined ? benchmarks : best.toFixed(1)}</dd>
                   </div>
                   <div>
                     <dt className="text-[12px] text-subtle">From</dt>

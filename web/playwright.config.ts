@@ -21,9 +21,12 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
+  // The build under test is the published dataset plus the synthetic reports
+  // in e2e/fixtures/reports: categories the site has no code for, so the
+  // tests can see a page lay itself out from reports alone.
   webServer: {
     command:
-      `env NEXT_TELEMETRY_DISABLED=1 bun run build && bun run start --hostname 127.0.0.1 --port ${port}`,
+      `env NEXT_TELEMETRY_DISABLED=1 PROVIDERBENCH_DATA_OVERLAY=e2e/fixtures/reports bun run build && bun run start --hostname 127.0.0.1 --port ${port}`,
     url: `http://127.0.0.1:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

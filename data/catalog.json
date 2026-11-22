@@ -1,0 +1,166 @@
+{
+  "catalog_version": 1,
+  "categories": [
+    {
+      "name": "ai-language",
+      "protocol": "ai-language-v1",
+      "tests": [
+        {
+          "name": "arithmetic",
+          "profile": "standard",
+          "description": "Multi-step stock keeping with every quantity spelled out in words, in four languages"
+        },
+        {
+          "name": "ordering",
+          "profile": "standard",
+          "description": "Deduce a full order from shuffled pairwise comparisons, in four languages"
+        },
+        {
+          "name": "reading",
+          "profile": "standard",
+          "description": "Follow a chain of facts through a shuffled text to one detail, in four languages"
+        },
+        {
+          "name": "procedure",
+          "profile": "standard",
+          "description": "Carry out a written list procedure step by step, in four languages"
+        },
+        {
+          "name": "calendar",
+          "profile": "standard",
+          "description": "Find the weekday of a date from the weekday of another, in four languages"
+        }
+      ]
+    },
+    {
+      "name": "compute",
+      "protocol": "compute-v2",
+      "tests": [
+        {
+          "name": "cpu",
+          "profile": "standard",
+          "description": "SHA-256 throughput, single-core and all-cores, plus scaling efficiency"
+        },
+        {
+          "name": "cpu_sustained",
+          "profile": "sustained",
+          "description": "All-core SHA-256 for 10 minutes in 10 s windows: what is left after the burst"
+        },
+        {
+          "name": "disk",
+          "profile": "standard",
+          "description": "Sequential read/write throughput, random 4K read IOPS and fsync latency"
+        },
+        {
+          "name": "disk_sustained",
+          "profile": "sustained",
+          "description": "Random 4K direct writes for 5 minutes in 10 s windows: IOPS once the burst is spent"
+        },
+        {
+          "name": "memory",
+          "profile": "standard",
+          "description": "Sequential copy bandwidth and random-access latency (64 MiB pointer chase)"
+        },
+        {
+          "name": "network",
+          "profile": "standard",
+          "description": "Latency, download and upload throughput against the nearest Cloudflare edge"
+        },
+        {
+          "name": "steal",
+          "profile": "standard",
+          "description": "Contention and consistency signals: CPU steal time and fixed-workload variance"
+        }
+      ]
+    },
+    {
+      "name": "platform",
+      "protocol": "platform-v1",
+      "tests": [
+        {
+          "name": "files",
+          "profile": "standard",
+          "description": "Small-file metadata: create, read back and delete thousands of 4 KiB files"
+        },
+        {
+          "name": "kernel",
+          "profile": "standard",
+          "description": "Kernel path costs: system call, thread wake-up, first-touch memory and clock read"
+        },
+        {
+          "name": "spawn",
+          "profile": "standard",
+          "description": "Process creation: clone, exec, exit and reap of a minimal static helper"
+        },
+        {
+          "name": "stall",
+          "profile": "standard",
+          "description": "Scheduling stalls on busy CPUs: lost time, longest stall and stall rate, however the platform reports steal"
+        }
+      ]
+    },
+    {
+      "name": "reach",
+      "protocol": "reach-v1",
+      "tests": [
+        {
+          "name": "regions",
+          "profile": "standard",
+          "description": "Round-trip time to fixed anchors in nine cloud regions on six continents (TCP connect)"
+        }
+      ]
+    },
+    {
+      "name": "storage",
+      "protocol": "storage-v1",
+      "tests": [
+        {
+          "name": "s3",
+          "profile": "standard",
+          "description": "Object storage: TTFB, throughput and small-object latency against an S3-compatible endpoint"
+        }
+      ]
+    },
+    {
+      "name": "workload",
+      "protocol": "workload-v1",
+      "tests": [
+        {
+          "name": "alloc",
+          "profile": "standard",
+          "description": "Allocating and collecting small-object trees, one worker and all cores"
+        },
+        {
+          "name": "compress",
+          "profile": "standard",
+          "description": "DEFLATE compress + decompress round trip over text, one core and all cores"
+        },
+        {
+          "name": "http",
+          "profile": "standard",
+          "description": "HTTP/1.1 requests over loopback TCP: throughput and latency with every core busy"
+        },
+        {
+          "name": "json",
+          "profile": "standard",
+          "description": "JSON encode + decode of API-shaped records, one core and all cores"
+        },
+        {
+          "name": "kv",
+          "profile": "standard",
+          "description": "String-keyed lookups in a 1M-entry in-memory map, one core and all cores"
+        },
+        {
+          "name": "sort",
+          "profile": "standard",
+          "description": "Sorting random 64-bit keys, one core and all cores"
+        },
+        {
+          "name": "tls",
+          "profile": "standard",
+          "description": "Full TLS 1.3 handshakes (X25519, ECDSA P-256), one core and all cores"
+        }
+      ]
+    }
+  ]
+}

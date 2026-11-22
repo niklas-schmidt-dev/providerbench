@@ -30,6 +30,8 @@ jobs:
           manifest="$(mktemp)"
           go run ./cmd/providerbench validate --manifest "$manifest" data/results
           cmp data/report-manifest.json "$manifest"
+      - name: Check test catalog drift
+        run: go run ./cmd/providerbench list --json | cmp - data/catalog.json
 
   web:
     name: web

@@ -68,7 +68,7 @@ export function Segmented<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-3">
+    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-x-3">
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -78,7 +78,7 @@ export function Segmented<T extends string>({
             aria-pressed={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              "relative h-8 text-[13px] transition-colors",
+              "relative h-8 text-[13px] whitespace-nowrap transition-colors",
               "after:absolute after:inset-x-0 after:bottom-1 after:h-px after:transition-colors",
               active
                 ? "text-foreground after:bg-foreground"

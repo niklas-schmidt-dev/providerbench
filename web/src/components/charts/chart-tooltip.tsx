@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { CompanyLogo } from "@/components/company-logo";
+import { isWordmark } from "@/lib/companies";
 import type { PlanDatum } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +44,12 @@ export function TooltipHeader({ plan }: { plan: PlanDatum }) {
       <span
         aria-hidden
         className="size-2 shrink-0 rounded-full"
-        style={{ background: `var(--provider-${plan.provider}, var(--provider-other))` }}
+        style={{ background: plan.color }}
       />
-      {plan.company && <CompanyLogo company={plan.company} size="xs" decorative />}
-      <span className="font-medium">{plan.providerName}</span>
-      <span className="text-muted-foreground">{plan.plan}</span>
+      {/* A wordmark stands in for the name, so there it is not decoration. */}
+      {plan.company && <CompanyLogo company={plan.company} size="xs" decorative={!isWordmark(plan.company)} />}
+      {!isWordmark(plan.company) && <span className="font-medium">{plan.providerName}</span>}
+      <span className="text-muted-foreground">{plan.label}</span>
     </div>
   );
 }
@@ -58,5 +60,22 @@ export function TooltipRow({ label, value }: { label: string; value: ReactNode }
       <span className="text-muted-foreground">{label}</span>
       <span className="num font-medium">{value}</span>
     </div>
+  );
+}
+
+/**
+ * What stands behind a number: its hosts, and any caveat of the row. `hosts`
+ * is the host count behind the one metric shown. A row can join cohorts of
+ * two profiles, so it is not always the row's own count.
+ */
+export function TooltipEvidence({ plan, hosts = plan.hostCount }: { plan: PlanDatum; hosts?: number }) {
+  return (
+    <>
+      {(hosts > 1 || (plan.freshHostCount > 0 && hosts === plan.hostCount)) && (
+        <TooltipRow label={plan.freshHostCount >= hosts ? "Fresh hosts" : "Hosts"} value={hosts} />
+      )}
+      {plan.provisional && <p className="mt-1 text-subtle">Provisional · not ranked yet</p>}
+      {plan.quick && <p className="mt-1 text-subtle">Quick run · smaller workloads</p>}
+    </>
   );
 }
