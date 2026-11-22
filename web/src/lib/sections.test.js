@@ -166,9 +166,10 @@ describe("a dashboard laid out from its reports", () => {
   });
 });
 
-test("a category named like a page of the site gets a path of its own", () => {
+test("a category named like a page of the site gets a path no other category can have", () => {
   expect(categoryHref("compute")).toBe("/");
   expect(categoryHref("storage")).toBe("/storage");
-  expect(categoryHref("cli")).toBe("/cli-benchmarks");
-  expect(categoryHref("providers")).toBe("/providers-benchmarks");
+  expect(categoryHref("cli")).toBe("/benchmarks/cli");
+  const slugs = ["benchmarks", "cli", "cli-benchmarks", "providers", "storage"];
+  expect(new Set(slugs.map(categoryHref)).size).toBe(slugs.length);
 });
